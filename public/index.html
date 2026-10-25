@@ -2,130 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Moneyium - Profile</title>
+    <title>Moneyium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* --- CSS STAYS THE SAME AS PREVIOUS, JUST ADDING CATEGORY STYLES --- */
         :root { 
-            --bg: #2b211b; 
-            --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
-            --sidebar: #1c1410; 
-            --card: rgba(40, 30, 25, 0.85); 
-            --primary: #f9a825; 
-            --text: #e0e0e0; 
-            --border: #4a3b32;
-            --modal-bg: #3b2a1e;
-            --modal-border: #5a4636;
-            --btn-orange: #e67e22;
+            --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; 
+            --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        /* --- TOP RED BAR --- */
         .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 14px; font-weight: bold; color: white; z-index: 10; }
-        
-        /* --- TOP NAV --- */
         .top-nav { background: rgba(20, 15, 10, 0.95); padding: 10px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); z-index: 10; gap: 20px;}
-        .logo { font-size: 24px; font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none;}
-        .nav-links { display: flex; gap: 15px; }
-        .nav-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px;}
+        .logo { font-size: 24px; font-weight: 900; color: var(--primary); text-decoration: none;}
+        .nav-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; margin-right: 15px;}
         .search-bar { flex: 1; max-width: 400px; background: #111; border: 1px solid var(--border); border-radius: 20px; padding: 6px 15px; display: flex; align-items: center; color: #888; }
         .search-bar input { background: none; border: none; color: white; outline: none; margin-left: 10px; width: 100%;}
         .user-stats { display: flex; gap: 15px; font-size: 13px; font-weight: bold; margin-left: auto; align-items: center;}
-        .user-stats span { color: var(--primary); }
-
-        /* --- MAIN LAYOUT --- */
+        
         .layout { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 200px; background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 15px; overflow-y: auto;}
-        .nav-item { padding: 10px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold;}
+        
+        /* SIDEBAR */
+        .sidebar { width: 220px; background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 15px; overflow-y: auto; display: flex; flex-direction: column;}
+        .nav-item { padding: 10px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold; transition: 0.2s;}
         .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
         .nav-item i { width: 20px; text-align: center; font-size: 16px; }
-        .nav-badge { background: #d32f2f; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: auto;}
-        .upgrade-btn { margin: 15px; padding: 10px; text-align: center; background: var(--primary); color: black; border-radius: 5px; font-weight: bold; cursor: pointer;}
+        
+        /* CATEGORY SIDEBAR */
+        .category-header { padding: 15px 20px 5px 20px; color: var(--primary); font-weight: bold; font-size: 16px; border-top: 1px solid var(--border); margin-top: 10px;}
+        .cat-item { padding: 5px 20px; color: #bcaaa4; font-size: 14px; cursor: pointer; }
+        .cat-item:hover { color: white; }
+        .cat-item.active { color: var(--primary); font-weight: bold; }
 
+        /* CONTENT */
         .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
+        .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;}
+        .item-card:hover { transform: translateY(-5px); border-color: var(--primary);}
+        .item-card img { width: 100px; height: 100px; object-fit: contain; }
+        .item-card p { color: #ccc; margin: 5px 0; font-size: 14px;}
+        .item-price { color: var(--primary); font-weight: bold; }
 
-        /* --- PROFILE CARD --- */
-        .profile-card { width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .profile-header { display: flex; gap: 20px; }
-        .avatar-container { position: relative; }
-        .avatar { width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--border); background: #333; object-fit: cover;}
-        .online-indicator { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #2196f3; border-radius: 50%; border: 2px solid var(--card); }
-        .profile-info { flex: 1; }
-        .username-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-        .username { font-size: 28px; color: var(--primary); font-weight: bold; }
-        .verified-badge { color: #2196f3; font-size: 18px; }
-        .status-text { color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px; }
-        .stats-row { display: flex; gap: 40px; }
-        .stat-block { text-align: left; }
-        .stat-label { color: var(--primary); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
-        .stat-value { font-size: 18px; color: white; }
-        .profile-tabs { display: flex; border-bottom: 2px solid var(--border); margin-top: 20px; }
-        .tab-btn { padding: 10px 20px; background: none; border: none; color: var(--primary); font-size: 16px; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent;}
-        .tab-btn.active { border-bottom: 3px solid var(--primary); color: white; }
-        .about-section { padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px; }
-        .about-text { white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc; }
-        .social-links { display: flex; gap: 10px; margin-top: 15px; }
-        .social-links i { font-size: 18px; color: var(--primary); cursor: pointer; padding: 5px;}
-        .wearing-section { width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; }
-        .wearing-title { color: var(--primary); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
-        .wearing-grid { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;}
-        .wearing-item { width: 80px; height: 80px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
-        .wearing-item img { max-width: 60px; max-height: 60px; }
+        /* ITEM DETAIL PAGE */
+        .item-detail-container { display: flex; gap: 40px; background: var(--card); padding: 30px; border-radius: 10px; border: 1px solid var(--border); width: 100%; max-width: 800px; margin-top: 20px;}
+        .item-detail-img { width: 250px; height: 250px; object-fit: contain; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border);}
+        .item-detail-info { flex: 1; display: flex; flex-direction: column; }
+        .item-detail-title { font-size: 28px; color: var(--primary); margin-bottom: 10px; }
+        .item-detail-desc { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; flex: 1;}
+        .buy-btn { padding: 12px 30px; background: var(--primary); color: black; font-weight: bold; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; align-self: flex-start;}
+        .buy-btn:hover { background: #ffc107; }
+        .buy-btn.soldout { background: #555; color: #888; cursor: not-allowed; }
 
+        /* MODALS, AUTH, PROFILE (Same as before) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--modal-bg); width: 400px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .modal-header h3 { color: var(--primary); font-size: 18px; }
+        .modal-close { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
+        .modal-body { padding: 20px; text-align: center; }
+        .modal-footer { padding: 15px 20px; display: flex; gap: 10px; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .modal-footer button { padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-primary { background: var(--btn-orange); color: white; }
+        .btn-cancel { background: transparent; color: #aaa; border: 1px solid #555; }
+        .hidden { display: none !important; }
+        
         .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: absolute; z-index: 100; background: var(--bg);}
         .auth-box { background: var(--sidebar); padding: 40px; border-radius: 10px; border: 1px solid var(--border); width: 350px; }
         .auth-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; }
         .auth-box button { width: 100%; padding: 12px; background: var(--primary); color: black; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
-
-        /* --- MODAL SYSTEM --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.7); z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        .modal-box {
-            background: var(--modal-bg); width: 400px; border-radius: 8px;
-            border: 1px solid var(--modal-border); box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column; overflow: hidden;
-            transform: translateY(-20px); transition: transform 0.2s ease;
-        }
-        .modal-overlay.active .modal-box { transform: translateY(0); }
-
-        .modal-header {
-            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .modal-header h3 { color: var(--primary); font-size: 18px; font-weight: normal; }
-        .modal-close { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
-        .modal-close:hover { color: white; }
-
-        .modal-body { padding: 20px; text-align: center; }
-        .modal-body p { color: var(--primary); font-size: 15px; margin-bottom: 15px; line-height: 1.4;}
-        .modal-body .orange-text { color: var(--primary); font-weight: bold; }
-        
-        .item-image-container { width: 150px; height: 150px; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center;}
-        .item-image-container img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));}
-
-        .robux-stack { width: 180px; margin: 10px auto; }
-        .balance-text { font-size: 12px; color: #aaa; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;}
-        .balance-text i { color: var(--primary); }
-
-        .modal-footer { padding: 15px 20px; display: flex; gap: 10px; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); }
-        .modal-footer button { padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; transition: 0.2s;}
-        .btn-primary { background: var(--btn-orange); color: white; }
-        .btn-primary:hover { background: #d35400; }
-        .btn-cancel { background: transparent; color: #aaa; border: 1px solid #555; }
-        .btn-cancel:hover { background: rgba(255,255,255,0.1); color: white; }
-
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- AUTH SCREEN -->
     <div id="auth-screen" class="auth-container">
         <div class="auth-box">
             <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">Moneyium</h2>
@@ -137,22 +89,16 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="app" class="hidden" style="display: flex; flex-direction: column; height: 100vh;">
-        
         <div class="top-red-bar">Moneyium will never ask for your email address. Be cautious of TikTok accounts impersonating Moneyium staff.</div>
         
         <div class="top-nav">
             <a href="/" class="logo">Moneyium</a>
             <div class="nav-links">
-                <a href="#">Games</a>
                 <a href="/catalog" onclick="navigateTo('/catalog'); return false;">Catalog</a>
-                <a href="#">Create</a>
-                <a href="#">Download</a>
             </div>
             <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search">
+                <i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search">
             </div>
             <div class="user-stats">
                 <span style="color: #4caf50;"><i class="fa-solid fa-coins"></i> <span id="nav-robux"></span></span>
@@ -164,40 +110,39 @@
         <div class="layout">
             <div class="sidebar">
                 <div class="nav-item" onclick="navigateTo('/')"><i class="fa-solid fa-house"></i> Home</div>
-                <div class="nav-item" onclick="navigateTo('/' + currentUser.id + '/profile')"><i class="fa-solid fa-user"></i> Profile</div>
-                <div class="nav-item"><i class="fa-solid fa-comment-dots"></i> Messages <span class="nav-badge">99+</span></div>
-                <div class="nav-item"><i class="fa-solid fa-user-group"></i> Friends <span class="nav-badge">99+</span></div>
+                <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/profile')"><i class="fa-solid fa-user"></i> Profile</div>
+                <div class="nav-item"><i class="fa-solid fa-comment-dots"></i> Messages</div>
+                <div class="nav-item"><i class="fa-solid fa-user-group"></i> Friends</div>
                 <div class="nav-item"><i class="fa-solid fa-shirt"></i> Avatar</div>
-                <div class="nav-item" onclick="navigateTo('/inventory')"><i class="fa-solid fa-bag-shopping"></i> Inventory</div>
+                <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/inventory')"><i class="fa-solid fa-bag-shopping"></i> Inventory</div>
                 <div class="nav-item"><i class="fa-solid fa-right-left"></i> Trade</div>
                 <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin</div>
-                <div class="upgrade-btn">Upgrade Now</div>
+                
+                <div id="category-sidebar" class="hidden">
+                    <div class="category-header">CATEGORY</div>
+                    <div class="cat-item active" onclick="filterCategory('All')">All Items</div>
+                    <div class="cat-item" onclick="filterCategory('Hats')">Hats</div>
+                    <div class="cat-item" onclick="filterCategory('Faces')">Faces</div>
+                    <div class="cat-item" onclick="filterCategory('Gears')">Gears</div>
+                    <div class="cat-item" onclick="filterCategory('Hair')">Hair</div>
+                    <div class="cat-item" onclick="filterCategory('Shirts')">Shirts</div>
+                    <div class="cat-item" onclick="filterCategory('Pants')">Pants</div>
+                    <div class="cat-item" onclick="filterCategory('Packages')">Packages</div>
+                </div>
             </div>
 
-            <div class="content" id="main-content">
-                <!-- Content gets injected here -->
-            </div>
+            <div class="content" id="main-content"></div>
         </div>
     </div>
 
     <!-- MODALS -->
     <div id="modal-overlay" class="modal-overlay">
-        <!-- Buy Item Modal -->
         <div id="modal-buy" class="modal-box hidden">
-            <div class="modal-header">
-                <h3>Buy Item</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
+            <div class="modal-header"><h3>Buy Item</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
             <div class="modal-body">
-                <p>Would you like to buy the Hat:<br>
-                <span class="orange-text" id="modal-item-name">Item Name</span><br>
-                from ROBLOX for <i class="fa-solid fa-coins"></i> <span class="orange-text" id="modal-item-price">0</span>?</p>
-                
-                <div class="item-image-container">
-                    <img id="modal-item-img" src="" alt="Item">
-                </div>
-                
-                <p class="balance-text">Your balance after this transaction will be <i class="fa-solid fa-coins"></i> <span id="modal-new-balance">0</span></p>
+                <p style="color: var(--primary); margin-bottom: 10px;">Would you like to buy:<br><span id="modal-item-name" style="font-weight:bold; font-size:18px;"></span><br>for <i class="fa-solid fa-coins"></i> <span id="modal-item-price"></span>?</p>
+                <img id="modal-item-img" src="" style="width: 150px; height: 150px; object-fit: contain;">
+                <p style="font-size: 12px; color: #aaa; margin-top: 15px;">Your balance after this transaction will be <i class="fa-solid fa-coins"></i> <span id="modal-new-balance"></span></p>
             </div>
             <div class="modal-footer">
                 <button class="btn-primary" onclick="confirmPurchase()">Buy Now</button>
@@ -205,19 +150,11 @@
             </div>
         </div>
 
-        <!-- Insufficient Funds Modal -->
         <div id="modal-insufficient" class="modal-box hidden">
-            <div class="modal-header">
-                <h3>Insufficient Funds</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
+            <div class="modal-header"><h3>Insufficient Funds</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
             <div class="modal-body">
-                <p>You need <i class="fa-solid fa-coins"></i> <span class="orange-text" id="modal-missing-amount">0</span><br>more to purchase this item.</p>
-                
-                <!-- Using a CSS-based Robux icon stack to avoid external image dependencies -->
-                <div style="font-size: 80px; color: #4caf50; text-shadow: 0 5px 15px rgba(0,0,0,0.5); margin: 20px 0;">
-                    <i class="fa-solid fa-coins"></i>
-                </div>
+                <p style="color: var(--primary);">You need <i class="fa-solid fa-coins"></i> <span id="modal-missing-amount" style="font-weight:bold;"></span><br>more to purchase this item.</p>
+                <div style="font-size: 80px; color: #4caf50; margin: 20px 0;"><i class="fa-solid fa-coins"></i></div>
             </div>
             <div class="modal-footer">
                 <button class="btn-primary">Buy Robux</button>
@@ -228,28 +165,26 @@
 
     <script>
         let currentUser = null;
+        let currentCatalog = [];
+        let currentInventory = [];
+        let currentCategory = 'All';
         let currentItemToBuy = null;
 
+        function slugify(text) {
+            return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+        }
+
         async function register() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username, password }) });
-            const data = await res.json();
-            if (res.ok) login(); else document.getElementById('error').innerText = data.error;
+            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: username.value, password: password.value }) });
+            if (res.ok) login(); else document.getElementById('error').innerText = "Error registering";
         }
 
         async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username, password }) });
-            const data = await res.json();
-            if (res.ok) window.location.href = "/"; else document.getElementById('error').innerText = data.error;
+            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: username.value, password: password.value }) });
+            if (res.ok) window.location.href = "/"; else document.getElementById('error').innerText = "Invalid login";
         }
 
-        async function logout() { 
-            await fetch('/api/logout', { method: 'POST' }); 
-            window.location.href = "/"; 
-        }
+        async function logout() { await fetch('/api/logout', { method: 'POST' }); window.location.href = "/"; }
 
         function navigateTo(path) {
             history.pushState({}, '', path);
@@ -260,17 +195,17 @@
 
         async function init() {
             const res = await fetch('/api/user');
-            if (!res.ok) {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                return;
-            }
-            currentUser = (await res.json()).user;
+            if (!res.ok) { document.getElementById('auth-screen').classList.remove('hidden'); return; }
+            const data = await res.json();
+            
+            currentUser = data.user;
+            currentCatalog = data.catalog;
+            currentInventory = data.inventory;
             
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('nav-robux').innerText = currentUser.robux.toLocaleString();
             document.getElementById('nav-tix').innerText = currentUser.tix.toLocaleString();
-
             if (currentUser.is_admin === 1) document.getElementById('nav-admin').classList.remove('hidden');
 
             handleRouting();
@@ -279,122 +214,134 @@
         async function handleRouting() {
             const path = window.location.pathname;
             const main = document.getElementById('main-content');
+            const catSidebar = document.getElementById('category-sidebar');
+
+            // Reset category sidebar visibility
+            catSidebar.classList.add('hidden');
 
             if (path === '/' || path === '/home') {
-                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Welcome back, ${currentUser.username}</h2>`;
+                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Welcome back, ${currentUser.username}</h2>`;
             } 
             else if (path === '/catalog') {
-                const res = await fetch('/api/user');
-                const data = await res.json();
+                renderCatalog(main, currentCatalog, false);
+            }
+            else if (path.match(/^\/catalog\/\d+\/.+$/)) {
+                // Item Detail Page: /catalog/123/rbadams-smokestack-top-hat
+                const itemId = parseInt(path.split('/')[2]);
+                const item = currentCatalog.find(i => i.id === itemId);
                 
-                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Catalog</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 800px; margin-top: 20px;">
-                    ${data.catalog.map(item => `
-                        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center;">
-                            <img src="${item.asset_image}" style="width: 100px; height: 100px; object-fit: contain;">
-                            <p style="color: #ccc; margin: 5px 0;">${item.asset_name}</p>
-                            <p style="color: var(--primary); font-weight: bold;"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.is_limited ? '(Limited)' : ''}</p>
-                            <button onclick="openBuyModal(${item.id})" style="width: 100%; padding: 8px; background: var(--primary); border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px;">Buy</button>
-                        </div>
-                    `).join('')}
-                </div>`;
-            }
-            else if (path === '/inventory') {
-                const res = await fetch('/api/user');
-                const data = await res.json();
-                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Your Inventory</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 800px; margin-top: 20px;">
-                    ${data.inventory.map(item => `
-                        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center;">
-                            <img src="${item.asset_image}" style="width: 100px; height: 100px; object-fit: contain;">
-                            <p style="color: #ccc; margin: 5px 0;">${item.asset_name}</p>
-                        </div>
-                    `).join('')}
-                </div>`;
-            }
-            else if (path.match(/^\/\d+\/profile$/)) {
-                const userId = path.split('/')[1];
-                const res = await fetch(`/api/user/${userId}`);
-                if (!res.ok) return main.innerHTML = `<h2 style="color: red;">User not found</h2>`;
-                const data = await res.json();
-                const u = data.user;
+                if (!item) return main.innerHTML = `<h2 style="color: red;">Item not found</h2>`;
+
+                let typeLabel = item.item_type === 'LimitedU' ? `Limited U (${item.copies_left} left)` : item.item_type;
 
                 main.innerHTML = `
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="avatar-container">
-                            <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=150&height=150&format=png" class="avatar">
-                            <div class="online-indicator"></div>
-                        </div>
-                        <div class="profile-info">
-                            <div class="username-row">
-                                <span class="username">${u.username}</span>
-                                <i class="fa-solid fa-circle-check verified-badge"></i>
-                            </div>
-                            <div class="status-text">"${u.bio}"</div>
-                            <div class="stats-row">
-                                <div class="stat-block"><div class="stat-label">Friends</div><div class="stat-value">44</div></div>
-                                <div class="stat-block"><div class="stat-label">Followers</div><div class="stat-value">19</div></div>
-                                <div class="stat-block"><div class="stat-label">Following</div><div class="stat-value">0</div></div>
-                                <div class="stat-block"><div class="stat-label">RAP</div><div class="stat-value">${u.rap.toLocaleString()}+</div></div>
-                            </div>
-                        </div>
+                <div class="item-detail-container">
+                    <img src="${item.asset_image}" class="item-detail-img">
+                    <div class="item-detail-info">
+                        <h1 class="item-detail-title">${item.custom_name}</h1>
+                        ${typeLabel !== 'None' ? `<p style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">${typeLabel}</p>` : ''}
+                        <p class="item-detail-desc">${item.description}</p>
+                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}</p>
+                        <button class="buy-btn ${item.copies_left === 0 && item.item_type === 'LimitedU' ? 'soldout' : ''}" 
+                            onclick="${item.copies_left === 0 && item.item_type === 'LimitedU' ? '' : `openBuyModal(${item.id})`}">
+                            ${item.copies_left === 0 && item.item_type === 'LimitedU' ? 'Sold Out' : 'Buy Item'}
+                        </button>
                     </div>
-                    <div class="profile-tabs">
-                        <button class="tab-btn active">About</button>
-                        <button class="tab-btn">Creations</button>
-                    </div>
-                    <div class="about-section">
-                        <div class="about-text">You're never at the lowest point because you can always go up.
-Hey I'm ${u.username} this is my profile!
-Join a if you think you can get accepted.
-Senior moderator @Moneyium. Do not be afraid to ping me.</div>
-                        <div class="social-links">
-                            <i class="fa-brands fa-discord"></i>
-                            <i class="fa-brands fa-github"></i>
-                        </div>
-                    </div>
-                </div>
+                </div>`;
+            }
+            else if (path.match(/^\/users\/\d+\/inventory$/)) {
+                // Inventory with categories
+                catSidebar.classList.remove('hidden');
+                renderInventory(main, currentInventory, currentCategory);
+            }
+            else if (path.match(/^\/users\/\d+\/profile$/)) {
+                const userId = path.split('/')[2];
+                const res = await fetch(`/api/user/${userId}`);
+                if (!res.ok) return main.innerHTML = `<h2 style="color: red;">User not found</h2>`;
+                const u = (await res.json()).user;
 
-                <div class="wearing-section">
-                    <div class="wearing-title">Currently Wearing</div>
-                    <div class="wearing-grid">
-                        ${data.inventory.map(item => `
-                            <div class="wearing-item"><img src="${item.asset_image}"></div>
-                        `).join('')}
+                main.innerHTML = `
+                <div class="profile-card" style="width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px;">
+                    <div class="profile-header" style="display:flex; gap:20px;">
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=150&height=150&format=png" style="width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--border);">
+                        <div class="profile-info">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                <span style="font-size: 28px; color: var(--primary); font-weight: bold;">${u.username}</span>
+                                <i class="fa-solid fa-circle-check" style="color: #2196f3; font-size: 18px;"></i>
+                            </div>
+                            <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;">"${u.bio}"</div>
+                            <div style="display: flex; gap: 40px;">
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Friends</div><div style="font-size: 18px; color: white;">44</div></div>
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Followers</div><div style="font-size: 18px; color: white;">19</div></div>
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Following</div><div style="font-size: 18px; color: white;">0</div></div>
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">RAP</div><div style="font-size: 18px; color: white;">${u.rap.toLocaleString()}+</div></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                `;
+                    <div style="display: flex; border-bottom: 2px solid var(--border); margin-top: 20px;">
+                        <button style="padding: 10px 20px; background: none; border: none; color: white; font-size: 16px; font-weight: bold; border-bottom: 3px solid var(--primary);">About</button>
+                        <button style="padding: 10px 20px; background: none; border: none; color: var(--primary); font-size: 16px; font-weight: bold;">Creations</button>
+                    </div>
+                    <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;">
+                        <div style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc;">You're never at the lowest point because you can always go up.\nHey I'm ${u.username} this is my profile!\nSenior moderator @Moneyium.</div>
+                    </div>
+                </div>`;
             }
         }
 
-        // --- MODAL LOGIC ---
-        async function openBuyModal(itemId) {
-            const res = await fetch('/api/user');
-            const data = await res.json();
-            const item = data.catalog.find(i => i.id === itemId);
-            if (!item) return;
+        function renderCatalog(container, items, isAdmin) {
+            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Catalog</h2>
+            <div class="grid">
+                ${items.map(item => `
+                    <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')">
+                        <img src="${item.asset_image}">
+                        <p>${item.custom_name}</p>
+                        <p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
 
+        function renderInventory(container, items, category) {
+            let filtered = items;
+            if (category !== 'All') {
+                filtered = items.filter(i => i.category === category);
+            }
+
+            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Your Inventory</h2>
+            <div class="grid">
+                ${filtered.length === 0 ? '<p style="color: #aaa;">No items found in this category.</p>' : filtered.map(item => `
+                    <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')">
+                        <img src="${item.asset_image}">
+                        <p>${item.custom_name}</p>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            renderInventory(document.getElementById('main-content'), currentInventory, currentCategory);
+        }
+
+        function openBuyModal(itemId) {
+            const item = currentCatalog.find(i => i.id === itemId);
+            if (!item) return;
             currentItemToBuy = item;
             
-            // Setup Buy Modal
-            document.getElementById('modal-item-name').innerText = item.asset_name;
+            document.getElementById('modal-item-name').innerText = item.custom_name;
             document.getElementById('modal-item-price').innerText = item.price.toLocaleString();
             document.getElementById('modal-item-img').src = item.asset_image;
-            
-            const newBalance = currentUser.robux - item.price;
-            document.getElementById('modal-new-balance').innerText = newBalance.toLocaleString();
+            document.getElementById('modal-new-balance').innerText = (currentUser.robux - item.price).toLocaleString();
 
-            // Show the correct modal state
             document.getElementById('modal-overlay').classList.add('active');
-            
             if (currentUser.robux < item.price) {
-                // Insufficient Funds
                 document.getElementById('modal-buy').classList.add('hidden');
                 document.getElementById('modal-insufficient').classList.remove('hidden');
-                document.getElementById('modal-missing-amount').innerText = Math.abs(newBalance).toLocaleString();
+                document.getElementById('modal-missing-amount').innerText = Math.abs(currentUser.robux - item.price).toLocaleString();
             } else {
-                // Has enough money
                 document.getElementById('modal-buy').classList.remove('hidden');
                 document.getElementById('modal-insufficient').classList.add('hidden');
             }
@@ -407,26 +354,12 @@ Senior moderator @Moneyium. Do not be afraid to ping me.</div>
 
         async function confirmPurchase() {
             if (!currentItemToBuy) return;
-            
-            const res = await fetch('/api/buy-item', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ itemId: currentItemToBuy.id }) 
-            });
+            const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId: currentItemToBuy.id }) });
             const data = await res.json();
-            
             if (data.success) {
                 closeModal();
-                // Refresh user data to update the top bar balance
-                const userRes = await fetch('/api/user');
-                currentUser = (await userRes.json()).user;
-                document.getElementById('nav-robux').innerText = currentUser.robux.toLocaleString();
-                
-                // Reload current page content
-                handleRouting();
-            } else {
-                alert(data.error);
-            }
+                init(); // Refresh everything
+            } else { alert(data.error); }
         }
 
         init();

@@ -16,11 +16,10 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
         th { color: var(--primary); }
-        input, button { padding: 10px; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 5px; }
-        button { background: var(--primary); color: black; font-weight: bold; cursor: pointer; border: none; margin-left: 10px; }
+        input, select, textarea, button { padding: 10px; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 5px; }
+        button { background: var(--primary); color: black; font-weight: bold; cursor: pointer; border: none; }
         button.danger { background: #ff4757; color: white; }
         .back-btn { margin-top: auto; padding: 10px; background: #333; color: white; text-align: center; text-decoration: none; border-radius: 5px; display: block; font-weight: bold;}
-        .back-btn:hover { background: #555; }
     </style>
 </head>
 <body>
@@ -28,12 +27,12 @@
         <h2>Management</h2>
         <div class="nav-item" onclick="showTab('users')">Users</div>
         <div class="nav-item" onclick="showTab('assets')">Asset Upload</div>
-        <div class="nav-item" onclick="showTab('danger')">Danger Zone</div>
-        
+        <div class="nav-item" onclick="showTab('catalog')">Manage Catalog</div>
         <a href="/" class="back-btn">Back to Site</a>
     </div>
 
     <div class="content">
+        <!-- USERS TAB -->
         <div id="users-tab">
             <h1>User Management</h1>
             <table>
@@ -42,21 +41,48 @@
             </table>
         </div>
 
+        <!-- ASSETS TAB (UPLOAD) -->
         <div id="assets-tab" class="hidden">
             <h1>Upload Item to Catalog</h1>
-            <div style="margin-top: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px;">
                 <input type="text" id="assetId" placeholder="Roblox Asset ID (e.g. 1365767)">
-                <input type="number" id="price" placeholder="Price in R$" value="50" style="width: 120px;">
-                <label style="margin-left: 10px;"><input type="checkbox" id="isLimited"> Limited Item?</label>
-                <button onclick="uploadItem()">Upload Item</button>
+                <input type="text" id="customName" placeholder="Custom Display Name (Optional)">
+                <textarea id="description" placeholder="Item Description" rows="3"></textarea>
+                
+                <div style="display: flex; gap: 15px;">
+                    <input type="number" id="price" placeholder="Price in R$" value="50" style="flex: 1;">
+                    <select id="category" style="flex: 1;">
+                        <option value="Hats">Hats</option>
+                        <option value="Faces">Faces</option>
+                        <option value="Gears">Gears</option>
+                        <option value="Hair">Hair</option>
+                        <option value="Shirts">Shirts</option>
+                        <option value="Pants">Pants</option>
+                        <option value="Packages">Packages</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <select id="itemType" style="flex: 1;">
+                        <option value="None">Normal Item</option>
+                        <option value="Limited">Limited (1 Copy)</option>
+                        <option value="LimitedU">Limited U (Multiple Copies)</option>
+                    </select>
+                    <input type="number" id="copies" placeholder="Copies (If Limited U)" value="10" style="flex: 1;">
+                </div>
+
+                <button onclick="uploadItem()" style="padding: 15px;">Upload Item</button>
             </div>
             <p id="upload-status" style="margin-top: 10px; color: var(--primary);"></p>
         </div>
 
-        <div id="danger-tab" class="hidden">
-            <h1 style="color: #ff4757;">Danger Zone</h1>
-            <p>This will wipe all users, items, and reset the database.</p>
-            <button class="danger" style="margin-top: 20px;" onclick="resetDB()">Reset Entire Database</button>
+        <!-- MANAGE CATALOG TAB -->
+        <div id="catalog-tab" class="hidden">
+            <h1>Manage Catalog</h1>
+            <table>
+                <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Type</th><th>Copies</th><th>Price</th></tr></thead>
+                <tbody id="catalog-list"></tbody>
+            </table>
         </div>
     </div>
 
@@ -65,23 +91,17 @@
             document.querySelectorAll('.content > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(tab + '-tab').classList.remove('hidden');
             if (tab === 'users') loadUsers();
+            if (tab === 'catalog') loadCatalog();
         }
 
         async function loadUsers() {
             const res = await fetch('/api/admin/users');
-            if (!res.ok) {
-                alert("You do not have admin permissions!");
-                window.location.href = "/"; // Kicks non-admins out
-                return;
-            }
+            if (!res.ok) return window.location.href = "/";
             const users = await res.json();
-            
             document.getElementById('users-list').innerHTML = users.map(u => `
                 <tr>
-                    <td>${u.id}</td>
-                    <td>${u.username}</td>
-                    <td>${u.is_admin ? 'Yes' : 'No'}</td>
-                    <td>${u.can_upload ? 'Yes' : 'No'}</td>
+                    <td>${u.id}</td><td>${u.username}</td>
+                    <td>${u.is_admin ? 'Yes' : 'No'}</td><td>${u.can_upload ? 'Yes' : 'No'}</td>
                     <td>
                         <button onclick="togglePerm(${u.id}, 'can_upload')">Toggle Upload</button>
                         <button onclick="togglePerm(${u.id}, 'is_admin')">Toggle Admin</button>
@@ -90,33 +110,39 @@
             `).join('');
         }
 
+        async function loadCatalog() {
+            const res = await fetch('/api/admin/catalog');
+            if (!res.ok) return;
+            const catalog = await res.json();
+            document.getElementById('catalog-list').innerHTML = catalog.map(i => `
+                <tr>
+                    <td>${i.id}</td><td>${i.custom_name}</td><td>${i.category}</td>
+                    <td>${i.item_type}</td><td>${i.copies_left}</td><td>R$ ${i.price}</td>
+                </tr>
+            `).join('');
+        }
+
         async function togglePerm(userId, perm) {
-            await fetch('/api/admin/toggle-perm', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ userId, perm })
-            });
+            await fetch('/api/admin/toggle-perm', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId, perm }) });
             loadUsers();
         }
 
         async function uploadItem() {
             const assetId = document.getElementById('assetId').value;
+            const custom_name = document.getElementById('customName').value;
+            const description = document.getElementById('description').value;
             const price = document.getElementById('price').value;
-            const isLimited = document.getElementById('isLimited').checked;
+            const category = document.getElementById('category').value;
+            const item_type = document.getElementById('itemType').value;
+            const copies = document.getElementById('copies').value;
 
             const res = await fetch('/api/admin/upload-item', {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ assetId, price, isLimited })
+                body: JSON.stringify({ assetId, custom_name, description, price, category, item_type, copies })
             });
             const data = await res.json();
             if (data.success) document.getElementById('upload-status').innerText = "Item uploaded successfully!";
             else document.getElementById('upload-status').innerText = "Error: " + data.error;
-        }
-
-        async function resetDB() {
-            if (!confirm("Are you sure you want to wipe the database?")) return;
-            await fetch('/api/admin/reset', { method: 'POST' });
-            alert("Database reset.");
-            window.location.href = "/";
         }
 
         showTab('users');

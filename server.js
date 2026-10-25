@@ -12,15 +12,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// FIX: Added path: '/' to fix the logout issue
 app.use(session({
     secret: 'moneyium_secret_key',
     resave: false,
     saveUninitialized: true,
-    cookie: { 
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-        path: '/' 
-    }
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, path: '/' }
 }));
 
 const db = new sqlite3.Database('./database.db');
@@ -39,15 +35,21 @@ function setupDatabase() {
                 bio TEXT DEFAULT 'Welcome to my profile!',
                 rap INTEGER DEFAULT 0
             )`);
+
+            // UPDATED CATALOG TABLE
             db.run(`CREATE TABLE IF NOT EXISTS catalog (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 asset_id TEXT,
-                asset_name TEXT,
+                custom_name TEXT,
                 asset_image TEXT,
+                description TEXT,
                 price INTEGER DEFAULT 10,
-                is_limited INTEGER DEFAULT 0,
+                category TEXT DEFAULT 'Hats',
+                item_type TEXT DEFAULT 'None', -- 'None', 'Limited', 'LimitedU'
+                copies_left INTEGER DEFAULT 0,
                 creator_id INTEGER
             )`);
+
             db.run(`CREATE TABLE IF NOT EXISTS inventory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
@@ -96,7 +98,6 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
-// --- USER DATA ---
 app.get('/api/user', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
@@ -109,7 +110,6 @@ app.get('/api/user', (req, res) => {
     });
 });
 
-// FIX: Get ANY user by ID for the /:uid/profile route
 app.get('/api/user/:id', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap FROM users WHERE id = ?`, [req.params.id], (err, user) => {
@@ -124,11 +124,26 @@ app.post('/api/buy-item', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     const { itemId } = req.body;
     db.get(`SELECT robux FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
-        db.get(`SELECT price, is_limited FROM catalog WHERE id = ?`, [itemId], (err, item) => {
+        db.get(`SELECT * FROM catalog WHERE id = ?`, [itemId], (err, item) => {
+            if (!item) return res.status(404).json({ error: "Item not found" });
             if (user.robux < item.price) return res.status(400).json({ error: "Not enough Robux!" });
+            
+            // Buy logic
             db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], (err) => {
                 db.run(`INSERT INTO inventory (user_id, catalog_id) VALUES (?, ?)`, [req.session.userId, itemId], (err) => {
-                    if (item.is_limited) db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]);
+                    
+                    // Handle Limited U copies
+                    if (item.item_type === 'LimitedU') {
+                        const newCopies = item.copies_left - 1;
+                        if (newCopies <= 0) {
+                            db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]); // Sold out
+                        } else {
+                            db.run(`UPDATE catalog SET copies_left = ? WHERE id = ?`, [newCopies, itemId]);
+                        }
+                    } else if (item.item_type === 'Limited') {
+                        db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]);
+                    }
+                    
                     res.json({ success: true });
                 });
             });
@@ -144,6 +159,13 @@ app.get('/api/admin/users', (req, res) => {
     });
 });
 
+app.get('/api/admin/catalog', (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
+    db.all(`SELECT * FROM catalog`, (err, catalog) => {
+        res.json(catalog);
+    });
+});
+
 app.post('/api/admin/toggle-perm', (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
     const { userId, perm } = req.body; 
@@ -154,22 +176,29 @@ app.post('/api/admin/toggle-perm', (req, res) => {
 
 app.post('/api/admin/upload-item', async (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
-    const { assetId, price, isLimited } = req.body;
+    const { assetId, custom_name, description, price, category, item_type, copies } = req.body;
+    
     try {
         const detailsRes = await axios.get(`https://economy.roblox.com/v2/assets/${assetId}/details`);
         const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&size=420x420&format=Png&isCircular=false`);
-        db.run(`INSERT INTO catalog (asset_id, asset_name, asset_image, price, is_limited, creator_id) VALUES (?, ?, ?, ?, ?, ?)`, 
-            [assetId, detailsRes.data.Name, thumbRes.data.data[0].imageUrl, price, isLimited ? 1 : 0, req.session.userId], 
+        
+        const finalName = custom_name || detailsRes.data.Name;
+        const finalDesc = description || "No description provided.";
+        const itemImage = thumbRes.data.data[0].imageUrl;
+        const copiesVal = item_type === 'LimitedU' ? copies : 0;
+
+        db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, copies_left, creator_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+            [assetId, finalName, itemImage, finalDesc, price, category, item_type, copiesVal, req.session.userId], 
             function(err) {
+                if (err) return res.status(500).json({ error: "DB error" });
                 res.json({ success: true });
             }
         );
     } catch (error) {
-        res.status(400).json({ error: "Invalid Asset ID" });
+        res.status(400).json({ error: "Invalid Roblox Asset ID" });
     }
 });
 
-// FIX: Redirect to index.html for ALL frontend routes (SPA)
 app.use((req, res, next) => {
     if (req.path.startsWith('/api') || req.path.endsWith('.html')) return next();
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
