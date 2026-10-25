@@ -8,6 +8,8 @@ A fully custom, from-scratch Roblox revival platform built for educational purpo
 
 This project was created to understand the underlying backend architecture of revival sites (like Pekora or Hexium). Instead of using leaked source code, this engine is built entirely from scratch using Node.js and SQLite to learn how authentication, economies, and Roblox API integrations actually work under the hood.
 
+**Note on Development:** This platform was built as a collaboration between a human developer (money) and AI. The human provided the vision, system architecture, and debugging, while the AI acted as the co-developer writing the raw code.
+
 ## Features
 
 - **Secure Authentication:** Password hashing using `bcrypt` and session management via `express-session`.
