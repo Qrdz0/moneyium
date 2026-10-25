@@ -36,7 +36,6 @@ function setupDatabase() {
                 rap INTEGER DEFAULT 0
             )`);
 
-            // UPDATED CATALOG TABLE
             db.run(`CREATE TABLE IF NOT EXISTS catalog (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 asset_id TEXT,
@@ -45,8 +44,8 @@ function setupDatabase() {
                 description TEXT,
                 price INTEGER DEFAULT 10,
                 category TEXT DEFAULT 'Hats',
-                item_type TEXT DEFAULT 'None', -- 'None', 'Limited', 'LimitedU'
-                copies_left INTEGER DEFAULT 0,
+                item_type TEXT DEFAULT 'None',
+                copies_left INTEGER DEFAULT 1,
                 creator_id INTEGER
             )`);
 
@@ -54,6 +53,7 @@ function setupDatabase() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
                 catalog_id INTEGER,
+                is_wearing INTEGER DEFAULT 0,
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )`, resolve);
         });
@@ -67,17 +67,23 @@ app.post('/api/register', async (req, res) => {
     if (!username || !password) return res.status(400).json({ error: "Please fill in all fields" });
     if (username.includes(' ')) return res.status(400).json({ error: "No spaces allowed" });
     
-    const hashedPassword = await bcrypt.hash(password, 10);
-    db.get(`SELECT COUNT(*) as count FROM users`, [], async (err, row) => {
-        const isFirstUser = row.count === 0 ? 1 : 0;
-        db.run(`INSERT INTO users (username, password, is_admin, can_upload) VALUES (?, ?, ?, ?)`, 
-            [username, hashedPassword, isFirstUser, isFirstUser], 
-            function(err) {
-                if (err) return res.status(400).json({ error: "Username taken" });
-                res.json({ success: true });
-            }
-        );
-    });
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        db.get(`SELECT COUNT(*) as count FROM users`, [], async (err, row) => {
+            if (err) return res.status(500).json({ error: "Database error" });
+            const isFirstUser = row.count === 0 ? 1 : 0;
+            
+            db.run(`INSERT INTO users (username, password, is_admin, can_upload) VALUES (?, ?, ?, ?)`, 
+                [username, hashedPassword, isFirstUser, isFirstUser], 
+                function(err) {
+                    if (err) return res.status(400).json({ error: "Username taken" });
+                    res.json({ success: true });
+                }
+            );
+        });
+    } catch (e) {
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
 app.post('/api/login', (req, res) => {
@@ -102,8 +108,8 @@ app.get('/api/user', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
         if (!user) return res.status(404).json({ error: "User not found" });
-        db.all(`SELECT c.* FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
-            db.all(`SELECT * FROM catalog`, (err, catalog) => {
+        db.all(`SELECT c.*, i.is_wearing FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
+            db.all(`SELECT * FROM catalog WHERE copies_left > 0`, (err, catalog) => {
                 res.json({ user, inventory: inventory || [], catalog: catalog || [] });
             });
         });
@@ -114,7 +120,7 @@ app.get('/api/user/:id', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap FROM users WHERE id = ?`, [req.params.id], (err, user) => {
         if (!user) return res.status(404).json({ error: "User not found" });
-        db.all(`SELECT c.* FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
+        db.all(`SELECT c.*, i.is_wearing FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
     });
@@ -123,30 +129,69 @@ app.get('/api/user/:id', (req, res) => {
 app.post('/api/buy-item', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     const { itemId } = req.body;
+    
     db.get(`SELECT robux FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
         db.get(`SELECT * FROM catalog WHERE id = ?`, [itemId], (err, item) => {
-            if (!item) return res.status(404).json({ error: "Item not found" });
+            if (!item) return res.status(404).json({ error: "Item is offsale or doesn't exist" });
             if (user.robux < item.price) return res.status(400).json({ error: "Not enough Robux!" });
             
-            // Buy logic
-            db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], (err) => {
-                db.run(`INSERT INTO inventory (user_id, catalog_id) VALUES (?, ?)`, [req.session.userId, itemId], (err) => {
-                    
-                    // Handle Limited U copies
-                    if (item.item_type === 'LimitedU') {
-                        const newCopies = item.copies_left - 1;
-                        if (newCopies <= 0) {
-                            db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]); // Sold out
-                        } else {
-                            db.run(`UPDATE catalog SET copies_left = ? WHERE id = ?`, [newCopies, itemId]);
+            // FIX: Check if user already owns this specific item (prevents double buying Limiteds)
+            db.get(`SELECT id FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], (err, owned) => {
+                if (owned && item.item_type !== 'None') return res.status(400).json({ error: "You already own this item!" });
+
+                db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], (err) => {
+                    db.run(`INSERT INTO inventory (user_id, catalog_id) VALUES (?, ?)`, [req.session.userId, itemId], (err) => {
+                        // Handle copies for BOTH Limited and Limited U
+                        if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
+                            const newCopies = item.copies_left - 1;
+                            if (newCopies <= 0) db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]); // Offsale
+                            else db.run(`UPDATE catalog SET copies_left = ? WHERE id = ?`, [newCopies, itemId]);
                         }
-                    } else if (item.item_type === 'Limited') {
-                        db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]);
-                    }
-                    
-                    res.json({ success: true });
+                        res.json({ success: true });
+                    });
                 });
             });
+        });
+    });
+});
+
+// --- AVATAR & RESELLING ROUTES ---
+app.post('/api/equip-item', (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
+    const { itemId, equip } = req.body;
+
+    db.get(`SELECT c.category FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ? AND i.catalog_id = ?`, [req.session.userId, itemId], (err, item) => {
+        if (!item) return res.status(404).json({ error: "Item not in inventory" });
+        
+        // Unequip other items in the same category first
+        if (equip) {
+            db.run(`UPDATE inventory SET is_wearing = 0 WHERE user_id = ? AND catalog_id IN (SELECT id FROM catalog WHERE category = ?)`, [req.session.userId, item.category]);
+        }
+        
+        db.run(`UPDATE inventory SET is_wearing = ? WHERE user_id = ? AND catalog_id = ?`, [equip ? 1 : 0, req.session.userId, itemId], (err) => {
+            res.json({ success: true });
+        });
+    });
+});
+
+app.post('/api/sell-item', (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
+    const { itemId } = req.body;
+
+    db.get(`SELECT * FROM catalog WHERE id = ?`, [itemId], (err, item) => {
+        if (!item) return res.status(404).json({ error: "Item not found" });
+        
+        db.run(`DELETE FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], function(err) {
+            if (this.changes === 0) return res.status(400).json({ error: "You don't own this item" });
+            
+            // Give money back
+            db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [item.price, req.session.userId]);
+            
+            // Put back in catalog if Limited
+            if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
+                db.run(`UPDATE catalog SET copies_left = copies_left + 1 WHERE id = ?`, [itemId]);
+            }
+            res.json({ success: true });
         });
     });
 });
@@ -154,24 +199,18 @@ app.post('/api/buy-item', (req, res) => {
 // --- ADMIN ROUTES ---
 app.get('/api/admin/users', (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
-    db.all(`SELECT id, username, robux, tix, is_admin, can_upload FROM users`, (err, users) => {
-        res.json(users);
-    });
+    db.all(`SELECT id, username, robux, tix, is_admin, can_upload FROM users`, (err, users) => res.json(users));
 });
 
 app.get('/api/admin/catalog', (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
-    db.all(`SELECT * FROM catalog`, (err, catalog) => {
-        res.json(catalog);
-    });
+    db.all(`SELECT * FROM catalog`, (err, catalog) => res.json(catalog));
 });
 
 app.post('/api/admin/toggle-perm', (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
     const { userId, perm } = req.body; 
-    db.run(`UPDATE users SET ${perm} = NOT ${perm} WHERE id = ?`, [userId], function(err) {
-        res.json({ success: true });
-    });
+    db.run(`UPDATE users SET ${perm} = NOT ${perm} WHERE id = ?`, [userId], function(err) { res.json({ success: true }); });
 });
 
 app.post('/api/admin/upload-item', async (req, res) => {
@@ -185,18 +224,13 @@ app.post('/api/admin/upload-item', async (req, res) => {
         const finalName = custom_name || detailsRes.data.Name;
         const finalDesc = description || "No description provided.";
         const itemImage = thumbRes.data.data[0].imageUrl;
-        const copiesVal = item_type === 'LimitedU' ? copies : 0;
+        const copiesVal = (item_type === 'Limited' || item_type === 'LimitedU') ? copies : 0;
 
         db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, copies_left, creator_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
             [assetId, finalName, itemImage, finalDesc, price, category, item_type, copiesVal, req.session.userId], 
-            function(err) {
-                if (err) return res.status(500).json({ error: "DB error" });
-                res.json({ success: true });
-            }
+            function(err) { res.json({ success: true }); }
         );
-    } catch (error) {
-        res.status(400).json({ error: "Invalid Roblox Asset ID" });
-    }
+    } catch (error) { res.status(400).json({ error: "Invalid Roblox Asset ID" }); }
 });
 
 app.use((req, res, next) => {

@@ -5,96 +5,88 @@
     <title>Moneyium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- CSS STAYS THE SAME AS PREVIOUS, JUST ADDING CATEGORY STYLES --- */
+        /* CSS STAYS THE SAME, JUST ADDED AVATAR EDITOR STYLES */
         :root { 
-            --bg: #2b211b; /* Dark brown background */
-            --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
-            --sidebar: #1c1410; 
-            --card: rgba(40, 30, 25, 0.85); /* Semi-transparent card */
-            --primary: #f9a825; /* Hexium Gold */
-            --text: #e0e0e0; 
-            --border: #4a3b32;
+            --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; 
+            --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
         .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 14px; font-weight: bold; color: white; z-index: 10; }
         .top-nav { background: rgba(20, 15, 10, 0.95); padding: 10px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); z-index: 10; gap: 20px;}
-        .logo { font-size: 24px; font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none;}
-        .nav-links { display: flex; gap: 15px; }
-        .nav-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; text-transform: capitalize;}
+        .logo { font-size: 24px; font-weight: 900; color: var(--primary); text-decoration: none;}
+        .nav-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; margin-right: 15px;}
         .search-bar { flex: 1; max-width: 400px; background: #111; border: 1px solid var(--border); border-radius: 20px; padding: 6px 15px; display: flex; align-items: center; color: #888; }
         .search-bar input { background: none; border: none; color: white; outline: none; margin-left: 10px; width: 100%;}
         .user-stats { display: flex; gap: 15px; font-size: 13px; font-weight: bold; margin-left: auto; align-items: center;}
-        .user-stats span { color: var(--primary); }
-        .user-stats i { margin-right: 5px; }
-
-        /* --- MAIN LAYOUT --- */
         .layout { display: flex; flex: 1; overflow: hidden; }
-
-        /* --- SIDEBAR --- */
-        .sidebar { width: 200px; background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 15px; overflow-y: auto;}
-        .nav-item { padding: 10px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold;}
+        .sidebar { width: 220px; background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 15px; overflow-y: auto; display: flex; flex-direction: column;}
+        .nav-item { padding: 10px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold; transition: 0.2s;}
         .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
         .nav-item i { width: 20px; text-align: center; font-size: 16px; }
-        
-        /* CATEGORY SIDEBAR */
         .category-header { padding: 15px 20px 5px 20px; color: var(--primary); font-weight: bold; font-size: 16px; border-top: 1px solid var(--border); margin-top: 10px;}
         .cat-item { padding: 5px 20px; color: #bcaaa4; font-size: 14px; cursor: pointer; }
         .cat-item:hover { color: white; }
         .cat-item.active { color: var(--primary); font-weight: bold; }
-
-        /* --- CONTENT AREA --- */
         .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-
-        /* --- PROFILE CARD --- */
-        .profile-card { width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
+        .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; position: relative;}
+        .item-card:hover { transform: translateY(-5px); border-color: var(--primary);}
+        .item-card img { width: 100px; height: 100px; object-fit: contain; }
+        .item-card p { color: #ccc; margin: 5px 0; font-size: 14px;}
+        .item-price { color: var(--primary); font-weight: bold; }
+        .item-detail-container { display: flex; gap: 40px; background: var(--card); padding: 30px; border-radius: 10px; border: 1px solid var(--border); width: 100%; max-width: 800px; margin-top: 20px;}
+        .item-detail-img { width: 250px; height: 250px; object-fit: contain; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border);}
+        .item-detail-info { flex: 1; display: flex; flex-direction: column; }
+        .item-detail-title { font-size: 28px; color: var(--primary); margin-bottom: 10px; }
+        .item-detail-desc { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; flex: 1;}
+        .buy-btn { padding: 12px 30px; background: var(--primary); color: black; font-weight: bold; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; align-self: flex-start;}
+        .buy-btn:hover { background: #ffc107; }
         
-        .profile-header { display: flex; gap: 20px; }
-        .avatar-container { position: relative; }
-        .avatar { width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--border); background: #333; object-fit: cover;}
-        .online-indicator { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #2196f3; border-radius: 50%; border: 2px solid var(--card); }
+        /* AVATAR EDITOR SPECIFIC */
+        .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
+        .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center;}
+        .avatar-preview { width: 100%; height: 350px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
+        .avatar-preview img { max-height: 100%; object-fit: contain; transition: transform 0.2s;}
+        .scaling-panel { text-align: left; margin-top: 20px;}
+        .scaling-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--primary); margin-bottom: 5px;}
+        .scaling-bar { width: 100%; height: 5px; background: #444; border-radius: 5px; margin-bottom: 15px; position: relative;}
+        .scaling-fill { height: 100%; background: var(--primary); border-radius: 5px; width: 50%;}
+        .avatar-right { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
+        .inventory-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;}
+        .inv-tab { color: #aaa; cursor: pointer; font-weight: bold; padding: 5px 10px; border-radius: 5px;}
+        .inv-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary);}
+        .small-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .small-item { background: #1e1e1e; border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; cursor: pointer;}
+        .small-item:hover { border-color: var(--primary); }
+        .small-item img { width: 60px; height: 60px; object-fit: contain; }
+        .small-item p { font-size: 10px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        
+        .sell-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;}
+        .sell-btn:hover { background: #f44336; }
 
-        .profile-info { flex: 1; }
-        .username-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-        .username { font-size: 28px; color: var(--primary); font-weight: bold; }
-        .verified-badge { color: #2196f3; font-size: 18px; }
-        .status-text { color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px; }
-
-        .stats-row { display: flex; gap: 40px; }
-        .stat-block { text-align: left; }
-        .stat-label { color: var(--primary); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
-        .stat-value { font-size: 18px; color: white; }
-
-        /* --- TABS --- */
-        .profile-tabs { display: flex; border-bottom: 2px solid var(--border); margin-top: 20px; }
-        .tab-btn { padding: 10px 20px; background: none; border: none; color: var(--primary); font-size: 16px; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent;}
-        .tab-btn.active { border-bottom: 3px solid var(--primary); color: white; }
-
-        /* --- ABOUT SECTION --- */
-        .about-section { padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px; }
-        .about-text { white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc; }
-        .social-links { display: flex; gap: 10px; margin-top: 15px; }
-        .social-links i { font-size: 18px; color: var(--primary); cursor: pointer; padding: 5px;}
-
-        /* --- WEARING SECTION --- */
-        .wearing-section { width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; }
-        .wearing-title { color: var(--primary); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
-        .wearing-grid { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;}
-        .wearing-item { width: 80px; height: 80px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
-        .wearing-item img { max-width: 60px; max-height: 60px; }
-
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--modal-bg); width: 400px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .modal-header h3 { color: var(--primary); font-size: 18px; }
+        .modal-close { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
+        .modal-body { padding: 20px; text-align: center; }
+        .modal-footer { padding: 15px 20px; display: flex; gap: 10px; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .modal-footer button { padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-primary { background: var(--btn-orange); color: white; }
+        .btn-cancel { background: transparent; color: #aaa; border: 1px solid #555; }
+        .hidden { display: none !important; }
         .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: absolute; z-index: 100; background: var(--bg);}
         .auth-box { background: var(--sidebar); padding: 40px; border-radius: 10px; border: 1px solid var(--border); width: 350px; }
         .auth-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; }
         .auth-box button { width: 100%; padding: 12px; background: var(--primary); color: black; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
-
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- AUTH SCREEN -->
     <div id="auth-screen" class="auth-container">
         <div class="auth-box">
             <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">Moneyium</h2>
@@ -106,60 +98,102 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="app" class="hidden" style="display: flex; flex-direction: column; height: 100vh;">
         <div class="top-red-bar">Moneyium will never ask for your email address. Be cautious of TikTok accounts impersonating Moneyium staff.</div>
-        
         <div class="top-nav">
             <a href="/" class="logo">Moneyium</a>
-            <div class="nav-links">
-                <a href="/catalog" onclick="navigateTo('/catalog'); return false;">Catalog</a>
-            </div>
-            <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search">
-            </div>
+            <div class="nav-links"><a href="/catalog" onclick="navigateTo('/catalog'); return false;">Catalog</a></div>
+            <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search"></div>
             <div class="user-stats">
                 <span style="color: #4caf50;"><i class="fa-solid fa-coins"></i> <span id="nav-robux"></span></span>
                 <span style="color: var(--primary);"><i class="fa-solid fa-ticket"></i> <span id="nav-tix"></span></span>
                 <i class="fa-solid fa-gear" style="cursor:pointer; color: #888;" onclick="logout()"></i>
             </div>
         </div>
-
         <div class="layout">
             <div class="sidebar">
                 <div class="nav-item" onclick="navigateTo('/')"><i class="fa-solid fa-house"></i> Home</div>
                 <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/profile')"><i class="fa-solid fa-user"></i> Profile</div>
                 <div class="nav-item"><i class="fa-solid fa-comment-dots"></i> Messages</div>
                 <div class="nav-item"><i class="fa-solid fa-user-group"></i> Friends</div>
-                <div class="nav-item"><i class="fa-solid fa-shirt"></i> Avatar</div>
+                <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/avatar')"><i class="fa-solid fa-shirt"></i> Avatar</div>
                 <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/inventory')"><i class="fa-solid fa-bag-shopping"></i> Inventory</div>
                 <div class="nav-item"><i class="fa-solid fa-right-left"></i> Trade</div>
-                <div class="nav-item"><i class="fa-solid fa-users"></i> Groups</div>
-                <div class="nav-item"><i class="fa-solid fa-comments"></i> Forums</div>
-                <div class="nav-item"><i class="fa-solid fa-bullhorn"></i> Events</div>
-                <div class="nav-item"><i class="fa-solid fa-tag"></i> Promo</div>
-                <div class="nav-item"><i class="fa-solid fa-hand-holding-dollar"></i> Donations</div>
-                <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin <span class="nav-badge" style="background:var(--primary); color:black;">1</span></div>
-                <div class="upgrade-btn">Upgrade Now</div>
+                <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin</div>
+                
+                <div id="category-sidebar" class="hidden">
+                    <div class="category-header">CATEGORY</div>
+                    <div class="cat-item active" onclick="filterCategory('All')">All Items</div>
+                    <div class="cat-item" onclick="filterCategory('Hats')">Hats</div>
+                    <div class="cat-item" onclick="filterCategory('Faces')">Faces</div>
+                    <div class="cat-item" onclick="filterCategory('Gears')">Gears</div>
+                    <div class="cat-item" onclick="filterCategory('Hair')">Hair</div>
+                    <div class="cat-item" onclick="filterCategory('Shirts')">Shirts</div>
+                    <div class="cat-item" onclick="filterCategory('Pants')">Pants</div>
+                    <div class="cat-item" onclick="filterCategory('Packages')">Packages</div>
+                </div>
             </div>
 
-            <div class="content" id="main-content">
-                <!-- Content gets injected here by JS -->
+            <div class="content" id="main-content"></div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal-buy" class="modal-box hidden">
+            <div class="modal-header"><h3>Buy Item</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+            <div class="modal-body">
+                <p style="color: var(--primary); margin-bottom: 10px;">Would you like to buy:<br><span id="modal-item-name" style="font-weight:bold; font-size:18px;"></span><br>for <i class="fa-solid fa-coins"></i> <span id="modal-item-price"></span>?</p>
+                <img id="modal-item-img" src="" style="width: 150px; height: 150px; object-fit: contain;">
+                <p style="font-size: 12px; color: #aaa; margin-top: 15px;">Your balance after this transaction will be <i class="fa-solid fa-coins"></i> <span id="modal-new-balance"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="confirmPurchase()">Buy Now</button>
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+        <div id="modal-insufficient" class="modal-box hidden">
+            <div class="modal-header"><h3>Insufficient Funds</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+            <div class="modal-body">
+                <p style="color: var(--primary);">You need <i class="fa-solid fa-coins"></i> <span id="modal-missing-amount" style="font-weight:bold;"></span><br>more to purchase this item.</p>
+                <div style="font-size: 80px; color: #4caf50; margin: 20px 0;"><i class="fa-solid fa-coins"></i></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary">Buy Robux</button>
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
         let currentUser = null;
+        let currentCatalog = [];
+        let currentInventory = [];
+        let currentCategory = 'All';
+        let currentItemToBuy = null;
+
+        function slugify(text) {
+            return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+        }
 
         async function register() {
-            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: username.value, password: password.value }) });
-            if (res.ok) login(); else document.getElementById('error').innerText = "Error registering";
+            try {
+                const user = document.getElementById('username').value;
+                const pass = document.getElementById('password').value;
+                if(!user || !pass) { document.getElementById('error').innerText = "Please fill in both fields"; return; }
+                const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: user, password: pass }) });
+                const data = await res.json();
+                if (res.ok) login(); else document.getElementById('error').innerText = data.error;
+            } catch (err) { document.getElementById('error').innerText = "Network Error."; }
         }
 
         async function login() {
-            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: username.value, password: password.value }) });
-            if (res.ok) window.location.href = "/"; else document.getElementById('error').innerText = "Invalid login";
+            try {
+                const user = document.getElementById('username').value;
+                const pass = document.getElementById('password').value;
+                const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: user, password: pass }) });
+                if (res.ok) window.location.href = "/"; 
+                else { const data = await res.json(); document.getElementById('error').innerText = data.error; }
+            } catch (err) { document.getElementById('error').innerText = "Network Error."; }
         }
 
         async function logout() { await fetch('/api/logout', { method: 'POST' }); window.location.href = "/"; }
@@ -168,25 +202,21 @@
             history.pushState({}, '', path);
             handleRouting();
         }
-
         window.onpopstate = handleRouting;
 
         async function init() {
             const res = await fetch('/api/user');
-            if (!res.ok) {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                return;
-            }
-            
-            currentUser = (await res.json()).user;
+            if (!res.ok) { document.getElementById('auth-screen').classList.remove('hidden'); return; }
+            const data = await res.json();
+            currentUser = data.user;
+            currentCatalog = data.catalog;
+            currentInventory = data.inventory;
             
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
-            document.getElementById('nav-robux').innerText = currentUser.robux;
-            document.getElementById('nav-tix').innerText = currentUser.tix;
-
+            document.getElementById('nav-robux').innerText = currentUser.robux.toLocaleString();
+            document.getElementById('nav-tix').innerText = currentUser.tix.toLocaleString();
             if (currentUser.is_admin === 1) document.getElementById('nav-admin').classList.remove('hidden');
-
             handleRouting();
         }
 
@@ -194,43 +224,38 @@
             const path = window.location.pathname;
             const main = document.getElementById('main-content');
             const catSidebar = document.getElementById('category-sidebar');
-
-            // Reset category sidebar visibility
             catSidebar.classList.add('hidden');
 
             if (path === '/' || path === '/home') {
                 main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Welcome back, ${currentUser.username}</h2>`;
             } 
             else if (path === '/catalog') {
-                // Fetch catalog data
-                const res = await fetch('/api/user');
-                const data = await res.json();
-                
-                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Catalog</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 800px; margin-top: 20px;">
-                    ${data.catalog.map(item => `
-                        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center;">
-                            <img src="${item.asset_image}" style="width: 100px; height: 100px; object-fit: contain;">
-                            <p style="color: #ccc; margin: 5px 0;">${item.asset_name}</p>
-                            <p style="color: var(--primary); font-weight: bold;">R$ ${item.price} ${item.is_limited ? '(Limited)' : ''}</p>
-                            <button onclick="buyItem(${item.id})" style="width: 100%; padding: 8px; background: var(--primary); border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px;">Buy</button>
-                        </div>
-                    `).join('')}
+                renderCatalog(main, currentCatalog);
+            }
+            else if (path.match(/^\/catalog\/\d+\/.+$/)) {
+                const itemId = parseInt(path.split('/')[2]);
+                const item = currentCatalog.find(i => i.id === itemId);
+                if (!item) return main.innerHTML = `<h2 style="color: red;">Item not found or offsale</h2>`;
+                let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${item.copies_left} left)` : '';
+
+                main.innerHTML = `
+                <div class="item-detail-container">
+                    <img src="${item.asset_image}" class="item-detail-img">
+                    <div class="item-detail-info">
+                        <h1 class="item-detail-title">${item.custom_name}</h1>
+                        ${typeLabel ? `<p style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">${typeLabel}</p>` : ''}
+                        <p class="item-detail-desc">${item.description}</p>
+                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}</p>
+                        <button class="buy-btn" onclick="openBuyModal(${item.id})">Buy Item</button>
+                    </div>
                 </div>`;
             }
-            else if (path === '/inventory') {
-                const res = await fetch('/api/user');
-                const data = await res.json();
-                
-                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Your Inventory</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 800px; margin-top: 20px;">
-                    ${data.inventory.map(item => `
-                        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center;">
-                            <img src="${item.asset_image}" style="width: 100px; height: 100px; object-fit: contain;">
-                            <p style="color: #ccc; margin: 5px 0;">${item.asset_name}</p>
-                        </div>
-                    `).join('')}
-                </div>`;
+            else if (path.match(/^\/users\/\d+\/inventory$/)) {
+                catSidebar.classList.remove('hidden');
+                renderInventory(main, currentInventory, currentCategory);
+            }
+            else if (path.match(/^\/users\/\d+\/avatar$/)) {
+                renderAvatarEditor(main);
             }
             else if (path.match(/^\/users\/\d+\/profile$/)) {
                 const userId = path.split('/')[2];
@@ -249,8 +274,8 @@
                             </div>
                             <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;">"${u.bio}"</div>
                             <div style="display: flex; gap: 40px;">
-                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Friends</div><div style="font-size: 18px; color: white;">44</div></div>
-                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Followers</div><div style="font-size: 18px; color: white;">19</div></div>
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Friends</div><div style="font-size: 18px; color: white;">0</div></div>
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Followers</div><div style="font-size: 18px; color: white;">0</div></div>
                                 <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Following</div><div style="font-size: 18px; color: white;">0</div></div>
                                 <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">RAP</div><div style="font-size: 18px; color: white;">${u.rap.toLocaleString()}+</div></div>
                             </div>
@@ -267,7 +292,60 @@
             }
         }
 
-        function renderCatalog(container, items, isAdmin) {
+        function renderAvatarEditor(container) {
+            const equipped = currentInventory.filter(i => i.is_wearing === 1);
+            // Mock 3D render using Roblox Headshot API
+            const avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=1&width=420&height=420&format=png";
+
+            container.innerHTML = `
+            <h2 style="color: var(--primary); width: 100%; max-width: 1000px; margin-bottom: 10px;">Avatar Editor</h2>
+            <div class="avatar-layout">
+                <div class="avatar-left">
+                    <div class="avatar-preview">
+                        <img src="${avatarUrl}" id="avatar-img">
+                    </div>
+                    <div class="scaling-panel">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">Scaling</h3>
+                        <div class="scaling-row"><span>Height</span><span>90%</span></div>
+                        <div class="scaling-bar"><div class="scaling-fill" style="width: 90%;"></div></div>
+                        <div class="scaling-row"><span>Width</span><span>70%</span></div>
+                        <div class="scaling-bar"><div class="scaling-fill" style="width: 70%;"></div></div>
+                        <div class="scaling-row"><span>Head</span><span>95%</span></div>
+                        <div class="scaling-bar"><div class="scaling-fill" style="width: 95%;"></div></div>
+                    </div>
+                </div>
+                <div class="avatar-right">
+                    <div class="inventory-tabs">
+                        <div class="inv-tab active">Recent</div>
+                        <div class="inv-tab">Clothing</div>
+                        <div class="inv-tab">Body</div>
+                        <div class="inv-tab">Animations</div>
+                    </div>
+                    <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Click an item to equip/unequip it.</p>
+                    <div class="small-grid">
+                        ${currentInventory.map(item => `
+                            <div class="small-item" onclick="toggleEquip(${item.id}, ${item.is_wearing})" style="border: ${item.is_wearing === 1 ? '2px solid var(--primary)' : '1px solid var(--border)'}">
+                                <img src="${item.asset_image}">
+                                <p>${item.custom_name}</p>
+                                ${item.item_type !== 'None' ? `<span style="color:var(--primary); font-size:8px;">${item.item_type}</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function toggleEquip(itemId, isWearing) {
+            const equip = isWearing === 1 ? 0 : 1;
+            await fetch('/api/equip-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId, equip }) });
+            // Reload data
+            const res = await fetch('/api/user');
+            const data = await res.json();
+            currentInventory = data.inventory;
+            handleRouting();
+        }
+
+        function renderCatalog(container, items) {
             container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Catalog</h2>
             <div class="grid">
                 ${items.map(item => `
@@ -282,26 +360,68 @@
 
         function renderInventory(container, items, category) {
             let filtered = items;
-            if (category !== 'All') {
-                filtered = items.filter(i => i.category === category);
-            }
+            if (category !== 'All') filtered = items.filter(i => i.category === category);
 
             container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Your Inventory</h2>
             <div class="grid">
                 ${filtered.length === 0 ? '<p style="color: #aaa;">No items found in this category.</p>' : filtered.map(item => `
-                    <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')">
+                    <div class="item-card">
                         <img src="${item.asset_image}">
                         <p>${item.custom_name}</p>
+                        <button class="sell-btn" onclick="sellItem(${item.id})">Sell for R$ ${item.price}</button>
                     </div>
-                </div>
-                `;
+                `).join('')}
+            </div>`;
+        }
+
+        async function sellItem(itemId) {
+            if(!confirm("Are you sure you want to sell this item?")) return;
+            const res = await fetch('/api/sell-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId }) });
+            const data = await res.json();
+            if(data.success) { alert("Item sold!"); init(); } else { alert(data.error); }
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            renderInventory(document.getElementById('main-content'), currentInventory, currentCategory);
+        }
+
+        function openBuyModal(itemId) {
+            const item = currentCatalog.find(i => i.id === itemId);
+            if (!item) return;
+            currentItemToBuy = item;
+            
+            document.getElementById('modal-item-name').innerText = item.custom_name;
+            document.getElementById('modal-item-price').innerText = item.price.toLocaleString();
+            document.getElementById('modal-item-img').src = item.asset_image;
+            document.getElementById('modal-new-balance').innerText = (currentUser.robux - item.price).toLocaleString();
+
+            document.getElementById('modal-overlay').classList.add('active');
+            if (currentUser.robux < item.price) {
+                document.getElementById('modal-buy').classList.add('hidden');
+                document.getElementById('modal-insufficient').classList.remove('hidden');
+                document.getElementById('modal-missing-amount').innerText = Math.abs(currentUser.robux - item.price).toLocaleString();
+            } else {
+                document.getElementById('modal-buy').classList.remove('hidden');
+                document.getElementById('modal-insufficient').classList.add('hidden');
             }
         }
 
-        async function buyItem(itemId) {
-            const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId }) });
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            currentItemToBuy = null;
+        }
+
+        async function confirmPurchase() {
+            if (!currentItemToBuy) return;
+            const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId: currentItemToBuy.id }) });
             const data = await res.json();
-            if (data.success) { alert("Purchased!"); window.location.reload(); } else { alert(data.error); }
+            if (data.success) {
+                closeModal();
+                init(); 
+            } else { alert(data.error); }
         }
 
         init();

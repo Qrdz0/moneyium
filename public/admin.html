@@ -32,7 +32,6 @@
     </div>
 
     <div class="content">
-        <!-- USERS TAB -->
         <div id="users-tab">
             <h1>User Management</h1>
             <table>
@@ -41,14 +40,12 @@
             </table>
         </div>
 
-        <!-- ASSETS TAB (UPLOAD) -->
         <div id="assets-tab" class="hidden">
             <h1>Upload Item to Catalog</h1>
             <div style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px;">
                 <input type="text" id="assetId" placeholder="Roblox Asset ID (e.g. 1365767)">
                 <input type="text" id="customName" placeholder="Custom Display Name (Optional)">
                 <textarea id="description" placeholder="Item Description" rows="3"></textarea>
-                
                 <div style="display: flex; gap: 15px;">
                     <input type="number" id="price" placeholder="Price in R$" value="50" style="flex: 1;">
                     <select id="category" style="flex: 1;">
@@ -61,22 +58,19 @@
                         <option value="Packages">Packages</option>
                     </select>
                 </div>
-                
                 <div style="display: flex; gap: 15px;">
                     <select id="itemType" style="flex: 1;">
                         <option value="None">Normal Item</option>
-                        <option value="Limited">Limited (1 Copy)</option>
+                        <option value="Limited">Limited (Multiple Copies)</option>
                         <option value="LimitedU">Limited U (Multiple Copies)</option>
                     </select>
-                    <input type="number" id="copies" placeholder="Copies (If Limited U)" value="10" style="flex: 1;">
+                    <input type="number" id="copies" placeholder="Copies" value="10" style="flex: 1;">
                 </div>
-
                 <button onclick="uploadItem()" style="padding: 15px;">Upload Item</button>
             </div>
             <p id="upload-status" style="margin-top: 10px; color: var(--primary);"></p>
         </div>
 
-        <!-- MANAGE CATALOG TAB -->
         <div id="catalog-tab" class="hidden">
             <h1>Manage Catalog</h1>
             <table>
