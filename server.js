@@ -19,22 +19,19 @@ function setupDatabase() {
     return new Promise((resolve) => {
         db.serialize(() => {
             db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0)`);
+            db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
+            db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))`);
+            db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
             
-            // UPDATED CATALOG: Added total_copies
-            db.run(`CREATE TABLE IF NOT EXISTS catalog (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, 
-                price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', 
-                total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER
-            )`);
-            
-            // UPDATED INVENTORY: Added serial_number
-            db.run(`CREATE TABLE IF NOT EXISTS inventory (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, 
-                serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, 
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            )`);
-            
-            db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`, resolve);
+            // CREATE SYSTEM ACCOUNT
+            db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
+                if (!row) {
+                    const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
+                    db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio) VALUES ('ROBLOX', ?, 0, 0, 'Official system account.')`, [sysPass], resolve);
+                } else {
+                    resolve();
+                }
+            });
         });
     });
 }
@@ -46,7 +43,8 @@ app.post('/api/register', async (req, res) => {
     if (!username || !password || username.includes(' ')) return res.status(400).json({ error: "Invalid username/password" });
     const hashedPassword = await bcrypt.hash(password, 10);
     db.get(`SELECT COUNT(*) as count FROM users`, [], async (err, row) => {
-        const isFirstUser = row.count === 0 ? 1 : 0;
+        // If it's literally the first user (besides ROBLOX), make them admin
+        const isFirstUser = row.count <= 1 ? 1 : 0;
         db.run(`INSERT INTO users (username, password, is_admin, can_upload) VALUES (?, ?, ?, ?)`, [username, hashedPassword, isFirstUser, isFirstUser], function(err) {
             if (err) return res.status(400).json({ error: "Username taken" });
             res.json({ success: true });
@@ -85,14 +83,10 @@ app.get('/api/user/:id', (req, res) => {
     });
 });
 
-// NEW: Get all catalog items (including sold out)
 app.get('/api/catalog', (req, res) => {
-    db.all(`SELECT * FROM catalog`, (err, catalog) => {
-        res.json(catalog || []);
-    });
+    db.all(`SELECT * FROM catalog`, (err, catalog) => { res.json(catalog || []); });
 });
 
-// NEW: Get specific item details + owners list
 app.get('/api/catalog/:id', (req, res) => {
     db.get(`SELECT * FROM catalog WHERE id = ?`, [req.params.id], (err, item) => {
         if (!item) return res.status(404).json({ error: "Item not found" });
@@ -120,21 +114,16 @@ app.post('/api/buy-item', (req, res) => {
             db.get(`SELECT id FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], (err, owned) => {
                 if (owned && item.item_type !== 'None') return res.status(400).json({ error: "You already own this item!" });
                 
-                // Calculate Serial Number
                 let serialNumber = 0;
                 if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
                     serialNumber = item.total_copies - item.copies_left + 1;
                 }
 
                 db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], () => {
-                    // Insert into inventory with serial number
                     db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, ?)`, [req.session.userId, itemId, serialNumber], () => {
                         
-                        // FIX: DO NOT DELETE. Just reduce copies.
                         const newCopies = item.copies_left - 1;
                         db.run(`UPDATE catalog SET copies_left = ? WHERE id = ?`, [newCopies, itemId]);
-
-                        // Log transaction
                         db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Purchase', ?, ?)`, [req.session.userId, -item.price, item.id]);
                         res.json({ success: true });
                     });
@@ -164,7 +153,6 @@ app.post('/api/sell-item', (req, res) => {
             db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [item.price, req.session.userId]);
             db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Sale', ?, ?)`, [req.session.userId, item.price, item.id]);
 
-            // Put the copy back into the catalog
             if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
                 db.run(`UPDATE catalog SET copies_left = copies_left + 1 WHERE id = ?`, [itemId]);
             }
@@ -174,7 +162,10 @@ app.post('/api/sell-item', (req, res) => {
 });
 
 // --- ADMIN ROUTES ---
-app.get('/api/admin/users', (req, res) => { if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); db.all(`SELECT id, username, robux, tix, is_admin, can_upload FROM users`, (err, users) => res.json(users)); });
+app.get('/api/admin/users', (req, res) => { 
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); 
+    db.all(`SELECT id, username, robux, tix, is_admin, can_upload FROM users`, (err, users) => res.json(users)); 
+});
 app.get('/api/admin/transactions/:id', (req, res) => { if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); db.all(`SELECT * FROM transactions WHERE user_id = ? ORDER BY timestamp DESC`, [req.params.id], (err, txs) => res.json(txs || [])); });
 app.post('/api/admin/give-currency', (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
@@ -194,12 +185,25 @@ app.post('/api/admin/upload-item', async (req, res) => {
         const detailsRes = await axios.get(`https://economy.roblox.com/v2/assets/${assetId}/details`);
         const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&size=420x420&format=Png&isCircular=false`);
         
-        const copiesVal = (item_type !== 'None') ? parseInt(copies) : 1;
-        
-        // UPDATED: Insert total_copies and copies_left
+        // If limited, user gets X copies + 1 for ROBLOX.
+        const userCopies = (item_type !== 'None') ? parseInt(copies) : 1;
+        const totalCopies = userCopies + 1; 
+
         db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, total_copies, copies_left, creator_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-            [assetId, custom_name || detailsRes.data.Name, thumbRes.data.data[0].imageUrl, description || "No desc.", price, category, item_type, copiesVal, copiesVal, req.session.userId], 
-            () => res.json({ success: true }));
+            [assetId, custom_name || detailsRes.data.Name, thumbRes.data.data[0].imageUrl, description || "No desc.", price, category, item_type, totalCopies, userCopies, req.session.userId], 
+            function(err) {
+                if (err) return res.status(500).json({ error: "DB Error" });
+                const newItemId = this.lastID;
+                
+                // Give the #1 copy to ROBLOX
+                db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, sysUser) => {
+                    if (sysUser) {
+                        db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
+                    }
+                    res.json({ success: true });
+                });
+            }
+        );
     } catch (error) { res.status(400).json({ error: "Invalid Asset ID" }); }
 });
 

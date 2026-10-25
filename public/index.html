@@ -31,8 +31,6 @@
         .item-card img { width: 100px; height: 100px; object-fit: contain; }
         .item-card p { color: #ccc; margin: 5px 0; font-size: 14px;}
         .item-price { color: var(--primary); font-weight: bold; }
-        
-        /* ITEM DETAIL PAGE */
         .item-detail-container { display: flex; gap: 40px; background: var(--card); padding: 30px; border-radius: 10px; border: 1px solid var(--border); width: 100%; max-width: 800px; margin-top: 20px;}
         .item-detail-img { width: 250px; height: 250px; object-fit: contain; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border);}
         .item-detail-info { flex: 1; display: flex; flex-direction: column; }
@@ -41,14 +39,10 @@
         .buy-btn { padding: 12px 30px; background: var(--primary); color: black; font-weight: bold; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; align-self: flex-start;}
         .buy-btn:hover { background: #ffc107; }
         .buy-btn.soldout { background: #555; color: #888; cursor: not-allowed; }
-        
-        /* OWNERS TABLE */
         .owners-list { width: 100%; max-width: 800px; margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
         .owners-list h3 { color: var(--primary); margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
         .owner-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px;}
         .owner-row:last-child { border-bottom: none; }
-        
-        /* AVATAR & OTHER CSS */
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
         .avatar-preview { width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
@@ -66,7 +60,6 @@
         .small-item img { width: 60px; height: 60px; object-fit: contain; }
         .small-item p { font-size: 10px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .sell-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;}
-        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box { background: var(--modal-bg); width: 400px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
@@ -192,7 +185,6 @@
             const data = await res.json();
             currentUser = data.user; currentInventory = data.inventory;
             
-            // Fetch all catalog items (including sold out)
             const catalogRes = await fetch('/api/catalog');
             currentCatalog = await catalogRes.json();
 
@@ -215,12 +207,14 @@
             else if (path.match(/^\/catalog\/\d+\/.+$/)) {
                 const itemId = parseInt(path.split('/')[2]);
                 
-                // Fetch full item details and owners
                 const res = await fetch(`/api/catalog/${itemId}`);
                 if (!res.ok) return main.innerHTML = `<h2 style="color: red;">Item not found</h2>`;
                 const { item, owners } = await res.json();
 
-                let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${item.total_copies} total copies)` : '';
+                // Display total copies minus 1 (since ROBLOX holds one)
+                const publicCopies = item.total_copies - 1;
+                
+                let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${publicCopies} total copies)` : '';
                 let isSoldOut = item.copies_left <= 0;
 
                 main.innerHTML = `
