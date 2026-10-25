@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Moneyium - Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --bg: #2b211b; /* Dark brown background */
+            --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            --sidebar: #1c1410; 
+            --card: rgba(40, 30, 25, 0.85); /* Semi-transparent card */
+            --primary: #f9a825; /* Hexium Gold */
+            --text: #e0e0e0; 
+            --border: #4a3b32;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* --- TOP RED BAR --- */
+        .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 14px; font-weight: bold; color: white; z-index: 10; }
+        
+        /* --- TOP NAV --- */
+        .top-nav { background: rgba(20, 15, 10, 0.95); padding: 10px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); z-index: 10; gap: 20px;}
+        .logo { font-size: 24px; font-weight: 900; color: var(--primary); letter-spacing: 1px; text-decoration: none;}
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; text-transform: capitalize;}
+        .search-bar { flex: 1; max-width: 400px; background: #111; border: 1px solid var(--border); border-radius: 20px; padding: 6px 15px; display: flex; align-items: center; color: #888; }
+        .search-bar input { background: none; border: none; color: white; outline: none; margin-left: 10px; width: 100%;}
+        .user-stats { display: flex; gap: 15px; font-size: 13px; font-weight: bold; margin-left: auto; align-items: center;}
+        .user-stats span { color: var(--primary); }
+        .user-stats i { margin-right: 5px; }
+
+        /* --- MAIN LAYOUT --- */
+        .layout { display: flex; flex: 1; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 200px; background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 15px; overflow-y: auto;}
+        .nav-item { padding: 10px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold;}
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+        .nav-badge { background: #d32f2f; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: auto;}
+        .upgrade-btn { margin: 15px; padding: 10px; text-align: center; background: var(--primary); color: black; border-radius: 5px; font-weight: bold; cursor: pointer;}
+
+        /* --- CONTENT AREA --- */
+        .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* --- PROFILE CARD --- */
+        .profile-card { width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        
+        .profile-header { display: flex; gap: 20px; }
+        .avatar-container { position: relative; }
+        .avatar { width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--border); background: #333; object-fit: cover;}
+        .online-indicator { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #2196f3; border-radius: 50%; border: 2px solid var(--card); }
+
+        .profile-info { flex: 1; }
+        .username-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .username { font-size: 28px; color: var(--primary); font-weight: bold; }
+        .verified-badge { color: #2196f3; font-size: 18px; }
+        .status-text { color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px; }
+
+        .stats-row { display: flex; gap: 40px; }
+        .stat-block { text-align: left; }
+        .stat-label { color: var(--primary); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .stat-value { font-size: 18px; color: white; }
+
+        /* --- TABS --- */
+        .profile-tabs { display: flex; border-bottom: 2px solid var(--border); margin-top: 20px; }
+        .tab-btn { padding: 10px 20px; background: none; border: none; color: var(--primary); font-size: 16px; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent;}
+        .tab-btn.active { border-bottom: 3px solid var(--primary); color: white; }
+
+        /* --- ABOUT SECTION --- */
+        .about-section { padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px; }
+        .about-text { white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc; }
+        .social-links { display: flex; gap: 10px; margin-top: 15px; }
+        .social-links i { font-size: 18px; color: var(--primary); cursor: pointer; padding: 5px;}
+
+        /* --- WEARING SECTION --- */
+        .wearing-section { width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px; }
+        .wearing-title { color: var(--primary); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
+        .wearing-grid { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;}
+        .wearing-item { width: 80px; height: 80px; background: #222; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+        .wearing-item img { max-width: 60px; max-height: 60px; }
+
+        .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: absolute; z-index: 100; background: var(--bg);}
+        .auth-box { background: var(--sidebar); padding: 40px; border-radius: 10px; border: 1px solid var(--border); width: 350px; }
+        .auth-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; }
+        .auth-box button { width: 100%; padding: 12px; background: var(--primary); color: black; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-box">
+            <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">Moneyium</h2>
+            <input type="text" id="username" placeholder="Username (no spaces)">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <button style="background: #333; color: white;" onclick="register()">Register</button>
+            <p id="error" style="color: #ff4757; text-align: center; margin-top: 10px; font-size: 14px;"></p>
+        </div>
+    </div>
+
+    <div id="app" class="hidden" style="display: flex; flex-direction: column; height: 100vh;">
+        
+        <div class="top-red-bar">Moneyium will never ask for your email address. Be cautious of TikTok accounts impersonating Moneyium staff.</div>
+        
+        <div class="top-nav">
+            <a href="/" class="logo">Moneyium</a>
+            <div class="nav-links">
+                <a href="#">Games</a>
+                <a href="/catalog" onclick="navigateTo('/catalog'); return false;">Catalog</a>
+                <a href="#">Create</a>
+                <a href="#">Download</a>
+            </div>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search">
+            </div>
+            <div class="user-stats">
+                <span style="color: #4caf50;"><i class="fa-solid fa-coin"></i> <span id="nav-robux"></span></span>
+                <span style="color: var(--primary);"><i class="fa-solid fa-ticket"></i> <span id="nav-tix"></span></span>
+                <i class="fa-solid fa-gear" style="cursor:pointer; color: #888;" onclick="logout()"></i>
+            </div>
+        </div>
+
+        <div class="layout">
+            <div class="sidebar">
+                <div class="nav-item" onclick="navigateTo('/')"><i class="fa-solid fa-house"></i> Home</div>
+                <div class="nav-item" onclick="navigateTo('/' + currentUser.id + '/profile')"><i class="fa-solid fa-user"></i> Profile</div>
+                <div class="nav-item"><i class="fa-solid fa-comment-dots"></i> Messages <span class="nav-badge">99+</span></div>
+                <div class="nav-item"><i class="fa-solid fa-user-group"></i> Friends <span class="nav-badge">99+</span></div>
+                <div class="nav-item"><i class="fa-solid fa-shirt"></i> Avatar</div>
+                <div class="nav-item" onclick="navigateTo('/inventory')"><i class="fa-solid fa-bag-shopping"></i> Inventory</div>
+                <div class="nav-item"><i class="fa-solid fa-right-left"></i> Trade</div>
+                <div class="nav-item"><i class="fa-solid fa-users"></i> Groups</div>
+                <div class="nav-item"><i class="fa-solid fa-comments"></i> Forums</div>
+                <div class="nav-item"><i class="fa-solid fa-bullhorn"></i> Events</div>
+                <div class="nav-item"><i class="fa-solid fa-tag"></i> Promo</div>
+                <div class="nav-item"><i class="fa-solid fa-hand-holding-dollar"></i> Donations</div>
+                <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin <span class="nav-badge" style="background:var(--primary); color:black;">1</span></div>
+                <div class="upgrade-btn">Upgrade Now</div>
+            </div>
+
+            <div class="content" id="main-content">
+                <!-- Content gets injected here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        async function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username, password }) });
+            const data = await res.json();
+            if (res.ok) login(); else document.getElementById('error').innerText = data.error;
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username, password }) });
+            const data = await res.json();
+            if (res.ok) window.location.href = "/"; else document.getElementById('error').innerText = data.error;
+        }
+
+        async function logout() { 
+            await fetch('/api/logout', { method: 'POST' }); 
+            window.location.href = "/"; 
+        }
+
+        function navigateTo(path) {
+            history.pushState({}, '', path);
+            handleRouting();
+        }
+
+        window.onpopstate = handleRouting;
+
+        async function init() {
+            const res = await fetch('/api/user');
+            if (!res.ok) {
+                document.getElementById('auth-screen').classList.remove('hidden');
+                return;
+            }
+            
+            currentUser = (await res.json()).user;
+            
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('nav-robux').innerText = currentUser.robux;
+            document.getElementById('nav-tix').innerText = currentUser.tix;
+
+            if (currentUser.is_admin === 1) document.getElementById('nav-admin').classList.remove('hidden');
+
+            handleRouting();
+        }
+
+        async function handleRouting() {
+            const path = window.location.pathname;
+            const main = document.getElementById('main-content');
+
+            if (path === '/' || path === '/home') {
+                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Welcome back, ${currentUser.username}</h2>`;
+            } 
+            else if (path === '/catalog') {
+                // Fetch catalog data
+                const res = await fetch('/api/user');
+                const data = await res.json();
+                
+                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Catalog</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 800px; margin-top: 20px;">
+                    ${data.catalog.map(item => `
+                        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center;">
+                            <img src="${item.asset_image}" style="width: 100px; height: 100px; object-fit: contain;">
+                            <p style="color: #ccc; margin: 5px 0;">${item.asset_name}</p>
+                            <p style="color: var(--primary); font-weight: bold;">R$ ${item.price} ${item.is_limited ? '(Limited)' : ''}</p>
+                            <button onclick="buyItem(${item.id})" style="width: 100%; padding: 8px; background: var(--primary); border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px;">Buy</button>
+                        </div>
+                    `).join('')}
+                </div>`;
+            }
+            else if (path === '/inventory') {
+                const res = await fetch('/api/user');
+                const data = await res.json();
+                
+                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Your Inventory</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 800px; margin-top: 20px;">
+                    ${data.inventory.map(item => `
+                        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center;">
+                            <img src="${item.asset_image}" style="width: 100px; height: 100px; object-fit: contain;">
+                            <p style="color: #ccc; margin: 5px 0;">${item.asset_name}</p>
+                        </div>
+                    `).join('')}
+                </div>`;
+            }
+            else if (path.match(/^\/\d+\/profile$/)) {
+                const userId = path.split('/')[1];
+                const res = await fetch(`/api/user/${userId}`);
+                if (!res.ok) return main.innerHTML = `<h2 style="color: red;">User not found</h2>`;
+                const data = await res.json();
+                const u = data.user;
+
+                main.innerHTML = `
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="avatar-container">
+                            <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=150&height=150&format=png" class="avatar">
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="profile-info">
+                            <div class="username-row">
+                                <span class="username">${u.username}</span>
+                                <i class="fa-solid fa-circle-check verified-badge"></i>
+                            </div>
+                            <div class="status-text">"${u.bio}"</div>
+                            <div class="stats-row">
+                                <div class="stat-block"><div class="stat-label">Friends</div><div class="stat-value">44</div></div>
+                                <div class="stat-block"><div class="stat-label">Followers</div><div class="stat-value">19</div></div>
+                                <div class="stat-block"><div class="stat-label">Following</div><div class="stat-value">0</div></div>
+                                <div class="stat-block"><div class="stat-label">RAP</div><div class="stat-value">${u.rap.toLocaleString()}+</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-tabs">
+                        <button class="tab-btn active">About</button>
+                        <button class="tab-btn">Creations</button>
+                    </div>
+                    <div class="about-section">
+                        <div class="about-text">You're never at the lowest point because you can always go up.
+Hey I'm ${u.username} this is my profile!
+Join a if you think you can get accepted.
+Senior moderator @Moneyium. Do not be afraid to ping me.</div>
+                        <div class="social-links">
+                            <i class="fa-brands fa-discord"></i>
+                            <i class="fa-brands fa-github"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wearing-section">
+                    <div class="wearing-title">Currently Wearing</div>
+                    <div class="wearing-grid">
+                        ${data.inventory.map(item => `
+                            <div class="wearing-item"><img src="${item.asset_image}"></div>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }
+        }
+
+        async function buyItem(itemId) {
+            const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId }) });
+            const data = await res.json();
+            if (data.success) { alert("Purchased!"); window.location.reload(); } else { alert(data.error); }
+        }
+
+        init();
+    </script>
+</body>
+</html>
