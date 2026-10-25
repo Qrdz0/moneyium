@@ -31,6 +31,8 @@
         .item-card img { width: 100px; height: 100px; object-fit: contain; }
         .item-card p { color: #ccc; margin: 5px 0; font-size: 14px;}
         .item-price { color: var(--primary); font-weight: bold; }
+        
+        /* ITEM DETAIL PAGE */
         .item-detail-container { display: flex; gap: 40px; background: var(--card); padding: 30px; border-radius: 10px; border: 1px solid var(--border); width: 100%; max-width: 800px; margin-top: 20px;}
         .item-detail-img { width: 250px; height: 250px; object-fit: contain; background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid var(--border);}
         .item-detail-info { flex: 1; display: flex; flex-direction: column; }
@@ -38,6 +40,15 @@
         .item-detail-desc { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; flex: 1;}
         .buy-btn { padding: 12px 30px; background: var(--primary); color: black; font-weight: bold; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; align-self: flex-start;}
         .buy-btn:hover { background: #ffc107; }
+        .buy-btn.soldout { background: #555; color: #888; cursor: not-allowed; }
+        
+        /* OWNERS TABLE */
+        .owners-list { width: 100%; max-width: 800px; margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
+        .owners-list h3 { color: var(--primary); margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
+        .owner-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px;}
+        .owner-row:last-child { border-bottom: none; }
+        
+        /* AVATAR & OTHER CSS */
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
         .avatar-preview { width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
@@ -55,6 +66,7 @@
         .small-item img { width: 60px; height: 60px; object-fit: contain; }
         .small-item p { font-size: 10px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .sell-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;}
+        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box { background: var(--modal-bg); width: 400px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
@@ -178,7 +190,12 @@
             const res = await fetch('/api/user');
             if (!res.ok) { document.getElementById('auth-screen').classList.remove('hidden'); return; }
             const data = await res.json();
-            currentUser = data.user; currentCatalog = data.catalog; currentInventory = data.inventory;
+            currentUser = data.user; currentInventory = data.inventory;
+            
+            // Fetch all catalog items (including sold out)
+            const catalogRes = await fetch('/api/catalog');
+            currentCatalog = await catalogRes.json();
+
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('nav-robux').innerText = currentUser.robux.toLocaleString();
@@ -196,9 +213,16 @@
             } 
             else if (path === '/catalog') { renderCatalog(main, currentCatalog); }
             else if (path.match(/^\/catalog\/\d+\/.+$/)) {
-                const itemId = parseInt(path.split('/')[2]), item = currentCatalog.find(i => i.id === itemId);
-                if (!item) return main.innerHTML = `<h2 style="color: red;">Item not found or offsale</h2>`;
-                let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${item.copies_left} left)` : '';
+                const itemId = parseInt(path.split('/')[2]);
+                
+                // Fetch full item details and owners
+                const res = await fetch(`/api/catalog/${itemId}`);
+                if (!res.ok) return main.innerHTML = `<h2 style="color: red;">Item not found</h2>`;
+                const { item, owners } = await res.json();
+
+                let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${item.total_copies} total copies)` : '';
+                let isSoldOut = item.copies_left <= 0;
+
                 main.innerHTML = `
                 <div class="item-detail-container">
                     <img src="${item.asset_image}" class="item-detail-img">
@@ -206,9 +230,25 @@
                         <h1 class="item-detail-title">${item.custom_name}</h1>
                         ${typeLabel ? `<p style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">${typeLabel}</p>` : ''}
                         <p class="item-detail-desc">${item.description}</p>
-                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}</p>
-                        <button class="buy-btn" onclick="openBuyModal(${item.id})">Buy Item</button>
+                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;">
+                            Original Price: <i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}
+                        </p>
+                        
+                        <button class="buy-btn ${isSoldOut ? 'soldout' : ''}" 
+                            onclick="${isSoldOut ? '' : `openBuyModal(${item.id})`}">
+                            ${isSoldOut ? 'Sold Out' : 'Buy Item'}
+                        </button>
                     </div>
+                </div>
+
+                <div class="owners-list">
+                    <h3>Owners (${owners.length} / ${item.total_copies})</h3>
+                    ${owners.length === 0 ? '<p style="color: #555; font-size: 14px;">No one owns this item yet.</p>' : owners.map(o => `
+                        <div class="owner-row">
+                            <span style="color: #ccc;">${o.username}</span>
+                            <span style="color: var(--primary); font-weight: bold;">#${o.serial_number} / ${item.total_copies}</span>
+                        </div>
+                    `).join('')}
                 </div>`;
             }
             else if (path.match(/^\/users\/\d+\/inventory$/)) { catSidebar.classList.remove('hidden'); renderInventory(main, currentInventory, currentCategory); }
@@ -299,14 +339,24 @@
 
         function renderCatalog(container, items) {
             container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Catalog</h2><div class="grid">${items.map(item => `
-                <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')"><img src="${item.asset_image}"><p>${item.custom_name}</p><p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p></div>
+                <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')">
+                    <img src="${item.asset_image}">
+                    <p>${item.custom_name}</p>
+                    <p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p>
+                    ${item.copies_left <= 0 ? '<span style="color:#d32f2f; font-size:12px; font-weight:bold;">SOLD OUT</span>' : ''}
+                </div>
             `).join('')}</div>`;
         }
 
         function renderInventory(container, items, category) {
             let filtered = category !== 'All' ? items.filter(i => i.category === category) : items;
             container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Your Inventory</h2><div class="grid">${filtered.length === 0 ? '<p style="color: #aaa;">No items found.</p>' : filtered.map(item => `
-                <div class="item-card"><img src="${item.asset_image}"><p>${item.custom_name}</p><button class="sell-btn" onclick="sellItem(${item.id})">Sell for R$ ${item.price}</button></div>
+                <div class="item-card">
+                    <img src="${item.asset_image}">
+                    <p>${item.custom_name}</p>
+                    ${item.serial_number > 0 ? `<p style="color:var(--primary); font-size:12px; font-weight:bold;">#${item.serial_number}</p>` : ''}
+                    <button class="sell-btn" onclick="sellItem(${item.id})">Sell for R$ ${item.price}</button>
+                </div>
             `).join('')}</div>`;
         }
 
