@@ -211,7 +211,6 @@
                 if (!res.ok) return main.innerHTML = `<h2 style="color: red;">Item not found</h2>`;
                 const { item, owners } = await res.json();
 
-                // Display total copies minus 1 (since ROBLOX holds one)
                 const publicCopies = item.total_copies - 1;
                 
                 let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${publicCopies} total copies)` : '';

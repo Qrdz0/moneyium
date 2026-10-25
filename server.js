@@ -23,11 +23,11 @@ function setupDatabase() {
             db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))`);
             db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
             
-            // CREATE SYSTEM ACCOUNT
+            // FIX: ROBLOX ACCOUNT NOW HAS ADMIN (1) AND UPLOAD (1) PERMS
             db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
                 if (!row) {
                     const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
-                    db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio) VALUES ('ROBLOX', ?, 0, 0, 'Official system account.')`, [sysPass], resolve);
+                    db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio) VALUES ('ROBLOX', ?, 1, 1, 'Official system account.')`, [sysPass], resolve);
                 } else {
                     resolve();
                 }
@@ -41,9 +41,10 @@ setupDatabase();
 app.post('/api/register', async (req, res) => {
     let { username, password } = req.body;
     if (!username || !password || username.includes(' ')) return res.status(400).json({ error: "Invalid username/password" });
+    if (username === 'ROBLOX') return res.status(400).json({ error: "This username is reserved." });
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     db.get(`SELECT COUNT(*) as count FROM users`, [], async (err, row) => {
-        // If it's literally the first user (besides ROBLOX), make them admin
         const isFirstUser = row.count <= 1 ? 1 : 0;
         db.run(`INSERT INTO users (username, password, is_admin, can_upload) VALUES (?, ?, ?, ?)`, [username, hashedPassword, isFirstUser, isFirstUser], function(err) {
             if (err) return res.status(400).json({ error: "Username taken" });
@@ -116,7 +117,9 @@ app.post('/api/buy-item', (req, res) => {
                 
                 let serialNumber = 0;
                 if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
-                    serialNumber = item.total_copies - item.copies_left + 1;
+                    // FIX: The "Duped #1" logic. 
+                    // If total is 51 and 50 are left, serial = 1. 
+                    serialNumber = item.total_copies - item.copies_left;
                 }
 
                 db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], () => {
@@ -185,9 +188,8 @@ app.post('/api/admin/upload-item', async (req, res) => {
         const detailsRes = await axios.get(`https://economy.roblox.com/v2/assets/${assetId}/details`);
         const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&size=420x420&format=Png&isCircular=false`);
         
-        // If limited, user gets X copies + 1 for ROBLOX.
         const userCopies = (item_type !== 'None') ? parseInt(copies) : 1;
-        const totalCopies = userCopies + 1; 
+        const totalCopies = userCopies + 1; // +1 for ROBLOX
 
         db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, total_copies, copies_left, creator_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
             [assetId, custom_name || detailsRes.data.Name, thumbRes.data.data[0].imageUrl, description || "No desc.", price, category, item_type, totalCopies, userCopies, req.session.userId], 
@@ -195,9 +197,9 @@ app.post('/api/admin/upload-item', async (req, res) => {
                 if (err) return res.status(500).json({ error: "DB Error" });
                 const newItemId = this.lastID;
                 
-                // Give the #1 copy to ROBLOX
                 db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, sysUser) => {
                     if (sysUser) {
+                        // ROBLOX gets the true #1
                         db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
                     }
                     res.json({ success: true });
