@@ -21,17 +21,7 @@ function setupDatabase() {
             db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0)`);
             db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
             db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, is_wearing INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))`);
-            
-            // NEW TRANSACTIONS TABLE
-            db.run(`CREATE TABLE IF NOT EXISTS transactions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                type TEXT,
-                amount INTEGER,
-                asset_id TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            )`, resolve);
+            db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`, resolve);
         });
     });
 }
@@ -101,8 +91,9 @@ app.post('/api/buy-item', (req, res) => {
                 
                 db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], () => {
                     db.run(`INSERT INTO inventory (user_id, catalog_id) VALUES (?, ?)`, [req.session.userId, itemId], () => {
-                        // LOG TRANSACTION
-                        db.run(`INSERT INTO transactions (user_id, type, amount, asset_id) VALUES (?, 'Purchase', ?, ?)`, [req.session.userId, -item.price, item.asset_id]);
+                        
+                        // FIX: Log the site's item.id instead of the Roblox asset_id
+                        db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Purchase', ?, ?)`, [req.session.userId, -item.price, item.id]);
 
                         if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
                             const newCopies = item.copies_left - 1;
@@ -135,8 +126,8 @@ app.post('/api/sell-item', (req, res) => {
             if (this.changes === 0) return res.status(400).json({ error: "You don't own this" });
             db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [item.price, req.session.userId]);
             
-            // LOG TRANSACTION
-            db.run(`INSERT INTO transactions (user_id, type, amount, asset_id) VALUES (?, 'Sale', ?, ?)`, [req.session.userId, item.price, item.asset_id]);
+            // FIX: Log the site's item.id here too
+            db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Sale', ?, ?)`, [req.session.userId, item.price, item.id]);
 
             if (item.item_type === 'Limited' || item.item_type === 'LimitedU') db.run(`UPDATE catalog SET copies_left = copies_left + 1 WHERE id = ?`, [itemId]);
             res.json({ success: true });
@@ -159,13 +150,12 @@ app.get('/api/admin/transactions/:id', (req, res) => {
 
 app.post('/api/admin/give-currency', (req, res) => {
     if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
-    const { userId, currency, amount } = req.body; // currency = 'robux' or 'tix'
+    const { userId, currency, amount } = req.body; 
     if (currency !== 'robux' && currency !== 'tix') return res.status(400).json({ error: "Invalid currency" });
     
     db.run(`UPDATE users SET ${currency} = ${currency} + ? WHERE id = ?`, [amount, userId], (err) => {
         if (err) return res.status(500).json({ error: "DB error" });
-        // LOG TRANSACTION
-        db.run(`INSERT INTO transactions (user_id, type, amount, asset_id) VALUES (?, 'Admin Give', ?, 'N/A')`, [userId, amount]);
+        db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Admin Give', ?, 'N/A')`, [userId, amount]);
         res.json({ success: true });
     });
 });

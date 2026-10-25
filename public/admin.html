@@ -5,47 +5,31 @@
     <title>Moneyium - Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { 
-            --bg: #1a1a1a; 
-            --card: #2b211b; 
-            --primary: #f9a825; /* Hexium Gold */
-            --text: #e0e0e0; 
-            --border: #4a3b32;
-            --danger: #d32f2f;
-        }
+        :root { --bg: #1a1a1a; --card: #2b211b; --primary: #f9a825; --text: #e0e0e0; --border: #4a3b32; --danger: #d32f2f; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); }
-        
-        /* SIDEBAR */
         .sidebar { width: 250px; background: var(--card); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column;}
         .sidebar h2 { color: var(--primary); margin-bottom: 20px; font-weight: 400; }
         .nav-item { padding: 12px; color: #ccc; cursor: pointer; border-radius: 5px; margin-bottom: 5px; border: 1px solid transparent; transition: 0.2s;}
         .nav-item:hover, .nav-item.active { background: rgba(249, 168, 37, 0.1); color: var(--primary); border-color: var(--border); }
         .nav-item i { margin-right: 10px; width: 20px;}
         .back-btn { margin-top: auto; padding: 12px; background: #333; color: white; text-align: center; text-decoration: none; border-radius: 5px; display: block; font-weight: bold; border: 1px solid var(--border);}
-        
-        /* CONTENT */
         .content { flex: 1; padding: 40px; overflow-y: auto; }
         .page-header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--primary); font-size: 24px; font-weight: 400;}
-        
-        /* TABLES */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border);}
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
         th { color: var(--primary); font-weight: 600; border-bottom: 2px solid var(--border);}
         tr:hover { background: rgba(255,255,255,0.02); }
-        
-        /* BUTTONS & INPUTS */
         input, select { padding: 10px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; outline: none;}
         button { padding: 8px 15px; background: var(--primary); color: black; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; font-size: 13px; transition: 0.2s;}
         button:hover { filter: brightness(0.8); }
         button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
         button.outline:hover { background: var(--border); }
-        button.danger { background: var(--danger); color: white; }
-        
         .badge { background: #333; padding: 3px 8px; border-radius: 12px; font-size: 11px; border: 1px solid var(--border);}
         .badge.green { background: rgba(46, 125, 50, 0.2); color: #4caf50; border-color: #4caf50;}
         .badge.red { background: rgba(211, 47, 47, 0.2); color: #f44336; border-color: #f44336;}
-
+        a.item-link { color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary); }
+        a.item-link:hover { color: white; border-bottom: 1px solid white; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -60,7 +44,6 @@
     </div>
 
     <div class="content">
-        <!-- USERS TAB -->
         <div id="tab-users">
             <div class="page-header">User Summary</div>
             <table>
@@ -69,7 +52,6 @@
             </table>
         </div>
 
-        <!-- ASSET UPLOAD TAB -->
         <div id="tab-assets" class="hidden">
             <div class="page-header">Upload Item to Catalog</div>
             <div style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px;">
@@ -78,14 +60,10 @@
                 <textarea id="description" placeholder="Item Description" rows="3" style="background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; padding: 10px;"></textarea>
                 <div style="display: flex; gap: 15px;">
                     <input type="number" id="price" placeholder="Price in R$" value="50" style="flex: 1;">
-                    <select id="category" style="flex: 1;">
-                        <option value="Hats">Hats</option><option value="Faces">Faces</option><option value="Gears">Gears</option><option value="Hair">Hair</option><option value="Shirts">Shirts</option><option value="Pants">Pants</option><option value="Packages">Packages</option>
-                    </select>
+                    <select id="category" style="flex: 1;"><option value="Hats">Hats</option><option value="Faces">Faces</option><option value="Gears">Gears</option><option value="Hair">Hair</option><option value="Shirts">Shirts</option><option value="Pants">Pants</option></select>
                 </div>
                 <div style="display: flex; gap: 15px;">
-                    <select id="itemType" style="flex: 1;">
-                        <option value="None">Normal Item</option><option value="Limited">Limited</option><option value="LimitedU">Limited U</option>
-                    </select>
+                    <select id="itemType" style="flex: 1;"><option value="None">Normal Item</option><option value="Limited">Limited</option><option value="LimitedU">Limited U</option></select>
                     <input type="number" id="copies" placeholder="Copies (If Limited)" value="10" style="flex: 1;">
                 </div>
                 <button onclick="uploadItem()" style="padding: 15px;">Upload Item</button>
@@ -93,7 +71,6 @@
             <p id="upload-status" style="margin-top: 10px; color: var(--primary);"></p>
         </div>
 
-        <!-- CATALOG TAB -->
         <div id="tab-catalog" class="hidden">
             <div class="page-header">Manage Catalog</div>
             <table>
@@ -102,7 +79,6 @@
             </table>
         </div>
 
-        <!-- TRANSACTIONS TAB -->
         <div id="tab-transactions" class="hidden">
             <div class="page-header">Transaction History</div>
             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
@@ -110,19 +86,15 @@
                 <button onclick="loadTransactionsForUser(document.getElementById('tx-user-id').value)">Search</button>
             </div>
             <table>
-                <thead><tr><th>Date / Time</th><th>Type</th><th>Amount</th><th>Asset ID</th></tr></thead>
+                <thead><tr><th>Date / Time</th><th>Type</th><th>Amount</th><th>Site Item ID</th></tr></thead>
                 <tbody id="transactions-list"></tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // Initialize Routing
         window.onpopstate = handleRouting;
-        function navigateTo(tab) {
-            history.pushState({}, '', `/admin.html?tab=${tab}`);
-            handleRouting();
-        }
+        function navigateTo(tab) { history.pushState({}, '', `/admin.html?tab=${tab}`); handleRouting(); }
 
         function handleRouting() {
             const params = new URLSearchParams(window.location.search);
@@ -146,12 +118,10 @@
             }
         }
 
-        // --- USERS ---
         async function loadUsers() {
             const res = await fetch('/api/admin/users');
             if (!res.ok) return window.location.href = "/";
             const users = await res.json();
-            
             document.getElementById('users-list').innerHTML = users.map(u => `
                 <tr>
                     <td>${u.id}</td>
@@ -181,35 +151,35 @@
         async function giveCurrency(userId, currency) {
             const amount = prompt(`How much ${currency} do you want to give to User ${userId}?`);
             if (!amount || isNaN(amount)) return;
-            
-            const res = await fetch('/api/admin/give-currency', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ userId, currency, amount: parseInt(amount) })
-            });
+            const res = await fetch('/api/admin/give-currency', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId, currency, amount: parseInt(amount) }) });
             if (res.ok) { alert("Currency given!"); loadUsers(); }
         }
 
-        // --- TRANSACTIONS ---
-        function viewTransactions(userId) {
-            navigateTo(`transactions&user=${userId}`);
-        }
+        function viewTransactions(userId) { navigateTo(`transactions&user=${userId}`); }
 
         async function loadTransactionsForUser(userId) {
             if (!userId) return;
             const res = await fetch(`/api/admin/transactions/${userId}`);
             const txs = await res.json();
             
-            document.getElementById('transactions-list').innerHTML = txs.length === 0 ? '<tr><td colspan="4">No transactions found.</td></tr>' : txs.map(tx => `
+            document.getElementById('transactions-list').innerHTML = txs.length === 0 ? '<tr><td colspan="4">No transactions found.</td></tr>' : txs.map(tx => {
+                
+                // FIX: Make the Site Item ID a clickable link if it's not 'N/A'
+                let itemDisplay = tx.site_item_id;
+                if (tx.site_item_id !== 'N/A') {
+                    itemDisplay = `<a href="http://localhost:3000/catalog/${tx.site_item_id}/item" target="_blank" class="item-link">#${tx.site_item_id}</a>`;
+                }
+
+                return `
                 <tr>
                     <td>${new Date(tx.timestamp).toLocaleString()}</td>
                     <td>${tx.type}</td>
                     <td style="color: ${tx.amount > 0 ? '#4caf50' : '#f44336'};">${tx.amount > 0 ? '+' : ''}${tx.amount}</td>
-                    <td>${tx.asset_id}</td>
+                    <td>${itemDisplay}</td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
-        // --- ASSETS & CATALOG ---
         async function uploadItem() {
             const assetId = document.getElementById('assetId').value;
             const custom_name = document.getElementById('customName').value;
@@ -219,10 +189,7 @@
             const item_type = document.getElementById('itemType').value;
             const copies = document.getElementById('copies').value;
 
-            const res = await fetch('/api/admin/upload-item', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ assetId, custom_name, description, price, category, item_type, copies })
-            });
+            const res = await fetch('/api/admin/upload-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ assetId, custom_name, description, price, category, item_type, copies }) });
             const data = await res.json();
             if (data.success) document.getElementById('upload-status').innerText = "Item uploaded successfully!";
             else document.getElementById('upload-status').innerText = "Error: " + data.error;
@@ -232,14 +199,10 @@
             const res = await fetch('/api/admin/catalog');
             const catalog = await res.json();
             document.getElementById('catalog-list').innerHTML = catalog.map(i => `
-                <tr>
-                    <td>${i.id}</td><td>${i.custom_name}</td><td>${i.category}</td>
-                    <td>${i.item_type}</td><td>${i.copies_left}</td><td style="color: #4caf50;">R$ ${i.price}</td>
-                </tr>
+                <tr><td>${i.id}</td><td>${i.custom_name}</td><td>${i.category}</td><td>${i.item_type}</td><td>${i.copies_left}</td><td style="color: #4caf50;">R$ ${i.price}</td></tr>
             `).join('');
         }
 
-        // Initialize on load
         handleRouting();
     </script>
 </body>
