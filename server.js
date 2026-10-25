@@ -20,12 +20,24 @@ function setupDatabase() {
         db.serialize(() => {
             db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0)`);
             db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
-            db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, is_wearing INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))`, resolve);
+            db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, is_wearing INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))`);
+            
+            // NEW TRANSACTIONS TABLE
+            db.run(`CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                type TEXT,
+                amount INTEGER,
+                asset_id TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )`, resolve);
         });
     });
 }
 setupDatabase();
 
+// --- AUTH & USER ROUTES ---
 app.post('/api/register', async (req, res) => {
     let { username, password } = req.body;
     if (!username || !password || username.includes(' ')) return res.status(400).json({ error: "Invalid username/password" });
@@ -71,13 +83,9 @@ app.get('/api/user/:id', (req, res) => {
     });
 });
 
-// NEW ROUTE: Update Bio
 app.post('/api/update-bio', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
-    db.run(`UPDATE users SET bio = ? WHERE id = ?`, [req.body.bio, req.session.userId], (err) => {
-        if (err) return res.status(500).json({ error: "Error saving bio" });
-        res.json({ success: true });
-    });
+    db.run(`UPDATE users SET bio = ? WHERE id = ?`, [req.body.bio, req.session.userId], (err) => res.json({ success: true }));
 });
 
 app.post('/api/buy-item', (req, res) => {
@@ -87,10 +95,15 @@ app.post('/api/buy-item', (req, res) => {
         db.get(`SELECT * FROM catalog WHERE id = ?`, [itemId], (err, item) => {
             if (!item) return res.status(404).json({ error: "Item offsale" });
             if (user.robux < item.price) return res.status(400).json({ error: "Not enough Robux!" });
+            
             db.get(`SELECT id FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], (err, owned) => {
                 if (owned && item.item_type !== 'None') return res.status(400).json({ error: "You already own this item!" });
+                
                 db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], () => {
                     db.run(`INSERT INTO inventory (user_id, catalog_id) VALUES (?, ?)`, [req.session.userId, itemId], () => {
+                        // LOG TRANSACTION
+                        db.run(`INSERT INTO transactions (user_id, type, amount, asset_id) VALUES (?, 'Purchase', ?, ?)`, [req.session.userId, -item.price, item.asset_id]);
+
                         if (item.item_type === 'Limited' || item.item_type === 'LimitedU') {
                             const newCopies = item.copies_left - 1;
                             if (newCopies <= 0) db.run(`DELETE FROM catalog WHERE id = ?`, [itemId]);
@@ -121,13 +134,42 @@ app.post('/api/sell-item', (req, res) => {
         db.run(`DELETE FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], function(err) {
             if (this.changes === 0) return res.status(400).json({ error: "You don't own this" });
             db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [item.price, req.session.userId]);
+            
+            // LOG TRANSACTION
+            db.run(`INSERT INTO transactions (user_id, type, amount, asset_id) VALUES (?, 'Sale', ?, ?)`, [req.session.userId, item.price, item.asset_id]);
+
             if (item.item_type === 'Limited' || item.item_type === 'LimitedU') db.run(`UPDATE catalog SET copies_left = copies_left + 1 WHERE id = ?`, [itemId]);
             res.json({ success: true });
         });
     });
 });
 
-app.get('/api/admin/users', (req, res) => { if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); db.all(`SELECT id, username, robux, tix, is_admin, can_upload FROM users`, (err, users) => res.json(users)); });
+// --- ADMIN ROUTES ---
+app.get('/api/admin/users', (req, res) => { 
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); 
+    db.all(`SELECT id, username, robux, tix, is_admin, can_upload FROM users`, (err, users) => res.json(users)); 
+});
+
+app.get('/api/admin/transactions/:id', (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
+    db.all(`SELECT * FROM transactions WHERE user_id = ? ORDER BY timestamp DESC`, [req.params.id], (err, txs) => {
+        res.json(txs || []);
+    });
+});
+
+app.post('/api/admin/give-currency', (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
+    const { userId, currency, amount } = req.body; // currency = 'robux' or 'tix'
+    if (currency !== 'robux' && currency !== 'tix') return res.status(400).json({ error: "Invalid currency" });
+    
+    db.run(`UPDATE users SET ${currency} = ${currency} + ? WHERE id = ?`, [amount, userId], (err) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        // LOG TRANSACTION
+        db.run(`INSERT INTO transactions (user_id, type, amount, asset_id) VALUES (?, 'Admin Give', ?, 'N/A')`, [userId, amount]);
+        res.json({ success: true });
+    });
+});
+
 app.get('/api/admin/catalog', (req, res) => { if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); db.all(`SELECT * FROM catalog`, (err, catalog) => res.json(catalog)); });
 app.post('/api/admin/toggle-perm', (req, res) => { if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" }); db.run(`UPDATE users SET ${req.body.perm} = NOT ${req.body.perm} WHERE id = ?`, [req.body.userId], () => res.json({ success: true })); });
 app.post('/api/admin/upload-item', async (req, res) => {
