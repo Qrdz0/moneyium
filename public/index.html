@@ -5,12 +5,7 @@
     <title>Moneyium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS STAYS THE SAME, JUST ADDED AVATAR EDITOR STYLES */
-        :root { 
-            --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
-            --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; 
-            --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22;
-        }
+        :root { --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 14px; font-weight: bold; color: white; z-index: 10; }
@@ -31,7 +26,7 @@
         .cat-item.active { color: var(--primary); font-weight: bold; }
         .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
-        .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; position: relative;}
+        .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;}
         .item-card:hover { transform: translateY(-5px); border-color: var(--primary);}
         .item-card img { width: 100px; height: 100px; object-fit: contain; }
         .item-card p { color: #ccc; margin: 5px 0; font-size: 14px;}
@@ -43,29 +38,23 @@
         .item-detail-desc { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; flex: 1;}
         .buy-btn { padding: 12px 30px; background: var(--primary); color: black; font-weight: bold; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; align-self: flex-start;}
         .buy-btn:hover { background: #ffc107; }
-        
-        /* AVATAR EDITOR SPECIFIC */
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
-        .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center;}
-        .avatar-preview { width: 100%; height: 350px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
-        .avatar-preview img { max-height: 100%; object-fit: contain; transition: transform 0.2s;}
-        .scaling-panel { text-align: left; margin-top: 20px;}
-        .scaling-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--primary); margin-bottom: 5px;}
-        .scaling-bar { width: 100%; height: 5px; background: #444; border-radius: 5px; margin-bottom: 15px; position: relative;}
-        .scaling-fill { height: 100%; background: var(--primary); border-radius: 5px; width: 50%;}
+        .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
+        .avatar-preview { width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
+        .avatar-preview img { max-height: 100%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));}
+        .wearing-list { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; min-height: 80px;}
+        .wearing-slot { width: 60px; height: 60px; background: rgba(0,0,0,0.2); border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center;}
+        .wearing-slot img { max-width: 80%; max-height: 80%; object-fit: contain;}
         .avatar-right { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
         .inventory-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;}
         .inv-tab { color: #aaa; cursor: pointer; font-weight: bold; padding: 5px 10px; border-radius: 5px;}
         .inv-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary);}
-        .small-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .small-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto;}
         .small-item { background: #1e1e1e; border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; cursor: pointer;}
         .small-item:hover { border-color: var(--primary); }
         .small-item img { width: 60px; height: 60px; object-fit: contain; }
         .small-item p { font-size: 10px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        
         .sell-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;}
-        .sell-btn:hover { background: #f44336; }
-
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box { background: var(--modal-bg); width: 400px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
@@ -83,6 +72,9 @@
         .auth-box { background: var(--sidebar); padding: 40px; border-radius: 10px; border: 1px solid var(--border); width: 350px; }
         .auth-box input { width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; }
         .auth-box button { width: 100%; padding: 12px; background: var(--primary); color: black; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-bottom: 10px;}
+        .bio-edit-box { display: flex; gap: 10px; margin-top: 10px;}
+        .bio-edit-box input { flex: 1; padding: 8px; background: #111; border: 1px solid var(--border); color: white; border-radius: 4px;}
+        .bio-edit-box button { padding: 8px 15px; background: var(--primary); border: none; border-radius: 4px; font-weight: bold; cursor: pointer;}
     </style>
 </head>
 <body>
@@ -142,9 +134,8 @@
         <div id="modal-buy" class="modal-box hidden">
             <div class="modal-header"><h3>Buy Item</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
             <div class="modal-body">
-                <p style="color: var(--primary); margin-bottom: 10px;">Would you like to buy:<br><span id="modal-item-name" style="font-weight:bold; font-size:18px;"></span><br>for <i class="fa-solid fa-coins"></i> <span id="modal-item-price"></span>?</p>
+                <p style="color: var(--primary); margin-bottom: 10px;">Buy:<br><span id="modal-item-name" style="font-weight:bold; font-size:18px;"></span><br>for <i class="fa-solid fa-coins"></i> <span id="modal-item-price"></span>?</p>
                 <img id="modal-item-img" src="" style="width: 150px; height: 150px; object-fit: contain;">
-                <p style="font-size: 12px; color: #aaa; margin-top: 15px;">Your balance after this transaction will be <i class="fa-solid fa-coins"></i> <span id="modal-new-balance"></span></p>
             </div>
             <div class="modal-footer">
                 <button class="btn-primary" onclick="confirmPurchase()">Buy Now</button>
@@ -154,7 +145,7 @@
         <div id="modal-insufficient" class="modal-box hidden">
             <div class="modal-header"><h3>Insufficient Funds</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
             <div class="modal-body">
-                <p style="color: var(--primary);">You need <i class="fa-solid fa-coins"></i> <span id="modal-missing-amount" style="font-weight:bold;"></span><br>more to purchase this item.</p>
+                <p style="color: var(--primary);">You need <i class="fa-solid fa-coins"></i> <span id="modal-missing-amount" style="font-weight:bold;"></span> more.</p>
                 <div style="font-size: 80px; color: #4caf50; margin: 20px 0;"><i class="fa-solid fa-coins"></i></div>
             </div>
             <div class="modal-footer">
@@ -165,53 +156,29 @@
     </div>
 
     <script>
-        let currentUser = null;
-        let currentCatalog = [];
-        let currentInventory = [];
-        let currentCategory = 'All';
-        let currentItemToBuy = null;
+        let currentUser = null, currentCatalog = [], currentInventory = [], currentCategory = 'All', currentItemToBuy = null;
 
-        function slugify(text) {
-            return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-        }
+        function slugify(text) { return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, ''); }
 
         async function register() {
-            try {
-                const user = document.getElementById('username').value;
-                const pass = document.getElementById('password').value;
-                if(!user || !pass) { document.getElementById('error').innerText = "Please fill in both fields"; return; }
-                const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: user, password: pass }) });
-                const data = await res.json();
-                if (res.ok) login(); else document.getElementById('error').innerText = data.error;
-            } catch (err) { document.getElementById('error').innerText = "Network Error."; }
+            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
+            const data = await res.json(); if (res.ok) login(); else document.getElementById('error').innerText = data.error;
         }
 
         async function login() {
-            try {
-                const user = document.getElementById('username').value;
-                const pass = document.getElementById('password').value;
-                const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: user, password: pass }) });
-                if (res.ok) window.location.href = "/"; 
-                else { const data = await res.json(); document.getElementById('error').innerText = data.error; }
-            } catch (err) { document.getElementById('error').innerText = "Network Error."; }
+            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
+            if (res.ok) window.location.href = "/"; else { const data = await res.json(); document.getElementById('error').innerText = data.error; }
         }
 
         async function logout() { await fetch('/api/logout', { method: 'POST' }); window.location.href = "/"; }
-
-        function navigateTo(path) {
-            history.pushState({}, '', path);
-            handleRouting();
-        }
+        function navigateTo(path) { history.pushState({}, '', path); handleRouting(); }
         window.onpopstate = handleRouting;
 
         async function init() {
             const res = await fetch('/api/user');
             if (!res.ok) { document.getElementById('auth-screen').classList.remove('hidden'); return; }
             const data = await res.json();
-            currentUser = data.user;
-            currentCatalog = data.catalog;
-            currentInventory = data.inventory;
-            
+            currentUser = data.user; currentCatalog = data.catalog; currentInventory = data.inventory;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('nav-robux').innerText = currentUser.robux.toLocaleString();
@@ -221,23 +188,17 @@
         }
 
         async function handleRouting() {
-            const path = window.location.pathname;
-            const main = document.getElementById('main-content');
-            const catSidebar = document.getElementById('category-sidebar');
+            const path = window.location.pathname, main = document.getElementById('main-content'), catSidebar = document.getElementById('category-sidebar');
             catSidebar.classList.add('hidden');
 
             if (path === '/' || path === '/home') {
                 main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Welcome back, ${currentUser.username}</h2>`;
             } 
-            else if (path === '/catalog') {
-                renderCatalog(main, currentCatalog);
-            }
+            else if (path === '/catalog') { renderCatalog(main, currentCatalog); }
             else if (path.match(/^\/catalog\/\d+\/.+$/)) {
-                const itemId = parseInt(path.split('/')[2]);
-                const item = currentCatalog.find(i => i.id === itemId);
+                const itemId = parseInt(path.split('/')[2]), item = currentCatalog.find(i => i.id === itemId);
                 if (!item) return main.innerHTML = `<h2 style="color: red;">Item not found or offsale</h2>`;
                 let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${item.copies_left} left)` : '';
-
                 main.innerHTML = `
                 <div class="item-detail-container">
                     <img src="${item.asset_image}" class="item-detail-img">
@@ -250,18 +211,14 @@
                     </div>
                 </div>`;
             }
-            else if (path.match(/^\/users\/\d+\/inventory$/)) {
-                catSidebar.classList.remove('hidden');
-                renderInventory(main, currentInventory, currentCategory);
-            }
-            else if (path.match(/^\/users\/\d+\/avatar$/)) {
-                renderAvatarEditor(main);
-            }
+            else if (path.match(/^\/users\/\d+\/inventory$/)) { catSidebar.classList.remove('hidden'); renderInventory(main, currentInventory, currentCategory); }
+            else if (path.match(/^\/users\/\d+\/avatar$/)) { renderAvatarEditor(main); }
             else if (path.match(/^\/users\/\d+\/profile$/)) {
-                const userId = path.split('/')[2];
+                const userId = parseInt(path.split('/')[2]);
                 const res = await fetch(`/api/user/${userId}`);
                 if (!res.ok) return main.innerHTML = `<h2 style="color: red;">User not found</h2>`;
                 const u = (await res.json()).user;
+                const isOwnProfile = u.id === currentUser.id;
 
                 main.innerHTML = `
                 <div class="profile-card" style="width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px;">
@@ -272,18 +229,22 @@
                                 <span style="font-size: 28px; color: var(--primary); font-weight: bold;">${u.username}</span>
                                 <i class="fa-solid fa-circle-check" style="color: #2196f3; font-size: 18px;"></i>
                             </div>
-                            <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;">"${u.bio}"</div>
-                            <div style="display: flex; gap: 40px;">
+                            <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;" id="profile-bio-display">"${u.bio}"</div>
+                            ${isOwnProfile ? `
+                            <div class="bio-edit-box" id="bio-edit-container">
+                                <input type="text" id="new-bio-input" placeholder="Enter a new bio..." value="${u.bio}">
+                                <button onclick="saveBio()">Save</button>
+                            </div>` : ''}
+                            
+                            <div style="display: flex; gap: 40px; margin-top: 20px;">
                                 <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Friends</div><div style="font-size: 18px; color: white;">0</div></div>
                                 <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Followers</div><div style="font-size: 18px; color: white;">0</div></div>
-                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Following</div><div style="font-size: 18px; color: white;">0</div></div>
                                 <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">RAP</div><div style="font-size: 18px; color: white;">${u.rap.toLocaleString()}+</div></div>
                             </div>
                         </div>
                     </div>
                     <div style="display: flex; border-bottom: 2px solid var(--border); margin-top: 20px;">
                         <button style="padding: 10px 20px; background: none; border: none; color: white; font-size: 16px; font-weight: bold; border-bottom: 3px solid var(--primary);">About</button>
-                        <button style="padding: 10px 20px; background: none; border: none; color: var(--primary); font-size: 16px; font-weight: bold;">Creations</button>
                     </div>
                     <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;">
                         <div style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc;">You're never at the lowest point because you can always go up.\nHey I'm ${u.username} this is my profile!\nSenior moderator @Moneyium.</div>
@@ -292,42 +253,36 @@
             }
         }
 
+        async function saveBio() {
+            const newBio = document.getElementById('new-bio-input').value;
+            const res = await fetch('/api/update-bio', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ bio: newBio }) });
+            if (res.ok) { currentUser.bio = newBio; handleRouting(); }
+        }
+
         function renderAvatarEditor(container) {
             const equipped = currentInventory.filter(i => i.is_wearing === 1);
-            // Mock 3D render using Roblox Headshot API
-            const avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=1&width=420&height=420&format=png";
-
             container.innerHTML = `
             <h2 style="color: var(--primary); width: 100%; max-width: 1000px; margin-bottom: 10px;">Avatar Editor</h2>
             <div class="avatar-layout">
                 <div class="avatar-left">
                     <div class="avatar-preview">
-                        <img src="${avatarUrl}" id="avatar-img">
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=420&height=420&format=png">
                     </div>
-                    <div class="scaling-panel">
-                        <h3 style="color: var(--primary); margin-bottom: 15px;">Scaling</h3>
-                        <div class="scaling-row"><span>Height</span><span>90%</span></div>
-                        <div class="scaling-bar"><div class="scaling-fill" style="width: 90%;"></div></div>
-                        <div class="scaling-row"><span>Width</span><span>70%</span></div>
-                        <div class="scaling-bar"><div class="scaling-fill" style="width: 70%;"></div></div>
-                        <div class="scaling-row"><span>Head</span><span>95%</span></div>
-                        <div class="scaling-bar"><div class="scaling-fill" style="width: 95%;"></div></div>
+                    <div style="margin-top: 15px; color: var(--primary); font-weight: bold; font-size: 14px;">Currently Wearing</div>
+                    <div class="wearing-list" id="wearing-list">
+                        ${equipped.length === 0 ? '<p style="color: #555; font-size: 12px;">No items equipped.</p>' : equipped.map(item => `
+                            <div class="wearing-slot"><img src="${item.asset_image}"></div>
+                        `).join('')}
                     </div>
                 </div>
                 <div class="avatar-right">
-                    <div class="inventory-tabs">
-                        <div class="inv-tab active">Recent</div>
-                        <div class="inv-tab">Clothing</div>
-                        <div class="inv-tab">Body</div>
-                        <div class="inv-tab">Animations</div>
-                    </div>
+                    <div class="inventory-tabs"><div class="inv-tab active">Recent</div><div class="inv-tab">Clothing</div><div class="inv-tab">Body</div></div>
                     <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Click an item to equip/unequip it.</p>
                     <div class="small-grid">
                         ${currentInventory.map(item => `
                             <div class="small-item" onclick="toggleEquip(${item.id}, ${item.is_wearing})" style="border: ${item.is_wearing === 1 ? '2px solid var(--primary)' : '1px solid var(--border)'}">
                                 <img src="${item.asset_image}">
                                 <p>${item.custom_name}</p>
-                                ${item.item_type !== 'None' ? `<span style="color:var(--primary); font-size:8px;">${item.item_type}</span>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -336,49 +291,29 @@
         }
 
         async function toggleEquip(itemId, isWearing) {
-            const equip = isWearing === 1 ? 0 : 1;
-            await fetch('/api/equip-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId, equip }) });
-            // Reload data
+            await fetch('/api/equip-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId, equip: isWearing === 1 ? 0 : 1 }) });
             const res = await fetch('/api/user');
-            const data = await res.json();
-            currentInventory = data.inventory;
+            currentInventory = (await res.json()).inventory;
             handleRouting();
         }
 
         function renderCatalog(container, items) {
-            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Catalog</h2>
-            <div class="grid">
-                ${items.map(item => `
-                    <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')">
-                        <img src="${item.asset_image}">
-                        <p>${item.custom_name}</p>
-                        <p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p>
-                    </div>
-                `).join('')}
-            </div>`;
+            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Catalog</h2><div class="grid">${items.map(item => `
+                <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')"><img src="${item.asset_image}"><p>${item.custom_name}</p><p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p></div>
+            `).join('')}</div>`;
         }
 
         function renderInventory(container, items, category) {
-            let filtered = items;
-            if (category !== 'All') filtered = items.filter(i => i.category === category);
-
-            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Your Inventory</h2>
-            <div class="grid">
-                ${filtered.length === 0 ? '<p style="color: #aaa;">No items found in this category.</p>' : filtered.map(item => `
-                    <div class="item-card">
-                        <img src="${item.asset_image}">
-                        <p>${item.custom_name}</p>
-                        <button class="sell-btn" onclick="sellItem(${item.id})">Sell for R$ ${item.price}</button>
-                    </div>
-                `).join('')}
-            </div>`;
+            let filtered = category !== 'All' ? items.filter(i => i.category === category) : items;
+            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Your Inventory</h2><div class="grid">${filtered.length === 0 ? '<p style="color: #aaa;">No items found.</p>' : filtered.map(item => `
+                <div class="item-card"><img src="${item.asset_image}"><p>${item.custom_name}</p><button class="sell-btn" onclick="sellItem(${item.id})">Sell for R$ ${item.price}</button></div>
+            `).join('')}</div>`;
         }
 
         async function sellItem(itemId) {
             if(!confirm("Are you sure you want to sell this item?")) return;
             const res = await fetch('/api/sell-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId }) });
-            const data = await res.json();
-            if(data.success) { alert("Item sold!"); init(); } else { alert(data.error); }
+            if ((await res.json()).success) init(); else alert("Error selling item.");
         }
 
         function filterCategory(cat) {
@@ -389,39 +324,26 @@
         }
 
         function openBuyModal(itemId) {
-            const item = currentCatalog.find(i => i.id === itemId);
-            if (!item) return;
-            currentItemToBuy = item;
-            
-            document.getElementById('modal-item-name').innerText = item.custom_name;
-            document.getElementById('modal-item-price').innerText = item.price.toLocaleString();
-            document.getElementById('modal-item-img').src = item.asset_image;
-            document.getElementById('modal-new-balance').innerText = (currentUser.robux - item.price).toLocaleString();
-
+            currentItemToBuy = currentCatalog.find(i => i.id === itemId);
+            document.getElementById('modal-item-name').innerText = currentItemToBuy.custom_name;
+            document.getElementById('modal-item-price').innerText = currentItemToBuy.price.toLocaleString();
+            document.getElementById('modal-item-img').src = currentItemToBuy.asset_image;
             document.getElementById('modal-overlay').classList.add('active');
-            if (currentUser.robux < item.price) {
+            if (currentUser.robux < currentItemToBuy.price) {
                 document.getElementById('modal-buy').classList.add('hidden');
                 document.getElementById('modal-insufficient').classList.remove('hidden');
-                document.getElementById('modal-missing-amount').innerText = Math.abs(currentUser.robux - item.price).toLocaleString();
+                document.getElementById('modal-missing-amount').innerText = Math.abs(currentUser.robux - currentItemToBuy.price).toLocaleString();
             } else {
                 document.getElementById('modal-buy').classList.remove('hidden');
                 document.getElementById('modal-insufficient').classList.add('hidden');
             }
         }
 
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.remove('active');
-            currentItemToBuy = null;
-        }
+        function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); currentItemToBuy = null; }
 
         async function confirmPurchase() {
-            if (!currentItemToBuy) return;
             const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId: currentItemToBuy.id }) });
-            const data = await res.json();
-            if (data.success) {
-                closeModal();
-                init(); 
-            } else { alert(data.error); }
+            if ((await res.json()).success) { closeModal(); init(); } else { alert("Error purchasing."); }
         }
 
         init();
