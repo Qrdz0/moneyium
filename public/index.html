@@ -5,7 +5,8 @@
     <title>Moneyium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22; }
+        /* CSS (Same as before, plus a few trade styles) */
+        :root { --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22; --verified: #3b82f6; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 14px; font-weight: bold; color: white; z-index: 10; }
@@ -41,8 +42,29 @@
         .buy-btn.soldout { background: #555; color: #888; cursor: not-allowed; }
         .owners-list { width: 100%; max-width: 800px; margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
         .owners-list h3 { color: var(--primary); margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
-        .owner-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px;}
+        .owner-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px;}
         .owner-row:last-child { border-bottom: none; }
+        .owner-left { display: flex; align-items: center; gap: 15px; }
+        .owner-avatar { width: 40px; height: 40px; border-radius: 8px; background: #222; object-fit: cover;}
+        .owner-info { display: flex; flex-direction: column; }
+        .owner-name { color: #e0e0e0; font-weight: bold; display: flex; align-items: center; gap: 5px;}
+        .verified-badge { color: var(--verified); font-size: 14px; }
+        .owner-serial { color: var(--primary); font-size: 12px; margin-top: 2px;}
+        .owner-right { display: flex; align-items: center; gap: 20px; }
+        .owner-time { color: #888; font-size: 12px; }
+        .trade-btn { padding: 6px 15px; background: transparent; border: 1px solid var(--border); color: #aaa; border-radius: 4px; cursor: pointer; transition: 0.2s;}
+        .trade-btn:hover { background: var(--border); color: white; }
+        
+        /* TRADE PAGE STYLES */
+        .trade-container { width: 100%; max-width: 800px; margin-top: 20px; }
+        .trade-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .trade-info h4 { color: var(--primary); margin-bottom: 5px; }
+        .trade-info p { font-size: 14px; color: #ccc; }
+        .trade-actions { display: flex; gap: 10px; }
+        .trade-actions button { padding: 8px 15px; font-weight: bold; border-radius: 5px; cursor: pointer; border: none;}
+        .btn-accept { background: #4caf50; color: white; }
+        .btn-decline { background: #d32f2f; color: white; }
+
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
         .avatar-preview { width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
@@ -115,7 +137,7 @@
                 <div class="nav-item"><i class="fa-solid fa-user-group"></i> Friends</div>
                 <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/avatar')"><i class="fa-solid fa-shirt"></i> Avatar</div>
                 <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/inventory')"><i class="fa-solid fa-bag-shopping"></i> Inventory</div>
-                <div class="nav-item"><i class="fa-solid fa-right-left"></i> Trade</div>
+                <div class="nav-item" onclick="navigateTo('/trade')"><i class="fa-solid fa-right-left"></i> Trade</div>
                 <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin</div>
                 
                 <div id="category-sidebar" class="hidden">
@@ -165,6 +187,22 @@
 
         function slugify(text) { return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, ''); }
 
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            if (diffInSeconds < 60) return 'Just now';
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) return `${diffInHours} hours ago`;
+            const diffInDays = Math.floor(diffInHours / 24);
+            if (diffInDays < 30) return `${diffInDays} days ago`;
+            const diffInMonths = Math.floor(diffInDays / 30);
+            if (diffInMonths < 12) return `${diffInMonths} months ago`;
+            return `${Math.floor(diffInMonths / 12)} years ago`;
+        }
+
         async function register() {
             const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
             const data = await res.json(); if (res.ok) login(); else document.getElementById('error').innerText = data.error;
@@ -184,7 +222,6 @@
             if (!res.ok) { document.getElementById('auth-screen').classList.remove('hidden'); return; }
             const data = await res.json();
             currentUser = data.user; currentInventory = data.inventory;
-            
             const catalogRes = await fetch('/api/catalog');
             currentCatalog = await catalogRes.json();
 
@@ -204,17 +241,35 @@
                 main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Welcome back, ${currentUser.username}</h2>`;
             } 
             else if (path === '/catalog') { renderCatalog(main, currentCatalog); }
+            else if (path === '/trade') { renderTradePage(main); }
             else if (path.match(/^\/catalog\/\d+\/.+$/)) {
                 const itemId = parseInt(path.split('/')[2]);
-                
                 const res = await fetch(`/api/catalog/${itemId}`);
                 if (!res.ok) return main.innerHTML = `<h2 style="color: red;">Item not found</h2>`;
                 const { item, owners } = await res.json();
 
                 const publicCopies = item.total_copies - 1;
-                
                 let typeLabel = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? `${item.item_type} (${publicCopies} total copies)` : '';
                 let isSoldOut = item.copies_left <= 0;
+
+                let ownersHtml = owners.map(o => {
+                    let serialText = o.username === 'ROBLOX' ? 'Serial N/A' : `Serial #${o.serial_number} of ${publicCopies}`;
+                    let verifiedIcon = o.is_verified ? `<i class="fa-solid fa-circle-check verified-badge"></i>` : '';
+                    return `
+                    <div class="owner-row">
+                        <div class="owner-left">
+                            <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=50&height=50&format=png" class="owner-avatar">
+                            <div class="owner-info">
+                                <span class="owner-name">${o.username} ${verifiedIcon}</span>
+                                <span class="owner-serial">${serialText}</span>
+                            </div>
+                        </div>
+                        <div class="owner-right">
+                            <span class="owner-time">${timeAgo(o.purchase_date)}</span>
+                            <button class="trade-btn" onclick="initiateTrade('${o.username}')">Trade</button>
+                        </div>
+                    </div>`;
+                }).join('');
 
                 main.innerHTML = `
                 <div class="item-detail-container">
@@ -226,23 +281,12 @@
                         <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;">
                             Original Price: <i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}
                         </p>
-                        
-                        <button class="buy-btn ${isSoldOut ? 'soldout' : ''}" 
-                            onclick="${isSoldOut ? '' : `openBuyModal(${item.id})`}">
+                        <button class="buy-btn ${isSoldOut ? 'soldout' : ''}" onclick="${isSoldOut ? '' : `openBuyModal(${item.id})`}">
                             ${isSoldOut ? 'Sold Out' : 'Buy Item'}
                         </button>
                     </div>
                 </div>
-
-                <div class="owners-list">
-                    <h3>Owners (${owners.length} / ${item.total_copies})</h3>
-                    ${owners.length === 0 ? '<p style="color: #555; font-size: 14px;">No one owns this item yet.</p>' : owners.map(o => `
-                        <div class="owner-row">
-                            <span style="color: #ccc;">${o.username}</span>
-                            <span style="color: var(--primary); font-weight: bold;">#${o.serial_number} / ${item.total_copies}</span>
-                        </div>
-                    `).join('')}
-                </div>`;
+                <div class="owners-list"><h3>Owners</h3>${ownersHtml}</div>`;
             }
             else if (path.match(/^\/users\/\d+\/inventory$/)) { catSidebar.classList.remove('hidden'); renderInventory(main, currentInventory, currentCategory); }
             else if (path.match(/^\/users\/\d+\/avatar$/)) { renderAvatarEditor(main); }
@@ -260,7 +304,7 @@
                         <div class="profile-info">
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
                                 <span style="font-size: 28px; color: var(--primary); font-weight: bold;">${u.username}</span>
-                                <i class="fa-solid fa-circle-check" style="color: #2196f3; font-size: 18px;"></i>
+                                ${u.is_verified ? '<i class="fa-solid fa-circle-check" style="color: var(--verified); font-size: 18px;"></i>' : ''}
                             </div>
                             <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;" id="profile-bio-display">"${u.bio}"</div>
                             ${isOwnProfile ? `
@@ -268,10 +312,7 @@
                                 <input type="text" id="new-bio-input" placeholder="Enter a new bio..." value="${u.bio}">
                                 <button onclick="saveBio()">Save</button>
                             </div>` : ''}
-                            
                             <div style="display: flex; gap: 40px; margin-top: 20px;">
-                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Friends</div><div style="font-size: 18px; color: white;">0</div></div>
-                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">Followers</div><div style="font-size: 18px; color: white;">0</div></div>
                                 <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">RAP</div><div style="font-size: 18px; color: white;">${u.rap.toLocaleString()}+</div></div>
                             </div>
                         </div>
@@ -280,10 +321,86 @@
                         <button style="padding: 10px 20px; background: none; border: none; color: white; font-size: 16px; font-weight: bold; border-bottom: 3px solid var(--primary);">About</button>
                     </div>
                     <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;">
-                        <div style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc;">You're never at the lowest point because you can always go up.\nHey I'm ${u.username} this is my profile!\nSenior moderator @Moneyium.</div>
+                        <div style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc;">Hey I'm ${u.username} this is my profile!</div>
                     </div>
                 </div>`;
             }
+        }
+
+        async function renderTradePage(container) {
+            const res = await fetch('/api/trade/pending');
+            const trades = await res.json();
+
+            let html = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Trade Hub</h2>
+            <div class="trade-container">
+                <button class="btn-primary" style="margin-bottom: 20px;" onclick="initiateTrade()">Create New Trade</button>
+                <h3 style="color: var(--primary); margin-bottom: 15px;">Pending Trades</h3>`;
+
+            if (trades.length === 0) {
+                html += `<p style="color: #aaa;">You have no pending trades.</p>`;
+            } else {
+                trades.forEach(t => {
+                    const isReceiver = t.receiver_id === currentUser.id;
+                    const otherPerson = isReceiver ? t.sender_name : t.receiver_name;
+                    const role = isReceiver ? "Incoming from" : "Outgoing to";
+
+                    html += `
+                    <div class="trade-card">
+                        <div class="trade-info">
+                            <h4>${role} ${otherPerson}</h4>
+                            <p>They are offering items + R$ ${isReceiver ? t.sender_robux : t.receiver_robux}</p>
+                            <p>You are offering items + R$ ${isReceiver ? t.receiver_robux : t.sender_robux}</p>
+                        </div>
+                        <div class="trade-actions">
+                            ${isReceiver ? `
+                                <button class="btn-accept" onclick="respondTrade(${t.id}, 'accept')">Accept</button>
+                                <button class="btn-decline" onclick="respondTrade(${t.id}, 'decline')">Decline</button>
+                            ` : `<span style="color: #aaa;">Waiting for response...</span>`}
+                        </div>
+                    </div>`;
+                });
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        async function initiateTrade(targetUsername) {
+            // Simplified Trade UI: Prompts for logic.
+            // In a full V2, this would be a drag-and-drop modal.
+            const receiverName = targetUsername || prompt("Enter the username of the person you want to trade:");
+            if (!receiverName) return;
+
+            const robuxToGive = prompt("How many Robux do you want to offer? (Enter 0 if none)") || 0;
+            
+            // Note: For this phase, we are keeping the item selection simple.
+            // It would require a complex UI to select exact items from inventory.
+            const itemToGive = prompt("Enter the ID of the item from your inventory you want to trade (Enter 0 if none):") || 0;
+            
+            // Mock receiver items for now (you'd normally build a UI where you request specific items)
+            const itemToRequest = prompt("Enter the ID of the item you want from them (Enter 0 if none):") || 0;
+            
+            const res = await fetch('/api/trade/send', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    receiverName,
+                    senderItems: itemToGive !== '0' ? [itemToGive] : [],
+                    receiverItems: itemToRequest !== '0' ? [itemToRequest] : [],
+                    senderRobux: parseInt(robuxToGive),
+                    receiverRobux: 0
+                })
+            });
+            alert("Trade sent!");
+            handleRouting();
+        }
+
+        async function respondTrade(tradeId, action) {
+            await fetch('/api/trade/respond', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ tradeId, action })
+            });
+            handleRouting();
         }
 
         async function saveBio() {
