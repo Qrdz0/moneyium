@@ -5,7 +5,6 @@
     <title>Moneyium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS (Same as before, plus a few trade styles) */
         :root { --bg: #2b211b; --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); --sidebar: #1c1410; --card: rgba(40, 30, 25, 0.85); --primary: #f9a825; --text: #e0e0e0; --border: #4a3b32; --modal-bg: #3b2a1e; --btn-orange: #e67e22; --verified: #3b82f6; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
         body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -54,8 +53,6 @@
         .owner-time { color: #888; font-size: 12px; }
         .trade-btn { padding: 6px 15px; background: transparent; border: 1px solid var(--border); color: #aaa; border-radius: 4px; cursor: pointer; transition: 0.2s;}
         .trade-btn:hover { background: var(--border); color: white; }
-        
-        /* TRADE PAGE STYLES */
         .trade-container { width: 100%; max-width: 800px; margin-top: 20px; }
         .trade-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
         .trade-info h4 { color: var(--primary); margin-bottom: 5px; }
@@ -64,7 +61,6 @@
         .trade-actions button { padding: 8px 15px; font-weight: bold; border-radius: 5px; cursor: pointer; border: none;}
         .btn-accept { background: #4caf50; color: white; }
         .btn-decline { background: #d32f2f; color: white; }
-
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
         .avatar-preview { width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
@@ -365,18 +361,11 @@
         }
 
         async function initiateTrade(targetUsername) {
-            // Simplified Trade UI: Prompts for logic.
-            // In a full V2, this would be a drag-and-drop modal.
             const receiverName = targetUsername || prompt("Enter the username of the person you want to trade:");
             if (!receiverName) return;
 
             const robuxToGive = prompt("How many Robux do you want to offer? (Enter 0 if none)") || 0;
-            
-            // Note: For this phase, we are keeping the item selection simple.
-            // It would require a complex UI to select exact items from inventory.
             const itemToGive = prompt("Enter the ID of the item from your inventory you want to trade (Enter 0 if none):") || 0;
-            
-            // Mock receiver items for now (you'd normally build a UI where you request specific items)
             const itemToRequest = prompt("Enter the ID of the item you want from them (Enter 0 if none):") || 0;
             
             const res = await fetch('/api/trade/send', {

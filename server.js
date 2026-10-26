@@ -22,19 +22,7 @@ function setupDatabase() {
             db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
             db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
             db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
-            
-            // NEW TRADES TABLE
-            db.run(`CREATE TABLE IF NOT EXISTS trades (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                sender_id INTEGER, 
-                receiver_id INTEGER, 
-                sender_items TEXT, 
-                receiver_items TEXT, 
-                sender_robux INTEGER DEFAULT 0, 
-                receiver_robux INTEGER DEFAULT 0, 
-                status TEXT DEFAULT 'pending', 
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            )`);
+            db.run(`CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, receiver_id INTEGER, sender_items TEXT, receiver_items TEXT, sender_robux INTEGER DEFAULT 0, receiver_robux INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
             
             db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
                 if (!row) {
@@ -77,9 +65,14 @@ app.post('/api/login', (req, res) => {
 
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });
 
+// THE FIX IS IN BOTH /api/user AND /api/user/:id
 app.get('/api/user', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap, is_verified FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
+        if (!user) { // If database was wiped, clear the old session
+            req.session.destroy();
+            return res.status(401).json({ error: "User session invalid." });
+        }
         db.all(`SELECT c.*, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
@@ -89,7 +82,7 @@ app.get('/api/user', (req, res) => {
 app.get('/api/user/:id', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap, is_verified FROM users WHERE id = ?`, [req.params.id], (err, user) => {
-        if (!user) return res.status(404).json({ error: "User not found" });
+        if (!user) return res.status(404).json({ error: "User not found" }); // Safety check
         db.all(`SELECT c.*, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
@@ -115,6 +108,7 @@ app.post('/api/buy-item', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     const { itemId } = req.body;
     db.get(`SELECT robux FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
+        if(!user) return res.status(401).json({ error: "User not found" });
         db.get(`SELECT * FROM catalog WHERE id = ?`, [itemId], (err, item) => {
             if (!item) return res.status(404).json({ error: "Item not found" });
             if (item.copies_left <= 0) return res.status(400).json({ error: "This item is sold out!" });
@@ -122,10 +116,7 @@ app.post('/api/buy-item', (req, res) => {
             
             db.get(`SELECT id FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], (err, owned) => {
                 if (owned && item.item_type !== 'None') return res.status(400).json({ error: "You already own this item!" });
-                
-                let serialNumber = 0;
-                if (item.item_type === 'Limited' || item.item_type === 'LimitedU') serialNumber = item.total_copies - item.copies_left;
-
+                let serialNumber = (item.item_type === 'Limited' || item.item_type === 'LimitedU') ? item.total_copies - item.copies_left : 0;
                 db.run(`UPDATE users SET robux = robux - ?, rap = rap + ? WHERE id = ?`, [item.price, item.price, req.session.userId], () => {
                     db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, ?)`, [req.session.userId, itemId, serialNumber], () => {
                         db.run(`UPDATE catalog SET copies_left = copies_left - 1 WHERE id = ?`, [itemId]);
@@ -166,74 +157,46 @@ app.post('/api/sell-item', (req, res) => {
 app.post('/api/trade/send', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     const { receiverId, senderItems, receiverItems, senderRobux, receiverRobux } = req.body;
-    
     db.run(`INSERT INTO trades (sender_id, receiver_id, sender_items, receiver_items, sender_robux, receiver_robux) VALUES (?, ?, ?, ?, ?, ?)`, 
         [req.session.userId, receiverId, JSON.stringify(senderItems), JSON.stringify(receiverItems), senderRobux, receiverRobux], 
-        function(err) {
-            if (err) return res.status(500).json({ error: "DB Error" });
-            res.json({ success: true });
-        }
+        function(err) { if (err) return res.status(500).json({ error: "DB Error" }); res.json({ success: true }); }
     );
 });
 
 app.get('/api/trade/pending', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
-    db.all(`SELECT t.*, u1.username as sender_name, u2.username as receiver_name 
-            FROM trades t 
-            JOIN users u1 ON t.sender_id = u1.id 
-            JOIN users u2 ON t.receiver_id = u2.id 
-            WHERE (t.receiver_id = ? OR t.sender_id = ?) AND t.status = 'pending'`, 
-            [req.session.userId, req.session.userId], (err, trades) => {
-        res.json(trades || []);
-    });
+    db.all(`SELECT t.*, u1.username as sender_name, u2.username as receiver_name FROM trades t JOIN users u1 ON t.sender_id = u1.id JOIN users u2 ON t.receiver_id = u2.id WHERE (t.receiver_id = ? OR t.sender_id = ?) AND t.status = 'pending'`, 
+        [req.session.userId, req.session.userId], (err, trades) => { res.json(trades || []); });
 });
 
 app.post('/api/trade/respond', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
-    const { tradeId, action } = req.body; // action = 'accept' or 'decline'
-
+    const { tradeId, action } = req.body; 
     db.get(`SELECT * FROM trades WHERE id = ? AND receiver_id = ? AND status = 'pending'`, [tradeId, req.session.userId], (err, trade) => {
         if (!trade) return res.status(404).json({ error: "Trade not found or already handled." });
-
         if (action === 'decline') {
             db.run(`UPDATE trades SET status = 'declined' WHERE id = ?`, [tradeId]);
             return res.json({ success: true });
         }
-
         if (action === 'accept') {
-            // Complex Logic: Swap items and Robux using a transaction block
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION");
-
-                // 1. Check if both parties have the required Robux
                 db.get(`SELECT robux FROM users WHERE id = ?`, [trade.sender_id], (err, sender) => {
                     db.get(`SELECT robux FROM users WHERE id = ?`, [trade.receiver_id], (err, receiver) => {
                         if (sender.robux < trade.sender_robux || receiver.robux < trade.receiver_robux) {
                             db.run("ROLLBACK");
                             return res.status(400).json({ error: "One or both parties do not have enough Robux." });
                         }
-
-                        // 2. Swap Robux
                         db.run(`UPDATE users SET robux = robux - ? WHERE id = ?`, [trade.sender_robux, trade.sender_id]);
                         db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [trade.sender_robux, trade.receiver_id]);
                         db.run(`UPDATE users SET robux = robux - ? WHERE id = ?`, [trade.receiver_robux, trade.receiver_id]);
                         db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [trade.receiver_robux, trade.sender_id]);
-
-                        // 3. Swap Items (This is a simplified logic using JSON arrays of catalog IDs)
+                        
                         const sItems = JSON.parse(trade.sender_items || '[]');
                         const rItems = JSON.parse(trade.receiver_items || '[]');
-
-                        // Transfer Sender's items to Receiver
-                        sItems.forEach(itemId => {
-                            db.run(`UPDATE inventory SET user_id = ? WHERE user_id = ? AND catalog_id = ?`, [trade.receiver_id, trade.sender_id, itemId]);
-                        });
-
-                        // Transfer Receiver's items to Sender
-                        rItems.forEach(itemId => {
-                            db.run(`UPDATE inventory SET user_id = ? WHERE user_id = ? AND catalog_id = ?`, [trade.sender_id, trade.receiver_id, itemId]);
-                        });
-
-                        // 4. Complete Trade
+                        sItems.forEach(itemId => db.run(`UPDATE inventory SET user_id = ? WHERE user_id = ? AND catalog_id = ?`, [trade.receiver_id, trade.sender_id, itemId]));
+                        rItems.forEach(itemId => db.run(`UPDATE inventory SET user_id = ? WHERE user_id = ? AND catalog_id = ?`, [trade.sender_id, trade.receiver_id, itemId]));
+                        
                         db.run(`UPDATE trades SET status = 'accepted' WHERE id = ?`, [tradeId]);
                         db.run("COMMIT");
                         res.json({ success: true });
@@ -264,20 +227,15 @@ app.post('/api/admin/upload-item', async (req, res) => {
     try {
         const detailsRes = await axios.get(`https://economy.roblox.com/v2/assets/${assetId}/details`);
         const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&size=420x420&format=Png&isCircular=false`);
-        
         const userCopies = (item_type !== 'None') ? parseInt(copies) : 1;
         const totalCopies = userCopies + 1;
-
         db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, total_copies, copies_left, creator_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
             [assetId, custom_name || detailsRes.data.Name, thumbRes.data.data[0].imageUrl, description || "No desc.", price, category, item_type, totalCopies, userCopies, req.session.userId], 
             function(err) {
                 if (err) return res.status(500).json({ error: "DB Error" });
                 const newItemId = this.lastID;
-                
                 db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, sysUser) => {
-                    if (sysUser) {
-                        db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
-                    }
+                    if (sysUser) db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
                     res.json({ success: true });
                 });
             }
