@@ -16,28 +16,54 @@ app.use(session({ secret: 'moneyium_secret_key', resave: false, saveUninitialize
 const db = new sqlite3.Database('./database.db');
 
 function setupDatabase() {
-    return new Promise((resolve) => {
-        db.serialize(() => {
-            db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0, is_verified INTEGER DEFAULT 0)`);
-            db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
-            db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
-            db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
-            db.run(`CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, receiver_id INTEGER, sender_items TEXT, receiver_items TEXT, sender_robux INTEGER DEFAULT 0, receiver_robux INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
-            
-            // NEW GAMES TABLE
-            db.run(`CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, thumbnail TEXT, game_url TEXT, creator_id INTEGER, visits INTEGER DEFAULT 0)`);
+    db.serialize(() => {
+        // 1. Create Tables
+        db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0, is_verified INTEGER DEFAULT 0)`);
+        db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
+        db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
+        db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
+        db.run(`CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, receiver_id INTEGER, sender_items TEXT, receiver_items TEXT, sender_robux INTEGER DEFAULT 0, receiver_robux INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
+        db.run(`CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, thumbnail TEXT, game_url TEXT, creator_id INTEGER, visits INTEGER DEFAULT 0)`);
 
-            db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
-                if (!row) {
-                    const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
-                    db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio, is_verified) VALUES ('ROBLOX', ?, 1, 1, 'Official system account.', 1)`, [sysPass], resolve);
-                } else {
-                    resolve();
-                }
-            });
+        // 2. Ensure ROBLOX Account Exists
+        db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
+            if (!row) {
+                const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
+                db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio, is_verified) VALUES ('ROBLOX', ?, 1, 1, 'Official system account.', 1)`, [sysPass], () => {
+                    injectBaseballCap();
+                });
+            } else {
+                injectBaseballCap();
+            }
         });
     });
 }
+
+// 3. Ensure the Free ROBLOX 'R' Baseball Cap Exists
+function injectBaseballCap() {
+    db.get(`SELECT id FROM catalog WHERE asset_id = '417457461'`, (err, row) => {
+        if (!row) {
+            const capImage = 'https://tr.rbxcdn.com/180DAY-c977137e24824f9a31f4837a97fcbda/420/420/Hat/Png/noFilter';
+            const capName = "ROBLOX 'R' Baseball Cap";
+            const capDesc = 'The classic ROBLOX Baseball Cap. Free for everyone!';
+            
+            db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, total_copies, copies_left, creator_id) VALUES (?, ?, ?, ?, 0, 'Hats', 'None', 999999, 999999, 1)`, 
+                ['417457461', capName, capImage, capDesc], 
+                function(err) {
+                    if (!err) {
+                        const newItemId = this.lastID;
+                        db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, sysUser) => {
+                            if (sysUser) {
+                                db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
+                            }
+                        });
+                    }
+                }
+            );
+        }
+    });
+}
+
 setupDatabase();
 
 // --- AUTH & USER ROUTES ---

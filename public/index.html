@@ -26,13 +26,11 @@
         .cat-item.active { color: var(--primary); font-weight: bold; }
         .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         
-        /* HOME PAGE FEED */
         .home-container { width: 100%; max-width: 900px; display: flex; gap: 20px; margin-top: 20px;}
         .feed-section { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
         .event-section { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
         .feed-title { color: var(--primary); font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;}
         
-        /* GAMES PAGE */
         .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
         .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s;}
         .game-card:hover { transform: translateY(-5px); border-color: var(--primary);}
@@ -41,18 +39,14 @@
         .game-title { color: var(--primary); font-weight: bold; font-size: 15px; margin-bottom: 5px;}
         .game-stats { color: #888; font-size: 12px; }
 
-        /* AVATAR RENDERER (Paper Doll) */
         .avatar-preview { width: 100%; height: 350px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;}
         .base-avatar { height: 80%; z-index: 1; }
         .worn-item { position: absolute; z-index: 2; object-fit: contain; pointer-events: none;}
-        
-        /* These percentages position the items on the base avatar */
         .worn-item.hats { top: 10%; left: 50%; transform: translateX(-50%); width: 120px; }
         .worn-item.faces { top: 22%; left: 50%; transform: translateX(-50%); width: 40px; z-index: 3;}
         .worn-item.shirts { top: 35%; left: 50%; transform: translateX(-50%); width: 110px; }
         .worn-item.pants { top: 55%; left: 50%; transform: translateX(-50%); width: 100px; }
 
-        /* Rest of standard styles */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
         .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;}
         .item-card:hover { transform: translateY(-5px); border-color: var(--primary);}
@@ -300,7 +294,7 @@
                         <h1 class="item-detail-title">${item.custom_name}</h1>
                         ${typeLabel ? `<p style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">${typeLabel}</p>` : ''}
                         <p class="item-detail-desc">${item.description}</p>
-                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;">Original Price: <i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}</p>
+                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;">Original Price: <i class="fa-solid fa-coins"></i> ${item.price === 0 ? 'FREE' : item.price.toLocaleString()}</p>
                         <button class="buy-btn ${isSoldOut ? 'soldout' : ''}" onclick="${isSoldOut ? '' : `openBuyModal(${item.id})`}">${isSoldOut ? 'Sold Out' : 'Buy Item'}</button>
                     </div>
                 </div>
@@ -386,13 +380,8 @@
 
         function renderAvatarEditor(container) {
             const equipped = currentInventory.filter(i => i.is_wearing === 1);
-            
-            // BASE R6 AVATAR (Using a generic transparent Roblox PNG)
             const baseAvatarUrl = "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4A5D1F5E8E5F5D5E5F5E5F5E5F5E5F5E-Png/150/150/AvatarHeadshot/Png/noFilter";
-
-            // RENDER EQUIPPED ITEMS ON TOP OF THE BASE AVATAR
             const renderedItems = equipped.map(item => {
-                // Lowercase category to match CSS classes
                 const cat = item.category.toLowerCase();
                 return `<img src="${item.asset_image}" class="worn-item ${cat}">`;
             }).join('');
@@ -439,7 +428,7 @@
                 <div class="item-card" onclick="navigateTo('/catalog/${item.id}/${slugify(item.custom_name)}')">
                     <img src="${item.asset_image}">
                     <p>${item.custom_name}</p>
-                    <p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p>
+                    <p class="item-price"><i class="fa-solid fa-coins"></i> ${item.price === 0 ? 'FREE' : item.price.toLocaleString()} ${item.item_type !== 'None' ? '(Limited)' : ''}</p>
                     ${item.copies_left <= 0 ? '<span style="color:#d32f2f; font-size:12px; font-weight:bold;">SOLD OUT</span>' : ''}
                 </div>
             `).join('')}</div>`;
@@ -473,7 +462,7 @@
         function openBuyModal(itemId) {
             currentItemToBuy = currentCatalog.find(i => i.id === itemId);
             document.getElementById('modal-item-name').innerText = currentItemToBuy.custom_name;
-            document.getElementById('modal-item-price').innerText = currentItemToBuy.price.toLocaleString();
+            document.getElementById('modal-item-price').innerText = currentItemToBuy.price === 0 ? 'FREE' : currentItemToBuy.price.toLocaleString();
             document.getElementById('modal-item-img').src = currentItemToBuy.asset_image;
             document.getElementById('modal-overlay').classList.add('active');
             if (currentUser.robux < currentItemToBuy.price) {
