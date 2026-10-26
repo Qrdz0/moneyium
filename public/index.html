@@ -25,6 +25,34 @@
         .cat-item:hover { color: white; }
         .cat-item.active { color: var(--primary); font-weight: bold; }
         .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        
+        /* HOME PAGE FEED */
+        .home-container { width: 100%; max-width: 900px; display: flex; gap: 20px; margin-top: 20px;}
+        .feed-section { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+        .event-section { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+        .feed-title { color: var(--primary); font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;}
+        
+        /* GAMES PAGE */
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
+        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s;}
+        .game-card:hover { transform: translateY(-5px); border-color: var(--primary);}
+        .game-thumb { width: 100%; height: 120px; object-fit: cover; }
+        .game-info { padding: 10px; }
+        .game-title { color: var(--primary); font-weight: bold; font-size: 15px; margin-bottom: 5px;}
+        .game-stats { color: #888; font-size: 12px; }
+
+        /* AVATAR RENDERER (Paper Doll) */
+        .avatar-preview { width: 100%; height: 350px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;}
+        .base-avatar { height: 80%; z-index: 1; }
+        .worn-item { position: absolute; z-index: 2; object-fit: contain; pointer-events: none;}
+        
+        /* These percentages position the items on the base avatar */
+        .worn-item.hats { top: 10%; left: 50%; transform: translateX(-50%); width: 120px; }
+        .worn-item.faces { top: 22%; left: 50%; transform: translateX(-50%); width: 40px; z-index: 3;}
+        .worn-item.shirts { top: 35%; left: 50%; transform: translateX(-50%); width: 110px; }
+        .worn-item.pants { top: 55%; left: 50%; transform: translateX(-50%); width: 100px; }
+
+        /* Rest of standard styles */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
         .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;}
         .item-card:hover { transform: translateY(-5px); border-color: var(--primary);}
@@ -63,11 +91,6 @@
         .btn-decline { background: #d32f2f; color: white; }
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
-        .avatar-preview { width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative;}
-        .avatar-preview img { max-height: 100%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));}
-        .wearing-list { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; min-height: 80px;}
-        .wearing-slot { width: 60px; height: 60px; background: rgba(0,0,0,0.2); border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center;}
-        .wearing-slot img { max-width: 80%; max-height: 80%; object-fit: contain;}
         .avatar-right { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
         .inventory-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;}
         .inv-tab { color: #aaa; cursor: pointer; font-weight: bold; padding: 5px 10px; border-radius: 5px;}
@@ -117,7 +140,10 @@
         <div class="top-red-bar">Moneyium will never ask for your email address. Be cautious of TikTok accounts impersonating Moneyium staff.</div>
         <div class="top-nav">
             <a href="/" class="logo">Moneyium</a>
-            <div class="nav-links"><a href="/catalog" onclick="navigateTo('/catalog'); return false;">Catalog</a></div>
+            <div class="nav-links">
+                <a href="/catalog" onclick="navigateTo('/catalog'); return false;">Catalog</a>
+                <a href="/games" onclick="navigateTo('/games'); return false;">Games</a>
+            </div>
             <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search"></div>
             <div class="user-stats">
                 <span style="color: #4caf50;"><i class="fa-solid fa-coins"></i> <span id="nav-robux"></span></span>
@@ -134,6 +160,7 @@
                 <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/avatar')"><i class="fa-solid fa-shirt"></i> Avatar</div>
                 <div class="nav-item" onclick="navigateTo('/users/' + currentUser.id + '/inventory')"><i class="fa-solid fa-bag-shopping"></i> Inventory</div>
                 <div class="nav-item" onclick="navigateTo('/trade')"><i class="fa-solid fa-right-left"></i> Trade</div>
+                <div class="nav-item" onclick="navigateTo('/games')"><i class="fa-solid fa-gamepad"></i> Games</div>
                 <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin</div>
                 
                 <div id="category-sidebar" class="hidden">
@@ -233,11 +260,10 @@
             const path = window.location.pathname, main = document.getElementById('main-content'), catSidebar = document.getElementById('category-sidebar');
             catSidebar.classList.add('hidden');
 
-            if (path === '/' || path === '/home') {
-                main.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Welcome back, ${currentUser.username}</h2>`;
-            } 
+            if (path === '/' || path === '/home') { renderHomePage(main); }
             else if (path === '/catalog') { renderCatalog(main, currentCatalog); }
             else if (path === '/trade') { renderTradePage(main); }
+            else if (path === '/games') { renderGamesPage(main); }
             else if (path.match(/^\/catalog\/\d+\/.+$/)) {
                 const itemId = parseInt(path.split('/')[2]);
                 const res = await fetch(`/api/catalog/${itemId}`);
@@ -274,12 +300,8 @@
                         <h1 class="item-detail-title">${item.custom_name}</h1>
                         ${typeLabel ? `<p style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">${typeLabel}</p>` : ''}
                         <p class="item-detail-desc">${item.description}</p>
-                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;">
-                            Original Price: <i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}
-                        </p>
-                        <button class="buy-btn ${isSoldOut ? 'soldout' : ''}" onclick="${isSoldOut ? '' : `openBuyModal(${item.id})`}">
-                            ${isSoldOut ? 'Sold Out' : 'Buy Item'}
-                        </button>
+                        <p style="font-size: 24px; color: var(--primary); margin-bottom: 20px;">Original Price: <i class="fa-solid fa-coins"></i> ${item.price.toLocaleString()}</p>
+                        <button class="buy-btn ${isSoldOut ? 'soldout' : ''}" onclick="${isSoldOut ? '' : `openBuyModal(${item.id})`}">${isSoldOut ? 'Sold Out' : 'Buy Item'}</button>
                     </div>
                 </div>
                 <div class="owners-list"><h3>Owners</h3>${ownersHtml}</div>`;
@@ -323,89 +345,65 @@
             }
         }
 
-        async function renderTradePage(container) {
-            const res = await fetch('/api/trade/pending');
-            const trades = await res.json();
-
-            let html = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Trade Hub</h2>
-            <div class="trade-container">
-                <button class="btn-primary" style="margin-bottom: 20px;" onclick="initiateTrade()">Create New Trade</button>
-                <h3 style="color: var(--primary); margin-bottom: 15px;">Pending Trades</h3>`;
-
-            if (trades.length === 0) {
-                html += `<p style="color: #aaa;">You have no pending trades.</p>`;
-            } else {
-                trades.forEach(t => {
-                    const isReceiver = t.receiver_id === currentUser.id;
-                    const otherPerson = isReceiver ? t.sender_name : t.receiver_name;
-                    const role = isReceiver ? "Incoming from" : "Outgoing to";
-
-                    html += `
-                    <div class="trade-card">
-                        <div class="trade-info">
-                            <h4>${role} ${otherPerson}</h4>
-                            <p>They are offering items + R$ ${isReceiver ? t.sender_robux : t.receiver_robux}</p>
-                            <p>You are offering items + R$ ${isReceiver ? t.receiver_robux : t.sender_robux}</p>
-                        </div>
-                        <div class="trade-actions">
-                            ${isReceiver ? `
-                                <button class="btn-accept" onclick="respondTrade(${t.id}, 'accept')">Accept</button>
-                                <button class="btn-decline" onclick="respondTrade(${t.id}, 'decline')">Decline</button>
-                            ` : `<span style="color: #aaa;">Waiting for response...</span>`}
-                        </div>
-                    </div>`;
-                });
-            }
-            html += `</div>`;
-            container.innerHTML = html;
+        function renderHomePage(container) {
+            container.innerHTML = `
+            <h2 style="color: var(--primary); width: 100%; max-width: 900px;">Hello, ${currentUser.username}!</h2>
+            <div class="home-container">
+                <div class="feed-section">
+                    <div class="feed-title">My Feed</div>
+                    <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px;">
+                        <p style="color: #ccc; font-size: 14px;">Welcome to Moneyium! Use the sidebar to navigate.</p>
+                    </div>
+                </div>
+                <div class="event-section">
+                    <div class="feed-title">Events</div>
+                    <p style="color: #aaa; font-size: 14px;">No active events right now.</p>
+                </div>
+            </div>`;
         }
 
-        async function initiateTrade(targetUsername) {
-            const receiverName = targetUsername || prompt("Enter the username of the person you want to trade:");
-            if (!receiverName) return;
+        async function renderGamesPage(container) {
+            const res = await fetch('/api/games');
+            const games = await res.json();
 
-            const robuxToGive = prompt("How many Robux do you want to offer? (Enter 0 if none)") || 0;
-            const itemToGive = prompt("Enter the ID of the item from your inventory you want to trade (Enter 0 if none):") || 0;
-            const itemToRequest = prompt("Enter the ID of the item you want from them (Enter 0 if none):") || 0;
+            let html = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Games</h2>`;
             
-            const res = await fetch('/api/trade/send', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    receiverName,
-                    senderItems: itemToGive !== '0' ? [itemToGive] : [],
-                    receiverItems: itemToRequest !== '0' ? [itemToRequest] : [],
-                    senderRobux: parseInt(robuxToGive),
-                    receiverRobux: 0
-                })
-            });
-            alert("Trade sent!");
-            handleRouting();
-        }
-
-        async function respondTrade(tradeId, action) {
-            await fetch('/api/trade/respond', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ tradeId, action })
-            });
-            handleRouting();
-        }
-
-        async function saveBio() {
-            const newBio = document.getElementById('new-bio-input').value;
-            const res = await fetch('/api/update-bio', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ bio: newBio }) });
-            if (res.ok) { currentUser.bio = newBio; handleRouting(); }
+            if (games.length === 0) {
+                html += `<p style="color: #aaa; margin-top: 20px;">No games have been uploaded yet.</p>`;
+            } else {
+                html += `<div class="game-grid">${games.map(g => `
+                    <div class="game-card" onclick="window.open('${g.game_url}', '_blank')">
+                        <img src="${g.thumbnail}" class="game-thumb">
+                        <div class="game-info">
+                            <div class="game-title">${g.name}</div>
+                            <div class="game-stats">By ${g.creator_name} | ${g.visits} Visits</div>
+                        </div>
+                    </div>
+                `).join('')}</div>`;
+            }
+            container.innerHTML = html;
         }
 
         function renderAvatarEditor(container) {
             const equipped = currentInventory.filter(i => i.is_wearing === 1);
+            
+            // BASE R6 AVATAR (Using a generic transparent Roblox PNG)
+            const baseAvatarUrl = "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4A5D1F5E8E5F5D5E5F5E5F5E5F5E5F5E-Png/150/150/AvatarHeadshot/Png/noFilter";
+
+            // RENDER EQUIPPED ITEMS ON TOP OF THE BASE AVATAR
+            const renderedItems = equipped.map(item => {
+                // Lowercase category to match CSS classes
+                const cat = item.category.toLowerCase();
+                return `<img src="${item.asset_image}" class="worn-item ${cat}">`;
+            }).join('');
+
             container.innerHTML = `
             <h2 style="color: var(--primary); width: 100%; max-width: 1000px; margin-bottom: 10px;">Avatar Editor</h2>
             <div class="avatar-layout">
                 <div class="avatar-left">
                     <div class="avatar-preview">
-                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=420&height=420&format=png">
+                        <img src="${baseAvatarUrl}" class="base-avatar">
+                        ${renderedItems}
                     </div>
                     <div style="margin-top: 15px; color: var(--primary); font-weight: bold; font-size: 14px;">Currently Wearing</div>
                     <div class="wearing-list" id="wearing-list">

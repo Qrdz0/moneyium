@@ -20,7 +20,7 @@
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
         th { color: var(--primary); font-weight: 600; border-bottom: 2px solid var(--border);}
         tr:hover { background: rgba(255,255,255,0.02); }
-        input, select { padding: 10px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; outline: none;}
+        input, select, textarea { padding: 10px; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; outline: none; width: 100%;}
         button { padding: 8px 15px; background: var(--primary); color: black; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; font-size: 13px; transition: 0.2s;}
         button:hover { filter: brightness(0.8); }
         button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
@@ -39,6 +39,7 @@
         <div class="nav-item" id="nav-users" onclick="navigateTo('users')"><i class="fa-solid fa-users"></i> Users</div>
         <div class="nav-item" id="nav-assets" onclick="navigateTo('assets')"><i class="fa-solid fa-cloud-arrow-up"></i> Asset Upload</div>
         <div class="nav-item" id="nav-catalog" onclick="navigateTo('catalog')"><i class="fa-solid fa-store"></i> Manage Catalog</div>
+        <div class="nav-item" id="nav-games" onclick="navigateTo('games')"><i class="fa-solid fa-gamepad"></i> Manage Games</div>
         <div class="nav-item" id="nav-transactions" onclick="navigateTo('transactions')"><i class="fa-solid fa-receipt"></i> Transactions</div>
         <a href="/" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Site</a>
     </div>
@@ -57,13 +58,17 @@
             <div style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px;">
                 <input type="text" id="assetId" placeholder="Roblox Asset ID (e.g. 1365767)">
                 <input type="text" id="customName" placeholder="Custom Display Name (Optional)">
-                <textarea id="description" placeholder="Item Description" rows="3" style="background: #111; border: 1px solid var(--border); color: white; border-radius: 5px; padding: 10px;"></textarea>
+                <textarea id="description" placeholder="Item Description" rows="3"></textarea>
                 <div style="display: flex; gap: 15px;">
                     <input type="number" id="price" placeholder="Price in R$" value="50" style="flex: 1;">
-                    <select id="category" style="flex: 1;"><option value="Hats">Hats</option><option value="Faces">Faces</option><option value="Gears">Gears</option><option value="Hair">Hair</option><option value="Shirts">Shirts</option><option value="Pants">Pants</option></select>
+                    <select id="category" style="flex: 1;">
+                        <option value="Hats">Hats</option><option value="Faces">Faces</option><option value="Gears">Gears</option><option value="Hair">Hair</option><option value="Shirts">Shirts</option><option value="Pants">Pants</option><option value="Packages">Packages</option>
+                    </select>
                 </div>
                 <div style="display: flex; gap: 15px;">
-                    <select id="itemType" style="flex: 1;"><option value="None">Normal Item</option><option value="Limited">Limited</option><option value="LimitedU">Limited U</option></select>
+                    <select id="itemType" style="flex: 1;">
+                        <option value="None">Normal Item</option><option value="Limited">Limited</option><option value="LimitedU">Limited U</option>
+                    </select>
                     <input type="number" id="copies" placeholder="Copies (If Limited)" value="10" style="flex: 1;">
                 </div>
                 <button onclick="uploadItem()" style="padding: 15px;">Upload Item</button>
@@ -77,6 +82,19 @@
                 <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Type</th><th>Copies</th><th>Price</th></tr></thead>
                 <tbody id="catalog-list"></tbody>
             </table>
+        </div>
+
+        <!-- NEW GAMES TAB -->
+        <div id="tab-games" class="hidden">
+            <div class="page-header">Upload Game</div>
+            <div style="display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin-top: 20px;">
+                <input type="text" id="gameName" placeholder="Game Name">
+                <textarea id="gameDesc" placeholder="Game Description" rows="3"></textarea>
+                <input type="text" id="gameThumb" placeholder="Thumbnail Image URL">
+                <input type="text" id="gameUrl" placeholder="Game File URL (.rbxl link)">
+                <button onclick="uploadGame()" style="padding: 15px;">Upload Game</button>
+            </div>
+            <p id="game-status" style="margin-top: 10px; color: var(--primary);"></p>
         </div>
 
         <div id="tab-transactions" class="hidden">
@@ -124,8 +142,7 @@
             const users = await res.json();
             document.getElementById('users-list').innerHTML = users.map(u => `
                 <tr>
-                    <td>${u.id}</td>
-                    <td>${u.username}</td>
+                    <td>${u.id}</td><td>${u.username}</td>
                     <td style="color: #4caf50;">${u.robux}</td>
                     <td style="color: var(--primary);">${u.tix}</td>
                     <td>
@@ -163,13 +180,10 @@
             const txs = await res.json();
             
             document.getElementById('transactions-list').innerHTML = txs.length === 0 ? '<tr><td colspan="4">No transactions found.</td></tr>' : txs.map(tx => {
-                
-                // FIX: Make the Site Item ID a clickable link if it's not 'N/A'
                 let itemDisplay = tx.site_item_id;
                 if (tx.site_item_id !== 'N/A') {
                     itemDisplay = `<a href="http://localhost:3000/catalog/${tx.site_item_id}/item" target="_blank" class="item-link">#${tx.site_item_id}</a>`;
                 }
-
                 return `
                 <tr>
                     <td>${new Date(tx.timestamp).toLocaleString()}</td>
@@ -193,6 +207,18 @@
             const data = await res.json();
             if (data.success) document.getElementById('upload-status').innerText = "Item uploaded successfully!";
             else document.getElementById('upload-status').innerText = "Error: " + data.error;
+        }
+
+        async function uploadGame() {
+            const name = document.getElementById('gameName').value;
+            const description = document.getElementById('gameDesc').value;
+            const thumbnail = document.getElementById('gameThumb').value;
+            const game_url = document.getElementById('gameUrl').value;
+
+            const res = await fetch('/api/admin/upload-game', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, description, thumbnail, game_url }) });
+            const data = await res.json();
+            if (data.success) document.getElementById('game-status').innerText = "Game uploaded successfully!";
+            else document.getElementById('game-status').innerText = "Error: " + data.error;
         }
 
         async function loadCatalog() {

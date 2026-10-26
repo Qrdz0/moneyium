@@ -24,6 +24,9 @@ function setupDatabase() {
             db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
             db.run(`CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, receiver_id INTEGER, sender_items TEXT, receiver_items TEXT, sender_robux INTEGER DEFAULT 0, receiver_robux INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
             
+            // NEW GAMES TABLE
+            db.run(`CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, thumbnail TEXT, game_url TEXT, creator_id INTEGER, visits INTEGER DEFAULT 0)`);
+
             db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
                 if (!row) {
                     const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
@@ -65,14 +68,10 @@ app.post('/api/login', (req, res) => {
 
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });
 
-// THE FIX IS IN BOTH /api/user AND /api/user/:id
 app.get('/api/user', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap, is_verified FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
-        if (!user) { // If database was wiped, clear the old session
-            req.session.destroy();
-            return res.status(401).json({ error: "User session invalid." });
-        }
+        if (!user) { req.session.destroy(); return res.status(401).json({ error: "Invalid session" }); }
         db.all(`SELECT c.*, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
@@ -82,7 +81,7 @@ app.get('/api/user', (req, res) => {
 app.get('/api/user/:id', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap, is_verified FROM users WHERE id = ?`, [req.params.id], (err, user) => {
-        if (!user) return res.status(404).json({ error: "User not found" }); // Safety check
+        if (!user) return res.status(404).json({ error: "User not found" });
         db.all(`SELECT c.*, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
@@ -151,6 +150,25 @@ app.post('/api/sell-item', (req, res) => {
             res.json({ success: true });
         });
     });
+});
+
+// --- GAMES ROUTES ---
+app.get('/api/games', (req, res) => {
+    db.all(`SELECT g.*, u.username as creator_name FROM games g JOIN users u ON g.creator_id = u.id ORDER BY visits DESC`, (err, games) => {
+        res.json(games || []);
+    });
+});
+
+app.post('/api/admin/upload-game', (req, res) => {
+    if (!req.session.isAdmin) return res.status(403).json({ error: "Admin only" });
+    const { name, description, thumbnail, game_url } = req.body;
+    db.run(`INSERT INTO games (name, description, thumbnail, game_url, creator_id) VALUES (?, ?, ?, ?, ?)`, 
+        [name, description, thumbnail, game_url, req.session.userId], 
+        function(err) {
+            if (err) return res.status(500).json({ error: "DB Error" });
+            res.json({ success: true });
+        }
+    );
 });
 
 // --- TRADING ROUTES ---
