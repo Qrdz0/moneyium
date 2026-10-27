@@ -17,7 +17,6 @@ const db = new sqlite3.Database('./database.db');
 
 function setupDatabase() {
     db.serialize(() => {
-        // 1. Create Tables
         db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0, is_verified INTEGER DEFAULT 0)`);
         db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
         db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
@@ -25,7 +24,6 @@ function setupDatabase() {
         db.run(`CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, receiver_id INTEGER, sender_items TEXT, receiver_items TEXT, sender_robux INTEGER DEFAULT 0, receiver_robux INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
         db.run(`CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, thumbnail TEXT, game_url TEXT, creator_id INTEGER, visits INTEGER DEFAULT 0)`);
 
-        // 2. Ensure ROBLOX Account Exists
         db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
             if (!row) {
                 const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
@@ -39,23 +37,19 @@ function setupDatabase() {
     });
 }
 
-// 3. Ensure the Free ROBLOX 'R' Baseball Cap Exists
 function injectBaseballCap() {
     db.get(`SELECT id FROM catalog WHERE asset_id = '417457461'`, (err, row) => {
         if (!row) {
             const capImage = 'https://tr.rbxcdn.com/180DAY-c977137e24824f9a31f4837a97fcbda/420/420/Hat/Png/noFilter';
             const capName = "ROBLOX 'R' Baseball Cap";
             const capDesc = 'The classic ROBLOX Baseball Cap. Free for everyone!';
-            
             db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, total_copies, copies_left, creator_id) VALUES (?, ?, ?, ?, 0, 'Hats', 'None', 999999, 999999, 1)`, 
                 ['417457461', capName, capImage, capDesc], 
                 function(err) {
                     if (!err) {
                         const newItemId = this.lastID;
                         db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, sysUser) => {
-                            if (sysUser) {
-                                db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
-                            }
+                            if (sysUser) db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
                         });
                     }
                 }
@@ -63,7 +57,6 @@ function injectBaseballCap() {
         }
     });
 }
-
 setupDatabase();
 
 // --- AUTH & USER ROUTES ---
@@ -198,13 +191,23 @@ app.post('/api/admin/upload-game', (req, res) => {
 });
 
 // --- TRADING ROUTES ---
+// UPDATED: Now takes receiverName instead of ID!
 app.post('/api/trade/send', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
-    const { receiverId, senderItems, receiverItems, senderRobux, receiverRobux } = req.body;
-    db.run(`INSERT INTO trades (sender_id, receiver_id, sender_items, receiver_items, sender_robux, receiver_robux) VALUES (?, ?, ?, ?, ?, ?)`, 
-        [req.session.userId, receiverId, JSON.stringify(senderItems), JSON.stringify(receiverItems), senderRobux, receiverRobux], 
-        function(err) { if (err) return res.status(500).json({ error: "DB Error" }); res.json({ success: true }); }
-    );
+    const { receiverName, senderItems, senderRobux } = req.body;
+    
+    db.get(`SELECT id FROM users WHERE username = ?`, [receiverName], (err, receiver) => {
+        if (!receiver) return res.status(404).json({ error: "User not found" });
+        if (receiver.id === req.session.userId) return res.status(400).json({ error: "You can't trade yourself" });
+
+        db.run(`INSERT INTO trades (sender_id, receiver_id, sender_items, receiver_items, sender_robux, receiver_robux) VALUES (?, ?, ?, ?, ?, ?)`, 
+            [req.session.userId, receiver.id, JSON.stringify(senderItems), JSON.stringify([]), senderRobux, 0], 
+            function(err) { 
+                if (err) return res.status(500).json({ error: "DB Error" }); 
+                res.json({ success: true }); 
+            }
+        );
+    });
 });
 
 app.get('/api/trade/pending', (req, res) => {
