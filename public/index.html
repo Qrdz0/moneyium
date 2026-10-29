@@ -5,48 +5,113 @@
     <title>Moneyium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #1a1512; --bg-image: none; --sidebar: #1a1512; --card: #221a16; --primary: #f9a825; --text: #e8e0d8; --border: #3e2f26; --modal-bg: #221a16; --btn-orange: #f9a825; --verified: #3b82f6; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Source Sans Pro', 'Segoe UI', sans-serif; }
+        :root { 
+            --bg: #1a1512; 
+            --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'); 
+            --sidebar: #110e0c; 
+            --card: #221a16; 
+            --primary: #f9a825; 
+            --text: #e0e0e0; 
+            --border: #3e2f26; 
+            --modal-bg: #2b211c; 
+            --btn-orange: #e67e22; 
+            --verified: #3b82f6; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg); background-image: var(--bg-image); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 14px; font-weight: bold; color: white; z-index: 10; }
-        .top-nav { background: #221a16; padding: 10px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); z-index: 10; gap: 20px;}
+        
+        .top-red-bar { background: #b71c1c; text-align: center; padding: 8px; font-size: 13px; font-weight: bold; color: white; z-index: 10; }
+        
+        .top-nav { background: var(--sidebar); padding: 10px 20px; display: flex; align-items: center; border-bottom: 2px solid var(--border); z-index: 10; gap: 20px;}
         .logo { font-size: 24px; font-weight: 900; color: var(--primary); text-decoration: none;}
         .nav-links a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 14px; margin-right: 15px;}
-        .search-bar { flex: 1; max-width: 400px; background: #1a1512; border: 1px solid var(--border); border-radius: 20px; padding: 6px 15px; display: flex; align-items: center; color: #888; }
+        .search-bar { flex: 1; max-width: 400px; background: #000; border: 1px solid var(--border); border-radius: 20px; padding: 6px 15px; display: flex; align-items: center; color: #888; }
         .search-bar input { background: none; border: none; color: white; outline: none; margin-left: 10px; width: 100%;}
+        
         .user-stats { display: flex; gap: 15px; font-size: 13px; font-weight: bold; margin-left: auto; align-items: center;}
+        
         .layout { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 220px; background: var(--sidebar); border-right: 1px solid var(--border); padding-top: 15px; overflow-y: auto; display: flex; flex-direction: column;}
-        .nav-item { padding: 10px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold; transition: 0.2s;}
-        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 220px; background: var(--sidebar); border-right: 2px solid var(--border); padding-top: 15px; overflow-y: auto; display: flex; flex-direction: column;}
+        .nav-item { padding: 12px 20px; color: var(--primary); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: bold; transition: 0.2s; border-left: 3px solid transparent;}
+        .nav-item:hover { background: #221a16; border-left-color: var(--primary); }
         .nav-item i { width: 20px; text-align: center; font-size: 16px; }
-        .category-header { padding: 15px 20px 5px 20px; color: var(--primary); font-weight: bold; font-size: 16px; border-top: 1px solid var(--border); margin-top: 10px;}
-        .cat-item { padding: 5px 20px; color: #bcaaa4; font-size: 14px; cursor: pointer; }
+        
+        .category-header { padding: 15px 20px 5px 20px; color: #888; font-weight: bold; font-size: 12px; border-top: 1px solid var(--border); margin-top: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        .cat-item { padding: 6px 20px; color: #bcaaa4; font-size: 14px; cursor: pointer; }
         .cat-item:hover { color: white; }
         .cat-item.active { color: var(--primary); font-weight: bold; }
+        
         .content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        
-        .home-container { width: 100%; max-width: 900px; display: flex; gap: 20px; margin-top: 20px;}
-        .feed-section { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-        .event-section { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-        .feed-title { color: var(--primary); font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;}
-        
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
-        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s;}
-        .game-card:hover { transform: translateY(-5px); border-color: var(--primary);}
-        .game-thumb { width: 100%; height: 120px; object-fit: cover; }
-        .game-info { padding: 10px; }
-        .game-title { color: var(--primary); font-weight: bold; font-size: 15px; margin-bottom: 5px;}
-        .game-stats { color: #888; font-size: 12px; }
 
-        .avatar-preview { width: 100%; height: 360px; background: #17110e; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;}
-        .base-avatar { height: 80%; z-index: 1; }
-        .worn-item { position: absolute; z-index: 2; object-fit: contain; pointer-events: none;}
-        .worn-item.hats { top: 10%; left: 50%; transform: translateX(-50%); width: 120px; z-index: 2; }
-        .worn-item.faces { top: 22%; left: 50%; transform: translateX(-50%); width: 40px; z-index: 3;}
-        .worn-item.shirts { top: 35%; left: 50%; transform: translateX(-50%); width: 110px; z-index: 2; }
-        .worn-item.pants { top: 55%; left: 50%; transform: translateX(-50%); width: 100px; z-index: 2; }
+        /* HOME PAGE LAYOUT */
+        .home-wrapper { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
+        .feed-column { flex: 2; display: flex; flex-direction: column; gap: 15px;}
+        .feed-card { background: var(--card); border: 1px solid var(--border); padding: 20px; }
+        .feed-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;}
+        .feed-title { color: var(--primary); font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .post-box { display: flex; flex-direction: column; gap: 10px; }
+        .post-box textarea { width: 100%; height: 80px; background: #110e0c; border: 1px solid var(--border); color: white; padding: 10px; resize: none; outline: none;}
+        .post-btn { align-self: flex-end; padding: 8px 20px; background: var(--primary); color: black; font-weight: bold; border: none; cursor: pointer;}
+        
+        .post { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;}
+        .post:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+        .post-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px;}
+        .post-avatar { width: 40px; height: 40px; background: #333; border: 1px solid var(--border);}
+        .post-author { color: var(--primary); font-weight: bold; font-size: 15px;}
+        .post-time { color: #666; font-size: 12px;}
+        .post-text { color: #ccc; font-size: 14px; line-height: 1.5; margin-bottom: 10px;}
+        
+        .post-attachment { background: #110e0c; border: 1px solid var(--border); padding: 10px; display: flex; align-items: center; gap: 15px;}
+        .post-attachment img { width: 50px; height: 50px; object-fit: contain; background: #222;}
+        .attachment-info h5 { color: var(--primary); font-size: 14px; margin-bottom: 3px;}
+        .attachment-info p { color: #666; font-size: 12px;}
 
+        /* RIGHT SIDEBAR */
+        .right-column { flex: 1; display: flex; flex-direction: column; gap: 15px;}
+        .side-card { background: var(--card); border: 1px solid var(--border); padding: 20px;}
+        .side-header { color: var(--primary); font-size: 16px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between;}
+        .side-header span { color: #666; font-size: 11px; cursor: pointer;}
+        
+        .event-item { display: flex; gap: 15px; margin-bottom: 15px;}
+        .event-date { background: #110e0c; border: 1px solid var(--primary); padding: 5px 10px; text-align: center; min-width: 50px;}
+        .event-date h4 { color: var(--primary); font-size: 18px; margin: 0;}
+        .event-date p { color: #888; font-size: 10px; text-transform: uppercase;}
+        .event-info h5 { color: var(--primary); font-size: 14px; margin-bottom: 3px;}
+        .event-info p { color: #888; font-size: 12px;}
+
+        .friend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px;}
+        .friend-avatar { width: 32px; height: 32px; background: #333; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; color: #888;}
+        .friend-info h5 { color: var(--primary); font-size: 13px;}
+        .friend-info p { color: #666; font-size: 11px;}
+
+        /* ABOUT PAGE */
+        .about-container { width: 100%; max-width: 800px; margin-top: 30px; background: var(--card); border: 1px solid var(--border); padding: 40px; }
+        .about-title { color: var(--primary); font-size: 28px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); padding-bottom: 15px;}
+        .about-text { color: #ccc; font-size: 16px; line-height: 1.8; margin-bottom: 20px;}
+        .about-text strong { color: var(--primary); }
+
+        /* BRANDED LEGAL PAGES (/tos and /privacy) */
+        .legal-page-container { width: 100%; max-width: 900px; margin: 20px 0 40px 0; background: var(--card); border: 2px solid var(--border); border-radius: 0; padding: 35px 40px; color: #ccc; }
+        .legal-page-title { color: var(--primary); font-size: 28px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 6px; }
+        .legal-page-updated { color: #777; font-size: 12px; margin-bottom: 22px; }
+        .legal-page-content h2 { color: var(--primary); font-size: 17px; text-transform: uppercase; letter-spacing: 0.5px; margin: 26px 0 10px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+        .legal-page-content h3 { color: #f5c26b; font-size: 15px; margin: 16px 0 6px 0; }
+        .legal-page-content p { color: #ccc; font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+        .legal-page-content ul, .legal-page-content ol { margin: 0 0 14px 22px; }
+        .legal-page-content li { color: #ccc; font-size: 14px; line-height: 1.7; margin-bottom: 6px; }
+        .legal-page-content a { color: var(--primary); text-decoration: underline; }
+        .legal-page-content strong { color: #fff; }
+        .legal-page-content table { width: 100%; border-collapse: collapse; margin: 10px 0 18px 0; font-size: 13px; }
+        .legal-page-content th, .legal-page-content td { border: 1px solid var(--border); padding: 9px 11px; text-align: left; vertical-align: top; }
+        .legal-page-content th { background: rgba(249, 168, 37, 0.1); color: var(--primary); }
+        .legal-page-content .legal-note { background: rgba(249, 168, 37, 0.08); border-left: 3px solid var(--primary); padding: 12px 15px; margin: 15px 0; font-size: 13px; color: #ddd; }
+        .legal-page-lead { color: #ddd; font-size: 15px; line-height: 1.8; margin-bottom: 20px; }
+        @media (max-width: 650px) { .legal-page-container { padding: 22px 18px; } .legal-page-title { font-size: 20px; } }
+
+        /* Rest of the CSS */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;}
         .item-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;}
         .item-card:hover { transform: translateY(-5px); border-color: var(--primary);}
@@ -83,17 +148,6 @@
         .trade-actions button { padding: 8px 15px; font-weight: bold; border-radius: 5px; cursor: pointer; border: none;}
         .btn-accept { background: #4caf50; color: white; }
         .btn-decline { background: #d32f2f; color: white; }
-        .trade-item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; margin-top: 8px; max-height: 210px; overflow-y: auto; background: #1a1512; border: 1px solid var(--border); padding: 8px; }
-        .trade-item { background: #221a16; border: 1px solid var(--border); padding: 6px; text-align: center; cursor: pointer; }
-        .trade-item.selected { border-color: var(--primary); background: #2c211a; }
-        .trade-item img { width: 44px; height: 44px; object-fit: contain; }
-        .trade-item p { font-size: 9px; color: #8f7c6c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* About page */
-        .about-container { width: 100%; max-width: 800px; margin-top: 10px; background: var(--card); border: 1px solid var(--border); padding: 32px; }
-        .about-title { color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 18px; }
-        .about-text { color: #d8cbc0; font-size: 14px; line-height: 1.8; margin-bottom: 14px; }
-        .about-text strong { color: var(--primary); }
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
         .avatar-right { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
@@ -108,16 +162,21 @@
         .sell-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;}
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--modal-bg); width: 400px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
+        .modal-box { background: var(--modal-bg); width: 600px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; transform: translateY(-20px); transition: transform 0.2s;}
         .modal-overlay.active .modal-box { transform: translateY(0); }
         .modal-header { padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .modal-header h3 { color: var(--primary); font-size: 18px; }
         .modal-close { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
-        .modal-body { padding: 20px; text-align: center; }
+        .modal-body { padding: 20px; }
         .modal-footer { padding: 15px 20px; display: flex; gap: 10px; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); }
         .modal-footer button { padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; }
         .btn-primary { background: var(--btn-orange); color: white; }
         .btn-cancel { background: transparent; color: #aaa; border: 1px solid #555; }
+        .trade-item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px;}
+        .trade-item { background: #1e1e1e; border: 2px solid transparent; padding: 5px; border-radius: 5px; cursor: pointer; text-align: center;}
+        .trade-item.selected { border-color: var(--primary); background: rgba(249, 168, 37, 0.1); }
+        .trade-item img { width: 40px; height: 40px; object-fit: contain; }
+        .trade-item p { font-size: 9px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .hidden { display: none !important; }
         .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; position: absolute; z-index: 100; background: var(--bg);}
         .auth-box { background: var(--sidebar); padding: 40px; border-radius: 10px; border: 1px solid var(--border); width: 350px; }
@@ -127,248 +186,49 @@
         .bio-edit-box input { flex: 1; padding: 8px; background: #111; border: 1px solid var(--border); color: white; border-radius: 4px;}
         .bio-edit-box button { padding: 8px 15px; background: var(--primary); border: none; border-radius: 4px; font-weight: bold; cursor: pointer;}
 
-        /* ---------- Social home feed ---------- */
-        .home-shell { width: 100%; max-width: 1160px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; margin-top: 8px; }
-        .home-main-col { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-        .home-side-col { display: flex; flex-direction: column; gap: 16px; }
+        /* REGISTRATION CONSENT */
+        .tos-consent { display: flex; align-items: flex-start; gap: 10px; margin: 5px 0 15px 0; color: #aaa; font-size: 12px; line-height: 1.5; text-align: left; }
+        .tos-consent input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
+        .tos-consent a { color: var(--primary); font-weight: bold; text-decoration: underline; }
+        .tos-consent a:hover { color: #ffc107; }
+        .auth-box button:disabled { background: #3a3a3a; color: #777; cursor: not-allowed; opacity: 0.8; }
+        .auth-legal-links { display: flex; justify-content: center; gap: 12px; margin-top: 12px; font-size: 10px; color: #666; }
+        .auth-legal-links a { color: #888; text-decoration: none; }
+        .auth-legal-links a:hover { color: var(--primary); text-decoration: underline; }
 
-        .home-welcome { position: relative; overflow: hidden; display: flex; align-items: center; gap: 16px; padding: 22px 24px; border: 1px solid var(--border); border-radius: 14px;
-            background: #221a16; }
-        .home-welcome::after { display: none; }
-        .welcome-avatar { width: 56px; height: 56px; border-radius: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #1a120d;
-            background: #f9a825; }
-        .welcome-copy { flex: 1; min-width: 0; position: relative; z-index: 1; }
-        .welcome-kicker { color: var(--primary); font-size: 10px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px; }
-        .welcome-copy h1 { color: #fff8ee; font-size: 24px; line-height: 1.15; letter-spacing: -0.4px; }
-        .welcome-copy p { color: #a99a8d; font-size: 13px; margin-top: 5px; line-height: 1.45; }
-        .online-pill { position: relative; z-index: 1; display: flex; align-items: center; gap: 7px; flex-shrink: 0; color: #c9bcb0; font-size: 11px; font-weight: bold;
-            background: rgba(0, 0, 0, 0.24); border: 1px solid var(--border); border-radius: 20px; padding: 7px 12px; }
-        .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #49b96d; }
-
-        .feed-heading { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px; }
-        .feed-heading h2 { color: var(--primary); font-size: 18px; letter-spacing: 0.2px; }
-        .feed-heading span { color: #8f8075; font-size: 10px; font-weight: 900; letter-spacing: 1.4px; border: 1px solid var(--border); border-radius: 20px; padding: 4px 9px; background: rgba(0, 0, 0, 0.18); }
-
-        .composer { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-        .composer-row { display: flex; align-items: flex-start; gap: 12px; }
-        .composer textarea { width: 100%; min-height: 72px; max-height: 180px; resize: vertical; background: #1a1512; border: 1px solid var(--border); border-radius: 10px;
-            color: var(--text); padding: 12px 14px; outline: none; font-size: 14px; line-height: 1.5; transition: border-color 0.2s; }
-        .composer textarea::placeholder { color: #776a60; }
-        .composer textarea:focus { border-color: #f9a825; }
-        .composer-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 11px; padding-left: 52px; }
-        .composer-tools { display: flex; align-items: center; gap: 14px; color: #8f8075; font-size: 12px; font-weight: 600; }
-        .composer-tools span { display: flex; align-items: center; gap: 5px; }
-        .composer-tools i { color: #b09a86; }
-        .composer-count { color: #6f6259; font-variant-numeric: tabular-nums; }
-        .composer-post { background: #f9a825; color: #1a120d; border: none; border-radius: 20px; padding: 8px 22px; font-size: 13px; font-weight: 900;
-            cursor: pointer; transition: filter 0.2s, opacity 0.2s; }
-        .composer-post:hover:not(:disabled) { filter: brightness(1.08); }
-        .composer-post:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        .post-list { display: flex; flex-direction: column; gap: 14px; }
-        .post-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; transition: border-color 0.2s, transform 0.2s; animation: feedIn 0.3s ease both; }
-        .post-card:hover { border-color: rgba(249, 168, 37, 0.4); }
-        @keyframes feedIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-        .post-head { display: flex; align-items: center; gap: 11px; }
-        .post-avatar { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; color: #160f0a; }
-        .post-identity { flex: 1; min-width: 0; }
-        .post-name { color: #f3e9df; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
-        .post-verified { color: var(--primary); font-size: 12px; }
-        .post-meta { color: #8f8075; font-size: 11px; margin-top: 2px; }
-        .post-badge { flex-shrink: 0; color: var(--primary); background: rgba(249, 168, 37, 0.09); border: 1px solid rgba(249, 168, 37, 0.25); border-radius: 20px; padding: 4px 8px;
-            font-size: 9px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; white-space: nowrap; }
-        .post-text { margin-top: 12px; color: #d9cfc6; font-size: 14px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
-        .post-attachment { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: rgba(0, 0, 0, 0.22); }
-        .attachment-icon { width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--primary);
-            background: rgba(249, 168, 37, 0.09); border: 1px solid rgba(249, 168, 37, 0.22); }
-        .attachment-info { flex: 1; min-width: 0; }
-        .attachment-title { color: #f0e6dc; font-size: 13px; font-weight: 800; }
-        .attachment-sub { color: #8f8075; font-size: 11px; margin-top: 2px; }
-        .attachment-tag { flex-shrink: 0; color: #a99580; font-size: 8px; font-weight: 900; letter-spacing: 1px; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; }
-        .post-actions { display: flex; align-items: center; gap: 18px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
-        .post-action { background: none; border: none; padding: 0; color: #8f8075; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: color 0.15s; }
-        .post-action:hover { color: var(--primary); }
-        .post-action.liked { color: #ff6b81; }
-
-        .side-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-        .side-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--primary); font-size: 15px; font-weight: 800;
-            border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 8px; }
-        .side-link { color: #8f8075; font-size: 10px; font-weight: 900; letter-spacing: 0.5px; cursor: pointer; white-space: nowrap; }
-        .side-link:hover { color: var(--primary); }
-
-        .event-row { display: flex; gap: 11px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.045); }
-        .event-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .event-date { width: 42px; height: 44px; border-radius: 8px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(249, 168, 37, 0.08); border: 1px solid rgba(249, 168, 37, 0.22); }
-        .event-day { color: var(--primary); font-size: 15px; font-weight: 900; line-height: 1; }
-        .event-month { color: #a88f70; font-size: 8px; font-weight: 900; letter-spacing: 1px; margin-top: 2px; }
-        .event-info { min-width: 0; }
-        .event-name { color: #eadfd5; font-size: 12px; font-weight: 800; margin-bottom: 2px; }
-        .event-meta { color: #8f8075; font-size: 10.5px; line-height: 1.4; }
-
-        .friend-row { display: flex; align-items: center; gap: 10px; padding: 7px 6px; margin: 0 -6px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
-        .friend-row:hover { background: rgba(255, 255, 255, 0.035); }
-        .friend-avatar { position: relative; width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 900; color: #160f0a; }
-        .status-dot { position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #241a15; background: #6b625c; }
-        .status-dot.online { background: #49b96d; }
-        .status-dot.trading { background: var(--primary); }
-        .friend-info { min-width: 0; flex: 1; }
-        .friend-name { color: #e9dfd6; font-size: 12px; font-weight: 800; }
-        .friend-status { color: #8f8075; font-size: 10.5px; margin-top: 1px; }
-        .friend-status.trading { color: var(--primary); }
-
-        .blog-row { padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.045); cursor: pointer; }
-        .blog-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .blog-row:hover .blog-title { color: var(--primary); }
-        .blog-tag { color: #a88f70; font-size: 8px; font-weight: 900; letter-spacing: 1.2px; margin-bottom: 3px; }
-        .blog-title { color: #e3d8ce; font-size: 12px; font-weight: 800; line-height: 1.35; transition: color 0.15s; }
-        .blog-meta { color: #74685f; font-size: 10px; margin-top: 3px; }
-
-        @media (max-width: 1180px) {
-            .home-shell { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
-            .home-side-col { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .home-side-col .side-card:last-child { grid-column: 1 / -1; }
-        }
-        @media (max-width: 760px) {
-            .home-side-col { display: flex; }
-            .online-pill { display: none; }
-            .post-badge { display: none; }
-            .composer-footer { padding-left: 0; }
-            .home-welcome { padding: 18px; }
-            .welcome-copy h1 { font-size: 20px; }
-        }
-
-        /* ---------- Classic Hexium global overrides ---------- */
-        * { border-radius: 0 !important; }
-        .profile-avatar, .profile-status-dot, .status-dot, .online-dot { border-radius: 50% !important; }
-        body {
-            background-color: #1a1512;
-            background-image: none;
-            background-attachment: fixed;
-        }
-        a { color: #f9a825; }
-        h1, h2, h3, h4 { color: #f9a825; }
-
-        /* ---------- Classic profile page ---------- */
-        .classic-profile { width: 100%; max-width: 1060px; display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
-        .profile-hero { display: flex; align-items: flex-start; gap: 22px; padding: 22px; background: #221a16; border: 1px solid #3e2f26; }
-        .profile-avatar { width: 118px; height: 118px; border-radius: 50% !important; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-            font-size: 46px; font-weight: 900; color: #1a120d; border: 3px solid #3e2f26;
-            background: #f9a825; }
-        .profile-hero-info { flex: 1; min-width: 0; }
-        .profile-name-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
-        .profile-name-row h1 { color: #f9a825; font-size: 30px; line-height: 1.1; font-weight: 900; letter-spacing: 0.2px; overflow-wrap: anywhere; }
-        .profile-verified { color: var(--verified); font-size: 18px; }
-        .profile-status { color: #c9bcb0; font-style: italic; font-size: 13.5px; margin-top: 6px; line-height: 1.4; }
-        .profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 22px; border-top: 1px solid #3e2f26; padding-top: 14px; }
-        .profile-stat { min-width: 0; padding: 0 16px; border-right: 1px solid #3e2f26; }
-        .profile-stat:first-child { padding-left: 0; }
-        .profile-stat:last-child { border-right: none; padding-right: 0; }
-        .profile-stat-label { color: #a99a8d; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
-        .profile-stat-value { color: #fff; font-size: 21px; font-weight: 900; margin-top: 3px; line-height: 1; }
-
-        .profile-tabs { display: flex; gap: 2px; border-bottom: 1px solid #3e2f26; background: #1f1815; padding: 0 6px; }
-        .profile-tab { position: relative; background: none; border: none; color: #f9a825; padding: 12px 24px; font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: 0.3px; }
-        .profile-tab:hover { color: #ffd166; }
-        .profile-tab.active { color: #fff; }
-        .profile-tab.active::after { content: ''; position: absolute; left: 18px; right: 18px; bottom: -1px; height: 2px; background: #fff; }
-
-        .profile-panel { background: #221a16; border: 1px solid #3e2f26; padding: 18px 20px; }
-        .profile-about-text { color: #fff; font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 86px; }
-        .profile-about-footer { display: flex; align-items: flex-end; justify-content: flex-end; gap: 12px; margin-top: 16px; }
-        .profile-social { display: flex; gap: 8px; }
-        .profile-social a { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #f9a825; background: #1a1512;
-            border: 1px solid #3e2f26; text-decoration: none; font-size: 16px; transition: background 0.15s, color 0.15s; }
-        .profile-social a:hover { background: rgba(249, 168, 37, 0.12); color: #ffd166; }
-        .profile-bio-edit { display: flex; gap: 8px; margin-top: 16px; }
-        .profile-bio-edit input { flex: 1; min-width: 0; padding: 9px 11px; background: #1a1512; border: 1px solid #3e2f26; color: #fff; outline: none; font-size: 13px; }
-        .profile-bio-edit input:focus { border-color: #f9a825; }
-        .profile-bio-edit button { padding: 9px 16px; background: #f9a825; border: none; color: #1a120d; font-weight: 900; font-size: 12px; cursor: pointer; }
-        .profile-bio-edit button:hover { background: #ffd166; }
-        .profile-empty { color: #8f7c6c; font-size: 13px; text-align: center; padding: 36px 10px; }
-        .profile-empty i { display: block; font-size: 28px; margin-bottom: 10px; color: #4f423a; }
-
-        .wearing-panel { padding: 0; }
-        .wearing-header { padding: 12px 18px; border-bottom: 1px solid #3e2f26; color: #f9a825; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-        .wearing-body { display: flex; gap: 18px; padding: 18px; align-items: stretch; }
-        .avatar-render { flex: 0 0 260px; min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-            position: relative; overflow: hidden; border: 1px solid #3e2f26;
-            background: #17110e; }
-        .avatar-render::before { display: none; }
-        .avatar-render i { font-size: 82px; color: #6d5a4c; position: relative; z-index: 1; }
-        .avatar-render span { color: #8f7c6c; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 1; }
-        .wearing-grid { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-content: start; }
-        .wearing-item { position: relative; min-height: 100px; padding: 12px 8px 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-            text-align: center; background: #1a1512; border: 1px solid #3e2f26; overflow: hidden; }
-        .wearing-item-media { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .wearing-item-media img { width: 100%; height: 100%; object-fit: contain; }
-        .wearing-item-media i { display: none; font-size: 22px; color: #4f423a; }
-        .wearing-item-media.missing i { display: block; }
-        .wearing-item-name { width: 100%; color: #d8cbc0; font-size: 10px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .wearing-item-serial { color: #f9a825; font-size: 9px; font-weight: 900; }
-        .wearing-item.empty { border-style: dashed; background: rgba(0, 0, 0, 0.18); }
-        .wearing-item.empty i { font-size: 20px; color: #4f423a; }
-        .wearing-item.empty .wearing-item-name { color: #4f423a; }
-        .limited-tag { position: absolute; top: 0; left: 0; z-index: 2; padding: 3px 6px; background: #1b5e20; color: #b9f6ca;
-            font-size: 7px; font-weight: 900; letter-spacing: 0.7px; text-transform: uppercase; }
-
-        /* ---------- 2D R6 paper doll ---------- */
-        .paper-doll { position: relative; width: 200px; height: 320px; max-width: 100%; flex-shrink: 0; }
-        .paper-doll-base { width: 100%; height: 100%; display: block; }
-        .paper-doll .worn-item { position: absolute; object-fit: contain; pointer-events: none; }
-        .paper-doll .worn-item.hats { top: 10%; left: 50%; transform: translateX(-50%); width: 120px; z-index: 2; }
-        .paper-doll .worn-item.faces { top: 22%; left: 50%; transform: translateX(-50%); width: 40px; z-index: 3; }
-        .paper-doll .worn-item.shirts { top: 35%; left: 50%; transform: translateX(-50%); width: 110px; z-index: 2; }
-        .paper-doll .worn-item.pants { top: 55%; left: 50%; transform: translateX(-50%); width: 100px; z-index: 2; }
-        .wearing-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
-        .wearing-slot { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; background: #1a1512; border: 1px solid #3e2f26; }
-        .wearing-slot img { max-width: 36px; max-height: 36px; object-fit: contain; }
-
-        /* ---------- Hexium inventory ---------- */
-        .inventory-page { width: 100%; max-width: 1060px; display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
-        .inventory-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        .inventory-head h2 { font-size: 22px; line-height: 1; }
-        .inventory-sub { color: #8f7c6c; font-size: 12px; margin-top: 6px; }
-        .inventory-search { display: flex; align-items: center; gap: 9px; min-width: 280px; padding: 9px 12px; background: #221a16; border: 1px solid #3e2f26; }
-        .inventory-search i { color: #8f7c6c; font-size: 12px; }
-        .inventory-search input { width: 100%; min-width: 0; background: none; border: none; outline: none; color: #fff; font-size: 13px; }
-        .inventory-search input::placeholder { color: #776a60; }
-        .inventory-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #8f7c6c; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; width: 100%; max-width: none; margin-top: 0; }
-        .inv-card { position: relative; display: flex; flex-direction: column; background: #221a16; border: 1px solid #3e2f26; overflow: hidden; }
-        .inv-card:hover { border-color: #f9a825; }
-        .inv-media { position: relative; height: 130px; display: flex; align-items: center; justify-content: center; background: #17110e; border-bottom: 1px solid #3e2f26; }
-        .inv-media img { max-width: 100px; max-height: 100px; object-fit: contain; }
-        .inv-media .inv-fallback { display: none; font-size: 32px; color: #4f423a; }
-        .inv-media.missing img { display: none; }
-        .inv-media.missing .inv-fallback { display: block; }
-        .inv-card .limited-tag { font-size: 8px; padding: 4px 7px; }
-        .inv-worn { position: absolute; top: 0; right: 0; z-index: 2; padding: 4px 7px; background: #f9a825; color: #1a120d; font-size: 8px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; }
-        .inv-body { display: flex; flex-direction: column; gap: 3px; padding: 9px 10px 10px; }
-        .inv-name { color: #e8e0d8; font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .inv-sub { color: #8f7c6c; font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; }
-        .inv-serial { color: #f9a825; font-size: 10px; font-weight: 900; }
-        .inv-body .sell-btn { margin-top: 6px; align-self: flex-start; padding: 5px 9px; background: transparent; border: 1px solid #3e2f26; color: #c9bcb0; font-size: 10px; font-weight: 800; cursor: pointer; }
-        .inv-body .sell-btn:hover { background: #3e2f26; color: #fff; }
-        .inventory-empty { grid-column: 1 / -1; padding: 46px 16px; text-align: center; color: #8f7c6c; font-size: 13px; border: 1px dashed #3e2f26; background: #221a16; }
-        .inventory-empty i { display: block; font-size: 28px; color: #4f423a; margin-bottom: 10px; }
-
-        @media (max-width: 820px) {
-            .profile-hero { flex-direction: column; align-items: center; text-align: center; }
-            .profile-hero-info { width: 100%; }
-            .profile-name-row { justify-content: center; }
-            .profile-stats { justify-content: center; }
-            .profile-stat { padding: 0 12px; }
-            .wearing-body { flex-direction: column; }
-            .avatar-render { flex: none; width: 100%; min-height: 260px; }
-            .profile-about-footer { justify-content: center; }
-        }
-        @media (max-width: 520px) {
-            .wearing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .profile-stat-label { font-size: 9px; letter-spacing: 0.6px; }
-            .profile-stat-value { font-size: 17px; }
-            .profile-stat { padding: 0 8px; }
+        /* LEGAL PAGES (TOS / PRIVACY) */
+        .legal-screen { position: fixed; inset: 0; z-index: 3000; background: rgba(10, 8, 6, 0.97); background-image: var(--bg-image); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .legal-box { width: 100%; max-width: 900px; height: 88vh; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.8); overflow: hidden; }
+        .legal-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 18px 25px; border-bottom: 2px solid var(--border); background: var(--sidebar); flex-shrink: 0; }
+        .legal-header h1 { color: var(--primary); font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .legal-header .legal-meta { color: #777; font-size: 11px; margin-top: 4px; text-transform: none; letter-spacing: 0; font-weight: normal; }
+        .legal-close { background: transparent; border: 1px solid var(--border); color: var(--primary); font-weight: bold; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 13px; transition: 0.2s; flex-shrink: 0; }
+        .legal-close:hover { background: var(--primary); color: black; }
+        .legal-body { padding: 30px 40px; overflow-y: auto; flex: 1; color: #ccc; font-size: 14px; line-height: 1.7; scrollbar-width: thin; scrollbar-color: var(--primary) var(--sidebar); }
+        .legal-body::-webkit-scrollbar { width: 10px; }
+        .legal-body::-webkit-scrollbar-track { background: var(--sidebar); }
+        .legal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+        .legal-body::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        .legal-body h2 { color: var(--primary); font-size: 18px; margin: 28px 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .legal-body h2:first-child { margin-top: 0; }
+        .legal-body h3 { color: #f5c26b; font-size: 15px; margin: 18px 0 6px 0; }
+        .legal-body p { margin-bottom: 12px; }
+        .legal-body ul, .legal-body ol { margin: 0 0 14px 22px; }
+        .legal-body li { margin-bottom: 6px; }
+        .legal-body a { color: var(--primary); text-decoration: underline; }
+        .legal-body strong { color: #fff; }
+        .legal-body .legal-note { background: rgba(249, 168, 37, 0.08); border-left: 3px solid var(--primary); padding: 12px 15px; margin: 15px 0; font-size: 13px; color: #ddd; }
+        .legal-body table { width: 100%; border-collapse: collapse; margin: 10px 0 18px 0; font-size: 13px; }
+        .legal-body th, .legal-body td { border: 1px solid var(--border); padding: 9px 11px; text-align: left; vertical-align: top; }
+        .legal-body th { background: rgba(249, 168, 37, 0.1); color: var(--primary); }
+        .legal-footer { padding: 12px 25px; border-top: 1px solid var(--border); background: var(--sidebar); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; font-size: 11px; color: #666; }
+        .legal-footer a { color: #999; text-decoration: none; }
+        .legal-footer a:hover { color: var(--primary); }
+        @media (max-width: 650px) {
+            .legal-body { padding: 20px; }
+            .legal-header { padding: 14px 18px; }
+            .legal-header h1 { font-size: 15px; }
+            .legal-footer { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -377,11 +237,20 @@
     <div id="auth-screen" class="auth-container">
         <div class="auth-box">
             <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">Moneyium</h2>
-            <input type="text" id="username" placeholder="Username (no spaces)">
-            <input type="password" id="password" placeholder="Password">
+            <input type="text" id="username" placeholder="Username (no spaces)" autocomplete="username">
+            <input type="password" id="password" placeholder="Password" autocomplete="new-password">
             <button onclick="login()">Login</button>
-            <button style="background: #333; color: white;" onclick="register()">Register</button>
+            <label class="tos-consent" for="tos-checkbox">
+                <input type="checkbox" id="tos-checkbox" onchange="toggleRegisterButton()">
+                <span>I agree to the <a href="/tos" onclick="openLegalPage('tos'); return false;">Moneyium Terms of Service</a> and <a href="/privacy" onclick="openLegalPage('privacy'); return false;">Privacy Policy</a></span>
+            </label>
+            <button id="register-btn" style="background: #333; color: white;" onclick="register()" disabled>Register</button>
             <p id="error" style="color: #ff4757; text-align: center; margin-top: 10px; font-size: 14px;"></p>
+            <div class="auth-legal-links">
+                <a href="/tos" onclick="openLegalPage('tos'); return false;">Terms of Service</a>
+                <span>·</span>
+                <a href="/privacy" onclick="openLegalPage('privacy'); return false;">Privacy Policy</a>
+            </div>
         </div>
     </div>
 
@@ -412,17 +281,21 @@
                 <div class="nav-item" onclick="navigateTo('/trade')"><i class="fa-solid fa-right-left"></i> Trade</div>
                 <div class="nav-item" onclick="navigateTo('/games')"><i class="fa-solid fa-gamepad"></i> Games</div>
                 <div class="nav-item hidden" id="nav-admin" onclick="window.open('/admin.html', '_blank')"><i class="fa-solid fa-user-shield"></i> Admin</div>
+
+                <div class="category-header">LEGAL</div>
+                <div class="nav-item" onclick="navigateTo('/tos')"><i class="fa-solid fa-file-contract"></i> Terms of Service</div>
+                <div class="nav-item" onclick="navigateTo('/privacy')"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</div>
                 
                 <div id="category-sidebar" class="hidden">
                     <div class="category-header">CATEGORY</div>
-                    <div class="cat-item active" onclick="filterCategory('All', this)">All Items</div>
-                    <div class="cat-item" onclick="filterCategory('Hats', this)">Hats</div>
-                    <div class="cat-item" onclick="filterCategory('Faces', this)">Faces</div>
-                    <div class="cat-item" onclick="filterCategory('Gears', this)">Gears</div>
-                    <div class="cat-item" onclick="filterCategory('Hair', this)">Hair</div>
-                    <div class="cat-item" onclick="filterCategory('Shirts', this)">Shirts</div>
-                    <div class="cat-item" onclick="filterCategory('Pants', this)">Pants</div>
-                    <div class="cat-item" onclick="filterCategory('Packages', this)">Packages</div>
+                    <div class="cat-item active" onclick="filterCategory('All')">All Items</div>
+                    <div class="cat-item" onclick="filterCategory('Hats')">Hats</div>
+                    <div class="cat-item" onclick="filterCategory('Faces')">Faces</div>
+                    <div class="cat-item" onclick="filterCategory('Gears')">Gears</div>
+                    <div class="cat-item" onclick="filterCategory('Hair')">Hair</div>
+                    <div class="cat-item" onclick="filterCategory('Shirts')">Shirts</div>
+                    <div class="cat-item" onclick="filterCategory('Pants')">Pants</div>
+                    <div class="cat-item" onclick="filterCategory('Packages')">Packages</div>
                 </div>
             </div>
 
@@ -453,14 +326,14 @@
                 <button class="btn-cancel" onclick="closeModal()">Cancel</button>
             </div>
         </div>
-        <div id="modal-trade" class="modal-box hidden" style="width: 620px; max-width: 92vw;">
+        <div id="modal-trade" class="modal-box hidden">
             <div class="modal-header"><h3>Create Trade</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
             <div class="modal-body">
-                <label style="display:block; color: var(--primary); font-size: 12px; font-weight: 800; text-align:left; margin-bottom: 5px;">Receiver Username</label>
-                <input type="text" id="trade-receiver" placeholder="Enter username..." style="width: 100%; padding: 10px; margin-bottom: 15px; background: #1a1512; border: 1px solid var(--border); color: white;">
-                <label style="display:block; color: var(--primary); font-size: 12px; font-weight: 800; text-align:left; margin-bottom: 5px;">Robux to Offer</label>
-                <input type="number" id="trade-robux" placeholder="0" value="0" min="0" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #1a1512; border: 1px solid var(--border); color: white;">
-                <label style="display:block; color: var(--primary); font-size: 12px; font-weight: 800; text-align:left; margin-bottom: 5px;">Select Items to Offer</label>
+                <label style="color: var(--primary); font-size: 14px; font-weight: bold;">Receiver Username</label>
+                <input type="text" id="trade-receiver" placeholder="Enter username..." style="width: 100%; padding: 10px; margin: 5px 0 15px 0; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px;">
+                <label style="color: var(--primary); font-size: 14px; font-weight: bold;">Robux to Offer</label>
+                <input type="number" id="trade-robux" placeholder="0" value="0" style="width: 100%; padding: 10px; margin: 5px 0 15px 0; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px;">
+                <label style="color: var(--primary); font-size: 14px; font-weight: bold;">Select Items to Offer</label>
                 <div class="trade-item-grid" id="trade-items-grid"></div>
             </div>
             <div class="modal-footer">
@@ -470,9 +343,305 @@
         </div>
     </div>
 
+    <div id="legal-screen" class="legal-screen hidden">
+        <div class="legal-box">
+            <div class="legal-header">
+                <div>
+                    <h1 id="legal-title">Legal</h1>
+                    <div class="legal-meta" id="legal-meta"></div>
+                </div>
+                <button class="legal-close" onclick="closeLegalPage()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            </div>
+            <div class="legal-body" id="legal-body"></div>
+            <div class="legal-footer">
+                <span>&copy; 2026 Moneyium. All rights reserved.</span>
+                <span>
+                    <a href="/tos" onclick="openLegalPage('tos'); return false;">Terms of Service</a>
+                    &nbsp;·&nbsp;
+                    <a href="/privacy" onclick="openLegalPage('privacy'); return false;">Privacy Policy</a>
+                </span>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let currentUser = null, currentCatalog = [], currentInventory = [], currentCategory = 'All', currentItemToBuy = null, currentInventorySearch = '';
+        let currentUser = null, currentCatalog = [], currentInventory = [], currentCategory = 'All', currentItemToBuy = null;
         let selectedTradeItems = [];
+
+        const LEGAL_LAST_UPDATED = '29 October 2026';
+
+        const LEGAL_DOCS = {
+            tos: {
+                title: 'Terms of Service',
+                meta: 'Last updated: ' + LEGAL_LAST_UPDATED + ' &middot; Version 1.0',
+                body: `
+                    <div class="legal-note">
+                        <strong>Please read these Terms carefully.</strong> By creating an account or using Moneyium, you agree to be bound by these Terms of Service. If you do not agree, do not create an account and do not use the Platform.
+                    </div>
+                    <p class="legal-page-lead"><strong>Welcome to Moneyium.</strong> By accessing Moneyium, creating an account, or using any Moneyium feature, you agree to these Moneyium Terms of Service and to the Moneyium Privacy Policy. If you do not agree, you must not use Moneyium.</p>
+
+                    <h2>1. Who we are and what these Terms cover</h2>
+                    <p>Moneyium ("<strong>Moneyium</strong>", "<strong>we</strong>", "<strong>us</strong>", "<strong>our</strong>") is a free, fan-made, web-based gaming and social platform that recreates a classic Roblox-style experience, including a catalog, virtual items, trading, profiles and games. The Platform is operated from Belgium by <strong>[OPERATOR NAME / LEGAL ENTITY]</strong>, with its registered office at <strong>[ADDRESS, BELGIUM]</strong> ("<strong>Operator</strong>").</p>
+                    <p>These Terms of Service ("<strong>Terms</strong>") form a legally binding agreement between you and the Operator and govern your access to and use of the Moneyium website, its features, content and services (together, the "<strong>Platform</strong>").</p>
+                    <p><strong>Moneyium is an independent project. It is not affiliated with, endorsed by, sponsored by, or connected to Roblox Corporation or any of its subsidiaries.</strong> "Roblox", "Robux" and related names and logos are trademarks of their respective owners and are used only for descriptive and identification purposes.</p>
+
+                    <h2>2. Eligibility</h2>
+                    <ul>
+                        <li>You must be at least <strong>13 years old</strong> to create an account or use the Platform. This reflects the minimum age for valid digital consent in Belgium.</li>
+                        <li>If you are under 18, you must have the permission of a parent or legal guardian, who must agree to these Terms on your behalf.</li>
+                        <li>You must not use the Platform if you have previously been banned or had an account terminated by us, unless we have given you written permission to return.</li>
+                        <li>You must not use the Platform if you are barred from doing so under applicable law.</li>
+                    </ul>
+
+                    <h2>3. Your account</h2>
+                    <ul>
+                        <li>You must provide a username and password. You agree to provide accurate information and to keep your credentials confidential.</li>
+                        <li>You are responsible for all activity that occurs under your account. Notify us immediately if you believe your account has been compromised.</li>
+                        <li>You may not share, sell, rent, transfer or give away your account or access to it. Accounts may not be created using automated means or in bulk.</li>
+                        <li>We may require you to verify your identity or age where reasonably necessary to protect the Platform or comply with the law.</li>
+                        <li>You may request deletion of your account at any time as described in our <a href="/privacy" onclick="openLegalPage('privacy'); return false;">Privacy Policy</a>.</li>
+                    </ul>
+
+                    <h2>4. Rules of conduct</h2>
+                    <p>You agree to use the Platform in a respectful, lawful and fair manner. You must not, and must not attempt to:</p>
+                    <ul>
+                        <li>harass, bully, threaten, defame, stalk or intimidate any person, or engage in hate speech or discrimination;</li>
+                        <li>post or distribute sexual content, content involving minors in a sexual manner, or any content that is obscene or exploitative;</li>
+                        <li>promote or facilitate violence, self-harm, terrorism, illegal activity or the sale of illegal goods or services;</li>
+                        <li>share, publish or threaten to publish another person's private information without their consent (doxxing);</li>
+                        <li>impersonate Moneyium staff, Roblox, another user or any other person or entity;</li>
+                        <li>upload, link to or distribute malware, viruses, phishing pages or other harmful code;</li>
+                        <li>infringe the intellectual property, privacy or other rights of any person, including by uploading assets you do not have permission to use;</li>
+                        <li>exploit, cheat, hack, dupe, bot, macro, scrape or use unauthorised third-party tools to gain an unfair advantage or to disrupt the Platform;</li>
+                        <li>manipulate trades, virtual currency, item serial numbers, prices or the catalog by any fraudulent or deceptive means;</li>
+                        <li>offer to buy, sell, trade or transfer virtual currency or virtual items for real money, goods or services outside the Platform (real-money trading);</li>
+                        <li>use the Platform for gambling, betting, lotteries or games of chance involving virtual currency or virtual items;</li>
+                        <li>spam, advertise, solicit or send unsolicited commercial communications;</li>
+                        <li>evade a suspension or ban, including by creating a new account; or</li>
+                        <li>interfere with the security, availability or integrity of the Platform or attempt to access accounts or systems without authorisation.</li>
+                    </ul>
+                    <p>We may remove content and take moderation action, up to and including termination, where we reasonably believe these rules have been breached. Serious breaches may be reported to the competent authorities.</p>
+
+                    <h2>5. Virtual currency and virtual items</h2>
+                    <h3>5.1 No real-world value</h3>
+                    <p><strong>Moneyium Robux has no real-world value.</strong> Moneyium Robux, Tix and all virtual items on Moneyium are virtual, in-game assets. They have no real-world monetary value, are not legal tender, are not electronic money or crypto-assets, and cannot be exchanged, redeemed or cashed out for real money, goods or services. They exist only within Moneyium and are provided for entertainment purposes.</p>
+                    <h3>5.2 Licence, not ownership</h3>
+                    <p>Virtual currency and virtual items are licensed to you on a limited, personal, revocable, non-transferable and non-sublicensable basis for use within the Platform. You do not acquire any ownership or property rights in them. Serial numbers and rarity labels are cosmetic and do not create legal ownership.</p>
+                    <h3>5.3 No refunds or compensation</h3>
+                    <p>To the maximum extent permitted by law, virtual currency and virtual items are non-refundable and have no cash value. We are not obliged to compensate you for lost, deleted, rolled back, depreciated or altered virtual assets. Mandatory consumer rights under Belgian and EU law are not affected.</p>
+                    <h3>5.4 Changes to the economy</h3>
+                    <p>Moneyium is a fan project that may be in development, testing or beta. We may add, modify, rebalance, reset or remove virtual currency, items, catalog entries, serial numbers and economy features at any time, including as part of a wipe or reset. We will give reasonable notice of material changes where practicable.</p>
+                    <h3>5.5 Prohibited transactions</h3>
+                    <p>Any sale, purchase or exchange of virtual assets for real money or outside the Platform is prohibited and may result in permanent termination. We may reverse fraudulent or unauthorised transactions and remove illegitimately obtained assets.</p>
+
+                    <h2>6. User content</h2>
+                    <p>You may be able to submit content such as a profile bio, messages, usernames, images or other materials ("<strong>User Content</strong>"). You retain ownership of your User Content. You grant us a worldwide, non-exclusive, royalty-free licence to host, store, reproduce, display, moderate and technically process your User Content solely to operate, provide and promote the Platform.</p>
+                    <p>You are solely responsible for your User Content and must have all rights necessary to submit it. We may remove User Content that violates these Terms or the law. We are not responsible for User Content posted by users, but we may moderate it.</p>
+
+                    <h2>7. Intellectual property</h2>
+                    <p>The Platform, including its software, design, text, graphics, logos and original content, is owned by or licensed to us and is protected by intellectual property laws. You may not copy, modify, distribute, reverse-engineer, scrape or create derivative works from the Platform except as permitted by law or with our prior written consent.</p>
+                    <p>Third-party names, logos and assets belong to their respective owners. If you believe content on the Platform infringes your rights, contact us at <strong>[LEGAL CONTACT EMAIL]</strong> with sufficient detail and we will review the matter.</p>
+
+                    <h2>8. Privacy</h2>
+                    <p>We process personal data in accordance with the EU General Data Protection Regulation (GDPR) and Belgian data protection law. Our <a href="/privacy" onclick="openLegalPage('privacy'); return false;">Privacy Policy</a> explains what data we collect, why, how long we keep it and your rights.</p>
+
+                    <h2>9. Moderation, suspension and termination</h2>
+                    <p>We may suspend, restrict or permanently terminate your account, with or without notice, if we reasonably believe that you have breached these Terms, pose a risk to other users or the Platform, or where required by law. We may also remove or disable access to content.</p>
+                    <p>You may stop using the Platform at any time and request deletion of your account. On termination, your right to use the Platform ends immediately. Virtual assets associated with a terminated account may be forfeited, subject to applicable law. Provisions that by their nature should survive termination (including intellectual property, disclaimers, liability and governing law) will continue to apply.</p>
+                    <p>If you believe a moderation decision was made in error, you may appeal by contacting <strong>[SUPPORT EMAIL]</strong>. We will review appeals in good faith.</p>
+
+                    <h2>10. Availability and disclaimers</h2>
+                    <p>The Platform is provided on an "<strong>as is</strong>" and "<strong>as available</strong>" basis. It is a free, community-driven project and may be unavailable, interrupted, changed or discontinued at any time. We do not guarantee that the Platform will be error-free, secure, uninterrupted or that data will never be lost.</p>
+                    <p>To the maximum extent permitted by law, we disclaim all implied warranties, including merchantability, fitness for a particular purpose and non-infringement. Nothing in these Terms excludes or limits any warranty or right that cannot be excluded or limited under Belgian or EU consumer law.</p>
+
+                    <h2>11. Limitation of liability</h2>
+                    <p>To the maximum extent permitted by applicable law, the Operator will not be liable for any indirect, incidental, special, consequential or punitive damages, or for loss of profits, data, goodwill, virtual assets or business opportunities, arising out of or in connection with your use of the Platform.</p>
+                    <p>To the maximum extent permitted by law, our total aggregate liability arising out of or relating to the Platform or these Terms will not exceed the greater of (a) the total amount you paid to us in the twelve (12) months preceding the event giving rise to the claim, or (b) EUR 100.</p>
+                    <p><strong>Nothing in these Terms excludes or limits our liability for fraud, wilful misconduct, gross negligence, death or personal injury caused by our negligence, or any other liability that cannot be excluded or limited by law, including mandatory consumer protections.</strong></p>
+
+                    <h2>12. Indemnity</h2>
+                    <p>To the extent permitted by law, you agree to indemnify and hold harmless the Operator and its team from claims, damages, losses and reasonable costs arising from your breach of these Terms, your User Content, or your violation of the rights of a third party. This does not apply to the extent the claim results from our own wrongful conduct.</p>
+
+                    <h2>13. Third-party services and links</h2>
+                    <p>The Platform may contain links to third-party websites, games, assets or services (including Roblox APIs and asset thumbnails). We do not control and are not responsible for third-party content, terms or privacy practices. Your use of third-party services is at your own risk and subject to their terms.</p>
+
+                    <h2>14. Changes to these Terms</h2>
+                    <p>We may update these Terms from time to time to reflect changes to the Platform, the law or our practices. The updated version will be posted on this page with a new "Last updated" date. If a change is material, we will provide reasonable notice where practicable. If you do not agree to the updated Terms, you must stop using the Platform and may request deletion of your account.</p>
+
+                    <h2>15. Governing law and disputes</h2>
+                    <p>These Terms are governed by the laws of <strong>Belgium</strong>, without prejudice to mandatory consumer protections that apply in your country of residence.</p>
+                    <p>We encourage you to contact us first so we can try to resolve any dispute informally. If we cannot resolve it, and you are a consumer, you may bring proceedings before the competent court of your domicile in Belgium. Otherwise, the courts of <strong>Brussels, Belgium</strong> have exclusive jurisdiction.</p>
+                    <p>Consumers may also contact the Belgian Consumer Mediation Service (Consumentenombudsdienst), Koning Albert II-laan 8, 1000 Brussels, Belgium, or the European Consumer Centre Belgium for information about their rights.</p>
+
+                    <h2>16. General</h2>
+                    <p>If any provision of these Terms is found unenforceable, the remaining provisions remain in full force. Our failure to enforce a provision is not a waiver of that provision. You may not assign your rights under these Terms without our consent. We may assign our rights in connection with a reorganisation or transfer of the Platform.</p>
+
+                    <h2>17. Contact</h2>
+                    <p>Questions about these Terms? Contact us at <strong>[SUPPORT EMAIL]</strong> or write to <strong>[OPERATOR NAME / LEGAL ENTITY], [ADDRESS, BELGIUM]</strong>.</p>
+                    <p style="color:#777; font-size:12px; margin-top:25px;">These Terms are not legal advice to third parties. The Operator should have this document reviewed by a qualified Belgian lawyer before commercial launch.</p>
+                `
+            },
+            privacy: {
+                title: 'Privacy Policy',
+                meta: 'Last updated: ' + LEGAL_LAST_UPDATED + ' &middot; GDPR compliant',
+                body: `
+                    <div class="legal-note">
+                        <strong>Your privacy matters.</strong> This Privacy Policy explains how Moneyium collects, uses and protects your personal data, and the rights you have under the EU General Data Protection Regulation (GDPR).
+                    </div>
+                    <p class="legal-page-lead"><strong>Moneyium collects your username and a securely hashed version of your password</strong>, together with the platform activity and limited technical data needed to operate Moneyium. Moneyium uses only essential cookies and gives you the right to request deletion of your data.</p>
+
+                    <h2>1. Who is responsible for your data?</h2>
+                    <p>The <strong>data controller</strong> is <strong>[OPERATOR NAME / LEGAL ENTITY]</strong>, with its registered office at <strong>[ADDRESS, BELGIUM]</strong>, operating the Moneyium Platform ("<strong>we</strong>", "<strong>us</strong>").</p>
+                    <p>For privacy questions, to exercise your rights, or to request deletion of your account, contact us at <strong>[PRIVACY EMAIL]</strong>. We have not appointed a Data Protection Officer, as we do not believe we are required to do so; privacy requests are handled by the Operator.</p>
+
+                    <h2>2. Scope</h2>
+                    <p>This Policy applies to personal data processed through the Moneyium website and Platform. It does not apply to third-party websites or services, including Roblox, which have their own privacy policies.</p>
+
+                    <h2>3. What personal data we collect</h2>
+                    <table>
+                        <tr><th>Category</th><th>Data</th></tr>
+                        <tr><td>Account data</td><td>Username, password (stored only as a bcrypt password hash), account creation date, consent record (date and time you accepted these documents), account status and permissions.</td></tr>
+                        <tr><td>Profile and content</td><td>Profile bio, avatar/inventory choices, uploaded content, game listings and any content you submit or share.</td></tr>
+                        <tr><td>Platform activity</td><td>Virtual currency balances (Robux/Tix), inventory, item ownership and serial numbers, trade offers and history, transactions, purchases and sales, game visits and moderation records.</td></tr>
+                        <tr><td>Technical data</td><td>IP address, browser type and version, device information, operating system, session identifiers, timestamps and server logs. These are generated automatically when you access the Platform.</td></tr>
+                        <tr><td>Communications</td><td>If you contact us, the content of your message and any contact details you choose to provide (for example, an email address). We do not require an email address to register.</td></tr>
+                    </table>
+                    <p>We do <strong>not</strong> intentionally collect special categories of personal data (such as health, religion, ethnicity, political opinions or biometric data). Please do not submit such data through the Platform.</p>
+
+                    <h2>4. How we collect your data</h2>
+                    <ul>
+                        <li><strong>Directly from you</strong> when you register, set up your profile, trade, buy items, use games or contact us.</li>
+                        <li><strong>Automatically</strong> through our server, session cookies and technical logs when you use the Platform.</li>
+                        <li><strong>From your activity</strong> on the Platform, such as transaction and moderation records.</li>
+                    </ul>
+
+                    <h2>5. Why we process your data and our legal bases</h2>
+                    <table>
+                        <tr><th>Purpose</th><th>Legal basis (GDPR Art. 6)</th></tr>
+                        <tr><td>Creating and managing your account, logging you in and providing the Platform's features (catalog, inventory, trading, profiles, games).</td><td>Performance of a contract (Art. 6(1)(b))</td></tr>
+                        <tr><td>Recording your acceptance of the Terms of Service and Privacy Policy.</td><td>Compliance with a legal obligation / legitimate interests (Art. 6(1)(c) and (f))</td></tr>
+                        <tr><td>Keeping the Platform secure, preventing fraud, cheating, abuse and unauthorised access, and maintaining server logs.</td><td>Legitimate interests (Art. 6(1)(f))</td></tr>
+                        <tr><td>Moderating content and enforcing our Terms, including suspending or terminating accounts.</td><td>Legitimate interests (Art. 6(1)(f))</td></tr>
+                        <tr><td>Responding to your support and privacy requests.</td><td>Contract / legitimate interests / legal obligation</td></tr>
+                        <tr><td>Complying with legal obligations, responding to lawful requests from authorities and establishing or defending legal claims.</td><td>Legal obligation / legitimate interests (Art. 6(1)(c) and (f))</td></tr>
+                    </table>
+                    <p>Where we rely on legitimate interests, we have assessed that our interests are not overridden by your rights and freedoms, taking into account the nature of the Platform and the safeguards described in this Policy. You may object at any time as explained in section 10.</p>
+
+                    <h2>6. Cookies and similar technologies</h2>
+                    <p>Moneyium uses a <strong>strictly necessary session cookie</strong> (typically named <code>connect.sid</code>) to keep you logged in and to protect your session. This cookie is essential for the Platform to function and is set when you log in or use your session.</p>
+                    <ul>
+                        <li>It contains a session identifier and does not itself store your password.</li>
+                        <li>It is configured as <strong>HttpOnly</strong> and expires after approximately seven (7) days or when you log out.</li>
+                        <li>We do <strong>not</strong> use advertising, tracking or analytics cookies, and we do not sell your data.</li>
+                    </ul>
+                    <p>Because this cookie is strictly necessary to provide the service you request, it does not require prior consent under the ePrivacy Directive. You can block or delete cookies in your browser, but the Platform may then not work properly. We do not currently use any non-essential cookies; if we introduce them, we will ask for your consent first.</p>
+
+                    <h2>7. Who we share your data with</h2>
+                    <p>We do not sell your personal data. We may share it only as necessary with:</p>
+                    <ul>
+                        <li><strong>Hosting and infrastructure providers</strong> that operate the servers, databases, backups and security for the Platform, acting as our processors under a data processing agreement;</li>
+                        <li><strong>Professional advisers</strong> (such as lawyers or accountants) where necessary and bound by confidentiality;</li>
+                        <li><strong>Authorities, courts or regulators</strong> where required by law or to protect our rights, users or the public;</li>
+                        <li><strong>A successor entity</strong> in the event of a reorganisation, merger or transfer of the Platform, subject to this Policy.</li>
+                    </ul>
+                    <p>Roblox APIs are used to fetch public asset details and thumbnails. We do not send your personal data to Roblox for this purpose.</p>
+
+                    <h2>8. International transfers</h2>
+                    <p>We aim to keep your data within the European Economic Area (EEA). If a processor is located outside the EEA, we will only transfer data where an adequate level of protection applies (for example, an adequacy decision) or where appropriate safeguards are in place, such as the European Commission's Standard Contractual Clauses. You may request more information about these safeguards by contacting us.</p>
+
+                    <h2>9. How long we keep your data</h2>
+                    <table>
+                        <tr><th>Data</th><th>Retention period</th></tr>
+                        <tr><td>Account and profile data</td><td>For as long as your account is active. After a deletion request, deleted within 30 days, unless retention is required by law.</td></tr>
+                        <tr><td>Session data and logs</td><td>Session cookie: up to 7 days. Server and security logs: normally up to 90 days, unless needed to investigate an incident.</td></tr>
+                        <tr><td>Transaction and trade records</td><td>For as long as needed to operate the Platform and, where applicable, for the duration of any legal limitation period (generally up to 5 years under Belgian law).</td></tr>
+                        <tr><td>Moderation and ban records</td><td>For as long as necessary to protect the Platform, including to prevent ban evasion.</td></tr>
+                        <tr><td>Consent records</td><td>For as long as we need to demonstrate compliance, typically for the life of the account plus the applicable limitation period.</td></tr>
+                        <tr><td>Support communications</td><td>For as long as needed to resolve your request and for a reasonable period afterwards.</td></tr>
+                    </table>
+                    <p>When data is no longer needed, we delete it or anonymise it. Backup copies may persist for a short period until they are overwritten in the normal backup cycle.</p>
+
+                    <h2>10. Your rights under the GDPR</h2>
+                    <p>Subject to the conditions in the GDPR, you have the right to:</p>
+                    <ul>
+                        <li><strong>Access</strong> the personal data we hold about you and receive a copy;</li>
+                        <li><strong>Rectify</strong> inaccurate or incomplete data;</li>
+                        <li><strong>Erasure</strong> ("right to be forgotten") of your data, for example by requesting account deletion;</li>
+                        <li><strong>Restrict</strong> our processing of your data;</li>
+                        <li><strong>Data portability</strong>, where processing is based on consent or contract and is automated;</li>
+                        <li><strong>Object</strong> to processing based on our legitimate interests, including profiling;</li>
+                        <li><strong>Withdraw consent</strong> at any time, where processing is based on consent, without affecting the lawfulness of prior processing;</li>
+                        <li><strong>Not be subject to a decision based solely on automated processing</strong> that produces legal or similarly significant effects. We do not currently carry out such decision-making; and</li>
+                        <li><strong>Lodge a complaint</strong> with a supervisory authority.</li>
+                    </ul>
+                    <p>To exercise any of these rights, email <strong>[PRIVACY EMAIL]</strong>. We may ask for information to verify your identity before acting on your request. We will respond within one month, extendable by up to two further months for complex requests, and we will tell you if an extension applies. Exercising your rights is free of charge, unless a request is manifestly unfounded or excessive.</p>
+                    <p><strong>Account deletion:</strong> you can request deletion of your account and associated personal data at any time by emailing <strong>[PRIVACY EMAIL]</strong> from the contact address you used, or by providing enough information for us to verify ownership of the account. We will delete or anonymise your data within 30 days, except where we must retain certain records to comply with the law, resolve disputes or prevent fraud and abuse. Note that deleting your account will also delete your virtual items and currency, which cannot be restored.</p>
+
+                    <h2>11. Security</h2>
+                    <p>We take reasonable technical and organisational measures to protect your data, including:</p>
+                    <ul>
+                        <li>passwords stored using <strong>bcrypt</strong> hashing, never in plain text;</li>
+                        <li>session-based authentication with HttpOnly cookies;</li>
+                        <li>access controls limiting administrative access;</li>
+                        <li>regular software updates and server-side validation of requests.</li>
+                    </ul>
+                    <p>No system is completely secure. If we become aware of a personal data breach that is likely to result in a high risk to your rights and freedoms, we will notify the Belgian Data Protection Authority and, where required, you, without undue delay.</p>
+
+                    <h2>12. Children</h2>
+                    <p>Moneyium is intended for users aged <strong>13 and older</strong>. In Belgium, the age at which a child can validly consent to information society services is 13. We do not knowingly collect personal data from children under 13. If you are a parent or guardian and believe a child under 13 has created an account, please contact us at <strong>[PRIVACY EMAIL]</strong> and we will delete the account and associated data promptly.</p>
+                    <p>Users under 18 should use the Platform with the involvement and permission of a parent or guardian.</p>
+
+                    <h2>13. Automated decision-making and profiling</h2>
+                    <p>We do not use your personal data for automated decision-making that produces legal or similarly significant effects. We may use automated tools for security, fraud prevention and moderation, but significant moderation decisions are reviewed by a human where appropriate.</p>
+
+                    <h2>14. Changes to this Privacy Policy</h2>
+                    <p>We may update this Privacy Policy from time to time. The latest version will always be available on this page with a new "Last updated" date. If we make material changes, we will notify you through the Platform or by other appropriate means. Please review this Policy periodically.</p>
+
+                    <h2>15. How to complain</h2>
+                    <p>We would appreciate the chance to address your concerns first, so please contact us at <strong>[PRIVACY EMAIL]</strong>. You also have the right to lodge a complaint with the Belgian Data Protection Authority:</p>
+                    <p><strong>Gegevensbeschermingsautoriteit / Autorité de protection des données</strong><br>
+                    Drukpersstraat 35, 1000 Brussels, Belgium<br>
+                    Tel: +32 (0)2 274 48 00<br>
+                    Email: contact@apd-gba.be<br>
+                    Website: <a href="https://www.gegevensbeschermingsautoriteit.be" target="_blank" rel="noopener noreferrer">www.gegevensbeschermingsautoriteit.be</a></p>
+                    <p>You may also complain to the supervisory authority in your country of habitual residence, place of work or place of the alleged infringement within the EU/EEA.</p>
+
+                    <h2>16. Contact</h2>
+                    <p>For any privacy question or request: <strong>[PRIVACY EMAIL]</strong><br>
+                    Postal address: <strong>[OPERATOR NAME / LEGAL ENTITY], [ADDRESS, BELGIUM]</strong></p>
+                    <p style="color:#777; font-size:12px; margin-top:25px;">This Privacy Policy is provided for transparency and does not constitute legal advice. The Operator should have it reviewed by a qualified Belgian lawyer and complete all bracketed placeholders before launch.</p>
+                `
+            }
+        };
+
+        let legalReturnPath = '/';
+
+        function openLegalPage(type, pushHistory = true) {
+            const doc = LEGAL_DOCS[type];
+            if (!doc) return;
+            if (pushHistory) {
+                legalReturnPath = window.location.pathname || '/';
+                history.pushState({}, '', '/' + type);
+            }
+            document.getElementById('legal-title').innerHTML = doc.title;
+            document.getElementById('legal-meta').innerHTML = doc.meta;
+            document.getElementById('legal-body').innerHTML = doc.body;
+            document.getElementById('legal-body').scrollTop = 0;
+            document.getElementById('legal-screen').classList.remove('hidden');
+        }
+
+        function closeLegalPage() {
+            document.getElementById('legal-screen').classList.add('hidden');
+            const backTo = legalReturnPath || '/';
+            legalReturnPath = '/';
+            history.pushState({}, '', backTo);
+            if (currentUser) handleRouting();
+        }
+
+        function toggleRegisterButton() {
+            const checked = document.getElementById('tos-checkbox').checked;
+            document.getElementById('register-btn').disabled = !checked;
+        }
 
         function slugify(text) { return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, ''); }
 
@@ -493,8 +662,23 @@
         }
 
         async function register() {
-            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value }) });
-            const data = await res.json(); if (res.ok) login(); else document.getElementById('error').innerText = data.error;
+            const errorEl = document.getElementById('error');
+            const agreedToTos = document.getElementById('tos-checkbox').checked;
+            if (!agreedToTos) {
+                errorEl.innerText = "You must agree to the Moneyium Terms of Service and Privacy Policy.";
+                return;
+            }
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    agreedToTos: true
+                })
+            });
+            const data = await res.json();
+            if (res.ok) login(); else errorEl.innerText = data.error;
         }
 
         async function login() {
@@ -507,8 +691,13 @@
         window.onpopstate = handleRouting;
 
         async function init() {
+            const path = window.location.pathname;
             const res = await fetch('/api/user');
-            if (!res.ok) { document.getElementById('auth-screen').classList.remove('hidden'); return; }
+            if (!res.ok) {
+                document.getElementById('auth-screen').classList.remove('hidden');
+                if (path === '/tos' || path === '/privacy') openLegalPage(path.slice(1), false);
+                return;
+            }
             const data = await res.json();
             currentUser = data.user; currentInventory = data.inventory;
             const catalogRes = await fetch('/api/catalog');
@@ -525,6 +714,13 @@
         async function handleRouting() {
             const path = window.location.pathname, main = document.getElementById('main-content'), catSidebar = document.getElementById('category-sidebar');
             catSidebar.classList.add('hidden');
+
+            document.getElementById('legal-screen').classList.add('hidden');
+
+            if (path === '/tos') { renderTOS(main); return; }
+            if (path === '/privacy') { renderPrivacy(main); return; }
+
+            if (!currentUser) return;
 
             if (path === '/' || path === '/home') { renderHomePage(main); }
             else if (path === '/about') { renderAboutPage(main); }
@@ -579,150 +775,37 @@
                 const userId = parseInt(path.split('/')[2]);
                 const res = await fetch(`/api/user/${userId}`);
                 if (!res.ok) return main.innerHTML = `<h2 style="color: red;">User not found</h2>`;
-                const payload = await res.json();
-                renderProfilePage(main, payload.user, payload.inventory || [], payload.user.id === currentUser.id);
-            }
-        }
+                const u = (await res.json()).user;
+                const isOwnProfile = u.id === currentUser.id;
 
-        function renderWearingSlot(item) {
-            const type = String(item.item_type || '').toLowerCase();
-            const tagText = type === 'limited' ? 'LIMITED' : (type === 'limitedu' ? 'LIMITED U' : '');
-            const tag = tagText ? `<span class="limited-tag">${tagText}</span>` : '';
-            const serial = Number(item.serial_number) > 0 ? `<span class="wearing-item-serial">#${Number(item.serial_number)}</span>` : '';
-            return `
-                <div class="wearing-item">
-                    ${tag}
-                    <div class="wearing-item-media">
-                        <img src="${escapeHtml(item.asset_image || '')}" alt="" onerror="this.style.display='none'; this.parentElement.classList.add('missing');">
-                        <i class="fa-solid fa-shirt"></i>
+                main.innerHTML = `
+                <div class="profile-card" style="width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px;">
+                    <div class="profile-header" style="display:flex; gap:20px;">
+                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=150&height=150&format=png" style="width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--border);">
+                        <div class="profile-info">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                <span style="font-size: 28px; color: var(--primary); font-weight: bold;">${u.username}</span>
+                                ${u.is_verified ? '<i class="fa-solid fa-circle-check" style="color: var(--verified); font-size: 18px;"></i>' : ''}
+                            </div>
+                            <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;" id="profile-bio-display">"${u.bio}"</div>
+                            ${isOwnProfile ? `
+                            <div class="bio-edit-box" id="bio-edit-container">
+                                <input type="text" id="new-bio-input" placeholder="Enter a new bio..." value="${u.bio}">
+                                <button onclick="saveBio()">Save</button>
+                            </div>` : ''}
+                            <div style="display: flex; gap: 40px; margin-top: 20px;">
+                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">RAP</div><div style="font-size: 18px; color: white;">${u.rap.toLocaleString()}+</div></div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="wearing-item-name">${escapeHtml(item.custom_name || 'Item')}</span>
-                    ${serial}
+                    <div style="display: flex; border-bottom: 2px solid var(--border); margin-top: 20px;">
+                        <button style="padding: 10px 20px; background: none; border: none; color: white; font-size: 16px; font-weight: bold; border-bottom: 3px solid var(--primary);">About</button>
+                    </div>
+                    <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;">
+                        <div style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc;">Hey I'm ${u.username} this is my profile!</div>
+                    </div>
                 </div>`;
-        }
-
-        function renderProfilePage(container, u, inventory, isOwnProfile) {
-            const displayName = escapeHtml(u.username);
-            const initial = escapeHtml(String(u.username || '?').charAt(0).toUpperCase());
-            const bio = String(u.bio || '').trim();
-            const status = escapeHtml(bio || 'No bio set.');
-            const aboutText = bio ? escapeHtml(bio) : (isOwnProfile ? 'You have not written a bio yet.' : 'This user has not written a bio yet.');
-            const equipped = (inventory || []).filter(item => Number(item.is_wearing) === 1);
-            const slots = equipped.map(renderWearingSlot);
-            for (let i = slots.length; i < 9; i += 1) {
-                slots.push(`
-                    <div class="wearing-item empty">
-                        <i class="fa-solid fa-shirt"></i>
-                        <span class="wearing-item-name">Empty Slot</span>
-                    </div>`);
             }
-            const friendCount = 0;
-            const followerCount = 0;
-            const followingCount = 0;
-
-            container.innerHTML = `
-            <div class="classic-profile">
-                <section class="profile-hero">
-                    <div class="profile-avatar">${initial}</div>
-                    <div class="profile-hero-info">
-                        <div class="profile-name-row">
-                            <h1>${displayName}</h1>
-                            ${u.is_verified ? '<i class="fa-solid fa-circle-check profile-verified" title="Verified"></i>' : ''}
-                        </div>
-                        <div class="profile-status">${status}</div>
-                        <div class="profile-stats">
-                            <div class="profile-stat">
-                                <div class="profile-stat-label">Friends</div>
-                                <div class="profile-stat-value">${friendCount.toLocaleString()}</div>
-                            </div>
-                            <div class="profile-stat">
-                                <div class="profile-stat-label">Followers</div>
-                                <div class="profile-stat-value">${followerCount.toLocaleString()}</div>
-                            </div>
-                            <div class="profile-stat">
-                                <div class="profile-stat-label">Following</div>
-                                <div class="profile-stat-value">${followingCount.toLocaleString()}</div>
-                            </div>
-                            <div class="profile-stat">
-                                <div class="profile-stat-label">RAP</div>
-                                <div class="profile-stat-value">${Number(u.rap || 0).toLocaleString()}</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <div class="profile-tabs">
-                    <button class="profile-tab active" id="profile-tab-about" onclick="showProfileTab('about')">About</button>
-                    <button class="profile-tab" id="profile-tab-creations" onclick="showProfileTab('creations')">Creations</button>
-                </div>
-
-                <section class="profile-panel" id="profile-about-panel">
-                    <div class="profile-about-text">${aboutText}</div>
-                    ${isOwnProfile ? `
-                    <div class="profile-bio-edit">
-                        <input type="text" id="new-bio-input" maxlength="160" placeholder="Update your status..." value="${escapeHtml(bio)}">
-                        <button onclick="saveBio()">Save Bio</button>
-                    </div>` : ''}
-                    <div class="profile-about-footer">
-                        <div class="profile-social">
-                            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" title="Discord"><i class="fa-brands fa-discord"></i></a>
-                            <a href="https://github.com" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="fa-brands fa-github"></i></a>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="profile-panel hidden" id="profile-creations-panel">
-                    <div class="profile-empty">
-                        <i class="fa-solid fa-cubes"></i>
-                        No public creations yet.
-                    </div>
-                </section>
-
-                <section class="profile-panel wearing-panel">
-                    <div class="wearing-header">Currently Wearing</div>
-                    <div class="wearing-body">
-                        <div class="avatar-render">
-                            ${renderPaperDoll(equipped)}
-                            <span>R6 Avatar</span>
-                        </div>
-                        <div class="wearing-grid">${slots.join('')}</div>
-                    </div>
-                </section>
-            </div>`;
-        }
-
-        function showProfileTab(tab) {
-            const aboutPanel = document.getElementById('profile-about-panel');
-            const creationsPanel = document.getElementById('profile-creations-panel');
-            const aboutTab = document.getElementById('profile-tab-about');
-            const creationsTab = document.getElementById('profile-tab-creations');
-            if (!aboutPanel || !creationsPanel) return;
-            const showAbout = tab === 'about';
-            aboutPanel.classList.toggle('hidden', !showAbout);
-            creationsPanel.classList.toggle('hidden', showAbout);
-            aboutTab.classList.toggle('active', showAbout);
-            creationsTab.classList.toggle('active', !showAbout);
-        }
-
-        async function saveBio() {
-            const input = document.getElementById('new-bio-input');
-            if (!input) return;
-            const bio = input.value.trim();
-            const res = await fetch('/api/update-bio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bio })
-            });
-            if (!res.ok) {
-                alert('Could not save your bio. Please try again.');
-                return;
-            }
-            currentUser.bio = bio;
-            const statusEl = document.querySelector('.profile-status');
-            const aboutEl = document.querySelector('.profile-about-text');
-            if (statusEl) statusEl.textContent = bio || 'No bio set.';
-            if (aboutEl) aboutEl.textContent = bio || 'You have not written a bio yet.';
-            input.value = bio;
         }
 
         function renderAboutPage(container) {
@@ -733,7 +816,7 @@
                     I created <strong>Moneyium</strong> because I wanted to understand the engine behind the games I moderate. As a Senior Moderator on Hexium, I see the front-end of a revival every day, but I wanted to build the backend from absolute zero.
                 </p>
                 <p class="about-text">
-                    Instead of downloading leaked source code like Pekora, I decided to build this platform 100% from scratch. I wanted to learn how SQL databases, secure logins, and Roblox API integrations actually work under the hood.
+                    Instead of downloading leaked source code like Pekora, I decided to build this platform 100% from scratch. I wanted to learn how SQL databases, secure logins, and Roblox API integrations actually work under the hood. 
                 </p>
                 <p class="about-text">
                     Built with <strong>Node.js, Express, and SQLite</strong>, this project was a massive learning experience. AI helped me write the code, but I designed the system architecture, fixed the bugs, and built the UI.
@@ -742,254 +825,120 @@
                     Moneyium isn't a public revival; it's my personal sandbox. My goal was to prove to myself that I could build a full-stack economy with serial numbers, trading, and custom avatars. I wanted to level up my coding skills and show that a 15-year-old can build a real, functioning web application.
                 </p>
                 <p class="about-text" style="color: var(--primary); font-weight: bold; text-align: right; margin-top: 40px;">
-                    &mdash; Money (Qrdz0)
+                    — Money (Qrdz0)
                 </p>
             </div>`;
         }
 
-        const HOME_MOCK_POSTS = [
-            {
-                name: 'skel', initial: 'S', color: '#f9a825',
-                verified: true, badge: 'Limited purchase', meta: '2 minutes ago',
-                text: 'Just bought a limited! Dominus Aureus #2 is finally mine. The collection grows.',
-                attachment: { icon: 'fa-solid fa-gem', title: 'Dominus Aureus', sub: 'Serial #2 of 25 - Paid R$ 12,500', tag: 'RARE' },
-                likes: 48, comments: 12
-            },
-            {
-                name: 'hop', initial: 'H', color: '#69c779',
-                verified: true, badge: 'Milestone', meta: '18 minutes ago',
-                text: 'Reached 10,000 Robux! Thank you to everyone who traded with me this week.',
-                attachment: { icon: 'fa-solid fa-coins', title: '10,000 Robux', sub: 'Personal milestone unlocked', tag: 'MILESTONE' },
-                likes: 96, comments: 24
-            },
-            {
-                name: 'nyx', initial: 'N', color: '#a98ce8',
-                badge: 'Trading', meta: '1 hour ago',
-                text: 'Trading a Crimson Valkyrie for R$ 4,200 or clean limiteds. DMs are open.',
-                likes: 17, comments: 5
-            },
-            {
-                name: 'void', initial: 'V', color: '#7d8a99',
-                badge: 'Collection', meta: '3 hours ago',
-                text: 'Finally picked up the last piece for my gold collection. That catalog drop was insane.',
-                attachment: { icon: 'fa-solid fa-crown', title: 'Golden Crown', sub: 'Serial #7 - Golden Vault collection', tag: 'LIMITED' },
-                likes: 31, comments: 8
-            }
-        ];
-        let userHomePosts = [];
-
-        function escapeHtml(value) {
-            return String(value === undefined || value === null ? '' : value).replace(/[&<>"']/g, c => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[c]));
-        }
-
-        const R6_BASE_AVATAR = `
-            <svg class="paper-doll-base" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="R6 avatar">
-                <g stroke="#120d0a" stroke-width="2">
-                    <rect x="32" y="86" width="26" height="88" fill="#f0c15a"></rect>
-                    <rect x="142" y="86" width="26" height="88" fill="#f0c15a"></rect>
-                    <rect x="64" y="164" width="32" height="120" fill="#2f6f3e"></rect>
-                    <rect x="104" y="164" width="32" height="120" fill="#2f6f3e"></rect>
-                    <rect x="60" y="84" width="80" height="82" fill="#1f5f9e"></rect>
-                    <rect x="70" y="16" width="60" height="60" fill="#f0c15a"></rect>
-                </g>
-                <rect x="84" y="38" width="9" height="10" fill="#241a13"></rect>
-                <rect x="107" y="38" width="9" height="10" fill="#241a13"></rect>
-                <rect x="88" y="58" width="24" height="4" fill="#241a13"></rect>
-                <rect x="92" y="84" width="16" height="10" fill="#164a7c"></rect>
-            </svg>`;
-
-        function renderPaperDoll(equipped) {
-            const layers = (equipped || []).map(item => {
-                const category = String(item.category || '').toLowerCase();
-                if (!['hats', 'faces', 'shirts', 'pants'].includes(category)) return '';
-                return `<img src="${escapeHtml(item.asset_image || '')}" class="worn-item ${category}" alt="" onerror="this.style.display='none'">`;
-            }).join('');
-            return `<div class="paper-doll">${R6_BASE_AVATAR}${layers}</div>`;
-        }
-
-        function renderHomePost(post) {
-            const initials = post.initial || String(post.name || '?').charAt(0).toUpperCase();
-            const avatarStyle = post.color || '#f9a825';
-            const verified = post.verified ? '<i class="fa-solid fa-circle-check post-verified"></i>' : '';
-            const badge = post.badge ? `<span class="post-badge">${escapeHtml(post.badge)}</span>` : '';
-            const attachment = post.attachment ? `
-                <div class="post-attachment">
-                    <div class="attachment-icon"><i class="${escapeHtml(post.attachment.icon || 'fa-solid fa-gem')}"></i></div>
-                    <div class="attachment-info">
-                        <div class="attachment-title">${escapeHtml(post.attachment.title)}</div>
-                        <div class="attachment-sub">${escapeHtml(post.attachment.sub)}</div>
-                    </div>
-                    <div class="attachment-tag">${escapeHtml(post.attachment.tag || '')}</div>
-                </div>` : '';
-            return `
-                <article class="post-card">
-                    <div class="post-head">
-                        <div class="post-avatar" style="background:${avatarStyle}">${escapeHtml(initials)}</div>
-                        <div class="post-identity">
-                            <div class="post-name">${escapeHtml(post.name)} ${verified}</div>
-                            <div class="post-meta">${escapeHtml(post.meta || 'Just now')}</div>
-                        </div>
-                        ${badge}
-                    </div>
-                    <div class="post-text">${escapeHtml(post.text)}</div>
-                    ${attachment}
-                    <div class="post-actions">
-                        <button class="post-action" onclick="togglePostLike(this)"><i class="fa-regular fa-heart"></i> <span class="like-count">${Number(post.likes) || 0}</span></button>
-                        <button class="post-action"><i class="fa-regular fa-comment"></i> ${Number(post.comments) || 0}</button>
-                        <button class="post-action"><i class="fa-solid fa-arrow-up-from-bracket"></i> Share</button>
-                    </div>
-                </article>`;
-        }
-
-        function renderHomeFeed() {
-            const list = document.getElementById('home-feed-list');
-            if (!list) return;
-            list.innerHTML = [...userHomePosts, ...HOME_MOCK_POSTS].map(renderHomePost).join('');
-        }
-
-        function togglePostLike(button) {
-            const liked = button.classList.toggle('liked');
-            const count = button.querySelector('.like-count');
-            const icon = button.querySelector('i');
-            if (count) {
-                const value = parseInt(count.textContent, 10) || 0;
-                count.textContent = liked ? value + 1 : Math.max(0, value - 1);
-            }
-            if (icon) icon.className = liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-        }
-
-        function updateHomeComposer() {
-            const input = document.getElementById('home-post-input');
-            const button = document.getElementById('home-post-btn');
-            const counter = document.getElementById('home-char-count');
-            if (!input || !button) return;
-            if (counter) counter.textContent = input.value.length;
-            button.disabled = input.value.trim().length === 0;
-        }
-
-        function submitHomePost() {
-            const input = document.getElementById('home-post-input');
-            if (!input) return;
-            const text = input.value.trim();
-            if (!text) return;
-            userHomePosts.unshift({
-                name: currentUser.username,
-                initial: String(currentUser.username || '?').charAt(0).toUpperCase(),
-                color: '#f9a825',
-                meta: 'Just now', text, likes: 0, comments: 0
-            });
-            input.value = '';
-            updateHomeComposer();
-            renderHomeFeed();
-            const firstPost = document.querySelector('#home-feed-list .post-card');
-            if (firstPost) firstPost.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
         function renderHomePage(container) {
-            const initial = escapeHtml(String(currentUser.username || '?').charAt(0).toUpperCase());
-            const displayName = escapeHtml(currentUser.username);
             container.innerHTML = `
-            <div class="home-shell">
-                <div class="home-main-col">
-                    <section class="home-welcome">
-                        <div class="welcome-avatar">${initial}</div>
-                        <div class="welcome-copy">
-                            <div class="welcome-kicker">MONEYIUM COMMUNITY</div>
-                            <h1>Welcome back, ${displayName}</h1>
-                            <p>Your feed is buzzing. Catch up on the latest drops, milestones, and trades.</p>
+            <div class="home-wrapper">
+                <!-- MAIN FEED -->
+                <div class="feed-column">
+                    <div class="feed-card">
+                        <div class="feed-header">
+                            <div class="feed-title">Community Feed</div>
                         </div>
-                        <div class="online-pill"><span class="online-dot"></span> 1,284 online</div>
-                    </section>
-
-                    <div class="feed-heading"><h2>My Feed</h2><span>LATEST</span></div>
-
-                    <div class="composer">
-                        <div class="composer-row">
-                            <div class="post-avatar" style="background:#f9a825">${initial}</div>
-                            <textarea id="home-post-input" maxlength="280" placeholder="Share an update with the community..." oninput="updateHomeComposer()"></textarea>
-                        </div>
-                        <div class="composer-footer">
-                            <div class="composer-tools">
-                                <span><i class="fa-regular fa-image"></i> Media</span>
-                                <span><i class="fa-solid fa-gem"></i> Item</span>
-                                <span class="composer-count"><span id="home-char-count">0</span>/280</span>
-                            </div>
-                            <button class="composer-post" id="home-post-btn" onclick="submitHomePost()" disabled>Post</button>
+                        <div class="post-box">
+                            <textarea placeholder="Share an update with the community..."></textarea>
+                            <button class="post-btn">Post Update</button>
                         </div>
                     </div>
 
-                    <div class="post-list" id="home-feed-list"></div>
+                    <!-- Mock Post 1 -->
+                    <div class="feed-card">
+                        <div class="post">
+                            <div class="post-meta">
+                                <div class="post-avatar"></div>
+                                <div>
+                                    <div class="post-author">skel <i class="fa-solid fa-circle-check" style="color: var(--verified); font-size: 12px;"></i></div>
+                                    <div class="post-time">2 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="post-text">Just bought a limited! Dominus Aureus #2 is finally mine. The collection grows.</div>
+                            <div class="post-attachment">
+                                <img src="https://tr.rbxcdn.com/180DAY-9b8032a9f54c4054c8f2f5e5a3a4f6c9/420/420/Hat/Png/noFilter">
+                                <div class="attachment-info">
+                                    <h5>Dominus Aureus</h5>
+                                    <p>Serial #2 of 25 · Paid R$ 12,500</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mock Post 2 -->
+                    <div class="feed-card">
+                        <div class="post">
+                            <div class="post-meta">
+                                <div class="post-avatar"></div>
+                                <div>
+                                    <div class="post-author">hop</div>
+                                    <div class="post-time">18 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="post-text">Reached 10,000 Robux! Thank you to everyone who traded with me this week.</div>
+                        </div>
+                    </div>
                 </div>
 
-                <aside class="home-side-col">
-                    <section class="side-card">
-                        <div class="side-title">Events <span class="side-link">VIEW ALL</span></div>
-                        <div class="event-row">
-                            <div class="event-date"><span class="event-day">28</span><span class="event-month">OCT</span></div>
+                <!-- RIGHT SIDEBAR -->
+                <div class="right-column">
+                    <div class="side-card">
+                        <div class="side-header">Events <span>VIEW ALL</span></div>
+                        <div class="event-item">
+                            <div class="event-date"><h4>28</h4><p>OCT</p></div>
                             <div class="event-info">
-                                <div class="event-name">Midnight Limited Drop</div>
-                                <div class="event-meta">8:00 PM &middot; Serialized limiteds hit the catalog.</div>
+                                <h5>Midnight Limited Drop</h5>
+                                <p>8:00 PM · Serialized limiteds hit the catalog.</p>
                             </div>
                         </div>
-                        <div class="event-row">
-                            <div class="event-date"><span class="event-day">31</span><span class="event-month">OCT</span></div>
+                        <div class="event-item">
+                            <div class="event-date"><h4>31</h4><p>OCT</p></div>
                             <div class="event-info">
-                                <div class="event-name">Halloween Trade Night</div>
-                                <div class="event-meta">6:00 PM &middot; Trade Hub &middot; Double value trades.</div>
+                                <h5>Halloween Trade Night</h5>
+                                <p>6:00 PM · Trade Hub · Double value trades.</p>
                             </div>
                         </div>
-                        <div class="event-row">
-                            <div class="event-date"><span class="event-day">02</span><span class="event-month">NOV</span></div>
+                        <div class="event-item">
+                            <div class="event-date"><h4>02</h4><p>NOV</p></div>
                             <div class="event-info">
-                                <div class="event-name">Golden Vault Restock</div>
-                                <div class="event-meta">12:00 PM &middot; 50 new copies with fresh serials.</div>
+                                <h5>Golden Vault Restock</h5>
+                                <p>12:00 PM · 50 new copies with fresh serials.</p>
                             </div>
                         </div>
-                    </section>
+                    </div>
 
-                    <section class="side-card">
-                        <div class="side-title">Friends <span class="side-link">3 ONLINE</span></div>
-                        <div class="friend-row">
-                            <div class="friend-avatar" style="background:#f9a825">S<span class="status-dot trading"></span></div>
-                            <div class="friend-info"><div class="friend-name">skel</div><div class="friend-status trading">Trading &middot; 3 listings</div></div>
+                    <div class="side-card">
+                        <div class="side-header">Friends <span>3 ONLINE</span></div>
+                        <div class="friend-item">
+                            <div class="friend-avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="friend-info"><h5>skel</h5><p>Trading · 3 listings</p></div>
                         </div>
-                        <div class="friend-row">
-                            <div class="friend-avatar" style="background:#69c779">H<span class="status-dot online"></span></div>
-                            <div class="friend-info"><div class="friend-name">hop</div><div class="friend-status">In Catalog</div></div>
+                        <div class="friend-item">
+                            <div class="friend-avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="friend-info"><h5>hop</h5><p>In Catalog</p></div>
                         </div>
-                        <div class="friend-row">
-                            <div class="friend-avatar" style="background:#a98ce8">N<span class="status-dot online"></span></div>
-                            <div class="friend-info"><div class="friend-name">nyx</div><div class="friend-status">In Trade Hub</div></div>
+                        <div class="friend-item">
+                            <div class="friend-avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="friend-info"><h5>nyx</h5><p>In Trade Hub</p></div>
                         </div>
-                        <div class="friend-row">
-                            <div class="friend-avatar" style="background:#7d8a99">V<span class="status-dot"></span></div>
-                            <div class="friend-info"><div class="friend-name">void</div><div class="friend-status">Offline</div></div>
-                        </div>
-                    </section>
+                    </div>
 
-                    <section class="side-card">
-                        <div class="side-title">Hexium Blog <span class="side-link">ALL POSTS</span></div>
-                        <div class="blog-row">
-                            <div class="blog-tag">UPDATE</div>
-                            <div class="blog-title">Serial Numbers 2.0 is live</div>
-                            <div class="blog-meta">2 hours ago</div>
+                    <div class="side-card">
+                        <div class="side-header">Hexium Blog <span>ALL POSTS</span></div>
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #888; font-size: 10px; text-transform: uppercase; margin-bottom: 3px;">Update</div>
+                            <div style="color: var(--primary); font-size: 13px; font-weight: bold; margin-bottom: 3px;">Serial Numbers 2.0 is live</div>
+                            <div style="color: #666; font-size: 11px;">2 hours ago</div>
                         </div>
-                        <div class="blog-row">
-                            <div class="blog-tag">EVENT</div>
-                            <div class="blog-title">Season 1: The Golden Vault</div>
-                            <div class="blog-meta">Yesterday</div>
+                        <div>
+                            <div style="color: #888; font-size: 10px; text-transform: uppercase; margin-bottom: 3px;">Event</div>
+                            <div style="color: var(--primary); font-size: 13px; font-weight: bold; margin-bottom: 3px;">Season 1: The Golden Vault</div>
+                            <div style="color: #666; font-size: 11px;">Yesterday</div>
                         </div>
-                        <div class="blog-row">
-                            <div class="blog-tag">MARKET</div>
-                            <div class="blog-title">Sold-out items now stay forever</div>
-                            <div class="blog-meta">3 days ago</div>
-                        </div>
-                    </section>
-                </aside>
+                    </div>
+                </div>
             </div>`;
-            renderHomeFeed();
         }
 
         async function renderGamesPage(container) {
@@ -1001,13 +950,11 @@
             if (games.length === 0) {
                 html += `<p style="color: #aaa; margin-top: 20px;">No games have been uploaded yet.</p>`;
             } else {
-                html += `<div class="game-grid">${games.map(g => `
-                    <div class="game-card" onclick="window.open('${g.game_url}', '_blank')">
-                        <img src="${g.thumbnail}" class="game-thumb">
-                        <div class="game-info">
-                            <div class="game-title">${g.name}</div>
-                            <div class="game-stats">By ${g.creator_name} | ${g.visits} Visits</div>
-                        </div>
+                html += `<div class="grid">${games.map(g => `
+                    <div class="item-card" onclick="window.open('${g.game_url}', '_blank')">
+                        <img src="${g.thumbnail}">
+                        <p style="color: var(--primary); font-weight: bold;">${g.name}</p>
+                        <p style="font-size: 12px; color: #888;">By ${g.creator_name}</p>
                     </div>
                 `).join('')}</div>`;
             }
@@ -1015,39 +962,38 @@
         }
 
         function renderAvatarEditor(container) {
-            const equipped = currentInventory.filter(i => Number(i.is_wearing) === 1);
+            const equipped = currentInventory.filter(i => i.is_wearing === 1);
+            const baseAvatarUrl = "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4A5D1F5E8E5F5D5E5F5E5F5E5F5E5F5E-Png/150/150/AvatarHeadshot/Png/noFilter";
+            const renderedItems = equipped.map(item => {
+                const cat = item.category.toLowerCase();
+                return `<img src="${item.asset_image}" class="worn-item ${cat}">`;
+            }).join('');
 
             container.innerHTML = `
-            <div class="inventory-page">
-                <div class="inventory-head">
-                    <div>
-                        <h2>Avatar Editor</h2>
-                        <div class="inventory-sub">Equip items to build your R6 paper doll.</div>
+            <h2 style="color: var(--primary); width: 100%; max-width: 1000px; margin-bottom: 10px;">Avatar Editor</h2>
+            <div class="avatar-layout">
+                <div class="avatar-left">
+                    <div class="avatar-preview">
+                        <img src="${baseAvatarUrl}" class="base-avatar">
+                        ${renderedItems}
+                    </div>
+                    <div style="margin-top: 15px; color: var(--primary); font-weight: bold; font-size: 14px;">Currently Wearing</div>
+                    <div class="wearing-list" id="wearing-list">
+                        ${equipped.length === 0 ? '<p style="color: #555; font-size: 12px;">No items equipped.</p>' : equipped.map(item => `
+                            <div class="wearing-slot"><img src="${item.asset_image}"></div>
+                        `).join('')}
                     </div>
                 </div>
-                <div class="avatar-layout">
-                    <div class="avatar-left">
-                        <div class="avatar-preview">
-                            ${renderPaperDoll(equipped)}
-                        </div>
-                        <div style="margin-top: 15px; color: var(--primary); font-weight: 900; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">Currently Wearing</div>
-                        <div class="wearing-list" id="wearing-list">
-                            ${equipped.length === 0 ? '<p style="color: #6f6259; font-size: 12px;">No items equipped.</p>' : equipped.map(item => `
-                                <div class="wearing-slot"><img src="${escapeHtml(item.asset_image || '')}" alt=""></div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="avatar-right">
-                        <div class="inventory-tabs"><div class="inv-tab active">All Items</div></div>
-                        <p style="color: #8f7c6c; font-size: 13px; margin-bottom: 10px;">Click an item to equip or unequip it.</p>
-                        <div class="small-grid">
-                            ${currentInventory.map(item => `
-                                <div class="small-item" onclick="toggleEquip(${Number(item.inventory_id || item.id)}, ${Number(item.is_wearing) === 1 ? 1 : 0})" style="border: ${Number(item.is_wearing) === 1 ? '2px solid var(--primary)' : '1px solid var(--border)'}">
-                                    <img src="${escapeHtml(item.asset_image || '')}" alt="">
-                                    <p>${escapeHtml(item.custom_name)}</p>
-                                </div>
-                            `).join('')}
-                        </div>
+                <div class="avatar-right">
+                    <div class="inventory-tabs"><div class="inv-tab active">Recent</div><div class="inv-tab">Clothing</div><div class="inv-tab">Body</div></div>
+                    <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Click an item to equip/unequip it.</p>
+                    <div class="small-grid">
+                        ${currentInventory.map(item => `
+                            <div class="small-item" onclick="toggleEquip(${item.id}, ${item.is_wearing})" style="border: ${item.is_wearing === 1 ? '2px solid var(--primary)' : '1px solid var(--border)'}">
+                                <img src="${item.asset_image}">
+                                <p>${item.custom_name}</p>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             </div>`;
@@ -1072,76 +1018,15 @@
         }
 
         function renderInventory(container, items, category) {
-            container.innerHTML = `
-            <div class="inventory-page">
-                <div class="inventory-head">
-                    <div>
-                        <h2>Your Inventory</h2>
-                        <div class="inventory-sub">Every item you own, including serialized limiteds.</div>
-                    </div>
-                    <div class="inventory-search">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="inventory-search" placeholder="Search your inventory..." value="${escapeHtml(currentInventorySearch)}" oninput="setInventorySearch(this.value)">
-                    </div>
+            let filtered = category !== 'All' ? items.filter(i => i.category === category) : items;
+            container.innerHTML = `<h2 style="color: var(--primary); width: 100%; max-width: 900px;">Your Inventory</h2><div class="grid">${filtered.length === 0 ? '<p style="color: #aaa;">No items found.</p>' : filtered.map(item => `
+                <div class="item-card">
+                    <img src="${item.asset_image}">
+                    <p>${item.custom_name}</p>
+                    ${item.serial_number > 0 ? `<p style="color:var(--primary); font-size:12px; font-weight:bold;">#${item.serial_number}</p>` : ''}
+                    <button class="sell-btn" onclick="sellItem(${item.id})">Sell for R$ ${item.price}</button>
                 </div>
-                <div class="inventory-meta">
-                    <span id="inventory-count">0 items</span>
-                    <span>SELL returns an item to the catalog</span>
-                </div>
-                <div class="grid inventory-grid" id="inventory-grid"></div>
-            </div>`;
-            document.querySelectorAll('.cat-item').forEach(el => {
-                el.classList.toggle('active', el.textContent.trim() === (currentCategory === 'All' ? 'All Items' : currentCategory));
-            });
-            renderInventoryGrid();
-        }
-
-        function getFilteredInventory() {
-            const query = String(currentInventorySearch || '').trim().toLowerCase();
-            return (currentInventory || []).filter(item => {
-                if (currentCategory !== 'All' && item.category !== currentCategory) return false;
-                if (query && !String(item.custom_name || '').toLowerCase().includes(query)) return false;
-                return true;
-            });
-        }
-
-        function renderInventoryCard(item) {
-            const type = String(item.item_type || '').toLowerCase();
-            const tagText = type === 'limited' ? 'LIMITED' : (type === 'limitedu' ? 'LIMITED U' : '');
-            const tag = tagText ? `<span class="limited-tag">${tagText}</span>` : '';
-            const worn = Number(item.is_wearing) === 1 ? '<span class="inv-worn">Wearing</span>' : '';
-            const serial = Number(item.serial_number) > 0 ? `<span class="inv-serial">Serial #${Number(item.serial_number)}</span>` : '';
-            return `
-                <article class="inv-card">
-                    <div class="inv-media">
-                        ${tag}
-                        ${worn}
-                        <img src="${escapeHtml(item.asset_image || '')}" alt="" onerror="this.parentElement.classList.add('missing')">
-                        <i class="fa-solid fa-shirt inv-fallback"></i>
-                    </div>
-                    <div class="inv-body">
-                        <span class="inv-name" title="${escapeHtml(item.custom_name)}">${escapeHtml(item.custom_name || 'Item')}</span>
-                        <span class="inv-sub">${escapeHtml(item.category || 'Item')}</span>
-                        ${serial}
-                        <button class="sell-btn" onclick="sellItem(${Number(item.inventory_id || item.id)})">Sell for R$ ${Number(item.price || 0).toLocaleString()}</button>
-                    </div>
-                </article>`;
-        }
-
-        function renderInventoryGrid() {
-            const grid = document.getElementById('inventory-grid');
-            if (!grid) return;
-            const filtered = getFilteredInventory();
-            const count = document.getElementById('inventory-count');
-            if (count) count.textContent = `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
-            grid.innerHTML = filtered.length === 0
-                ? `<div class="inventory-empty"><i class="fa-solid fa-box-open"></i>No items match this filter.</div>`
-                : filtered.map(renderInventoryCard).join('');
-        }
-
-        function setInventorySearch(value) {
-            currentInventorySearch = value;
-            renderInventoryGrid();
+            `).join('')}</div>`;
         }
 
         async function sellItem(itemId) {
@@ -1150,18 +1035,15 @@
             if ((await res.json()).success) init(); else alert("Error selling item.");
         }
 
-        function filterCategory(cat, element) {
+        function filterCategory(cat) {
             currentCategory = cat;
             document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-            const target = element || (typeof event !== 'undefined' ? event.target : null);
-            if (target && target.classList) target.classList.add('active');
-            if (document.getElementById('inventory-grid')) renderInventoryGrid();
-            else renderInventory(document.getElementById('main-content'), currentInventory, currentCategory);
+            event.target.classList.add('active');
+            renderInventory(document.getElementById('main-content'), currentInventory, currentCategory);
         }
 
         function openBuyModal(itemId) {
             currentItemToBuy = currentCatalog.find(i => i.id === itemId);
-            document.getElementById('modal-trade').classList.add('hidden');
             document.getElementById('modal-item-name').innerText = currentItemToBuy.custom_name;
             document.getElementById('modal-item-price').innerText = currentItemToBuy.price === 0 ? 'FREE' : currentItemToBuy.price.toLocaleString();
             document.getElementById('modal-item-img').src = currentItemToBuy.asset_image;
@@ -1176,14 +1058,15 @@
             }
         }
 
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.remove('active');
-            ['modal-buy', 'modal-insufficient', 'modal-trade'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
-            });
-            currentItemToBuy = null;
+        function closeModal() { 
+            document.getElementById('modal-overlay').classList.remove('active'); 
+            currentItemToBuy = null; 
             selectedTradeItems = [];
+        }
+
+        async function confirmPurchase() {
+            const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId: currentItemToBuy.id }) });
+            if ((await res.json()).success) { closeModal(); init(); } else { alert("Error purchasing."); }
         }
 
         async function renderTradePage(container) {
@@ -1196,25 +1079,25 @@
                 <h3 style="color: var(--primary); margin-bottom: 15px;">Pending Trades</h3>`;
 
             if (trades.length === 0) {
-                html += `<p style="color: #8f7c6c;">You have no pending trades.</p>`;
+                html += `<p style="color: #aaa;">You have no pending trades.</p>`;
             } else {
                 trades.forEach(t => {
-                    const isReceiver = Number(t.receiver_id) === Number(currentUser.id);
-                    const otherPerson = escapeHtml(isReceiver ? t.sender_name : t.receiver_name);
-                    const role = isReceiver ? 'Incoming from' : 'Outgoing to';
+                    const isReceiver = t.receiver_id === currentUser.id;
+                    const otherPerson = isReceiver ? t.sender_name : t.receiver_name;
+                    const role = isReceiver ? "Incoming from" : "Outgoing to";
 
                     html += `
                     <div class="trade-card">
                         <div class="trade-info">
                             <h4>${role} ${otherPerson}</h4>
-                            <p>They are offering items + R$ ${Number(isReceiver ? t.sender_robux : t.receiver_robux).toLocaleString()}</p>
-                            <p>You are offering items + R$ ${Number(isReceiver ? t.receiver_robux : t.sender_robux).toLocaleString()}</p>
+                            <p>They are offering items + R$ ${isReceiver ? t.sender_robux : t.receiver_robux}</p>
+                            <p>You are offering items + R$ ${isReceiver ? t.receiver_robux : t.sender_robux}</p>
                         </div>
                         <div class="trade-actions">
                             ${isReceiver ? `
-                                <button class="btn-accept" onclick="respondTrade(${Number(t.id)}, 'accept')">Accept</button>
-                                <button class="btn-decline" onclick="respondTrade(${Number(t.id)}, 'decline')">Decline</button>
-                            ` : `<span style="color: #8f7c6c;">Waiting for response...</span>`}
+                                <button class="btn-accept" onclick="respondTrade(${t.id}, 'accept')">Accept</button>
+                                <button class="btn-decline" onclick="respondTrade(${t.id}, 'decline')">Decline</button>
+                            ` : `<span style="color: #aaa;">Waiting for response...</span>`}
                         </div>
                     </div>`;
                 });
@@ -1223,27 +1106,18 @@
             container.innerHTML = html;
         }
 
-        function initiateTrade(username) {
-            openTradeModal(username);
-        }
-
         function openTradeModal(targetUsername = '') {
-            document.getElementById('modal-buy').classList.add('hidden');
-            document.getElementById('modal-insufficient').classList.add('hidden');
             document.getElementById('trade-receiver').value = targetUsername;
             document.getElementById('trade-robux').value = 0;
             selectedTradeItems = [];
 
-            const tradeable = (currentInventory || []).filter((item, index, arr) => arr.findIndex(other => other.id === item.id) === index);
             const grid = document.getElementById('trade-items-grid');
-            grid.innerHTML = tradeable.length === 0
-                ? '<p style="color: #6f6259; font-size: 12px;">You have no items to trade.</p>'
-                : tradeable.map(item => `
-                    <div class="trade-item" id="trade-item-${Number(item.id)}" onclick="toggleTradeItem(${Number(item.id)})">
-                        <img src="${escapeHtml(item.asset_image || '')}" alt="">
-                        <p>${escapeHtml(item.custom_name)}</p>
-                    </div>
-                `).join('');
+            grid.innerHTML = currentInventory.map(item => `
+                <div class="trade-item" id="trade-item-${item.id}" onclick="toggleTradeItem(${item.id})">
+                    <img src="${item.asset_image}">
+                    <p>${item.custom_name}</p>
+                </div>
+            `).join('');
 
             document.getElementById('modal-trade').classList.remove('hidden');
             document.getElementById('modal-overlay').classList.add('active');
@@ -1251,7 +1125,6 @@
 
         function toggleTradeItem(itemId) {
             const el = document.getElementById(`trade-item-${itemId}`);
-            if (!el) return;
             if (selectedTradeItems.includes(itemId)) {
                 selectedTradeItems = selectedTradeItems.filter(id => id !== itemId);
                 el.classList.remove('selected');
@@ -1262,30 +1135,29 @@
         }
 
         async function submitTrade() {
-            const receiverName = document.getElementById('trade-receiver').value.trim();
-            const robux = parseInt(document.getElementById('trade-robux').value, 10) || 0;
+            const receiverName = document.getElementById('trade-receiver').value;
+            const robux = parseInt(document.getElementById('trade-robux').value) || 0;
 
-            if (!receiverName) return alert('Please enter a username.');
-            if (robux < 0) return alert('Robux amount cannot be negative.');
+            if (!receiverName) return alert("Please enter a username.");
             if (robux > currentUser.robux) return alert("You don't have that many Robux.");
 
             const res = await fetch('/api/trade/send', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    receiverName,
+                    receiverName: receiverName,
                     senderItems: selectedTradeItems,
                     senderRobux: robux
                 })
             });
-
+            
             const data = await res.json();
-            if (data.success) {
-                closeModal();
-                alert('Trade sent!');
-                handleRouting();
-            } else {
-                alert(data.error || 'Could not send trade.');
+            if (data.success) { 
+                closeModal(); 
+                alert("Trade sent!"); 
+                handleRouting(); 
+            } else { 
+                alert(data.error); 
             }
         }
 
@@ -1298,9 +1170,28 @@
             handleRouting();
         }
 
-        async function confirmPurchase() {
-            const res = await fetch('/api/buy-item', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ itemId: currentItemToBuy.id }) });
-            if ((await res.json()).success) { closeModal(); init(); } else { alert("Error purchasing."); }
+        async function saveBio() {
+            const newBio = document.getElementById('new-bio-input').value;
+            const res = await fetch('/api/update-bio', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ bio: newBio }) });
+            if (res.ok) { currentUser.bio = newBio; handleRouting(); }
+        }
+
+        function renderLegalPage(container, doc) {
+            container.innerHTML = `
+                <div class="legal-page-container">
+                    <h1 class="legal-page-title">Moneyium ${doc.title}</h1>
+                    <div class="legal-page-updated">${doc.meta}</div>
+                    <div class="legal-page-content">${doc.body}</div>
+                </div>`;
+            container.scrollTop = 0;
+        }
+
+        function renderTOS(container) {
+            renderLegalPage(container, LEGAL_DOCS.tos);
+        }
+
+        function renderPrivacy(container) {
+            renderLegalPage(container, LEGAL_DOCS.privacy);
         }
 
         init();
