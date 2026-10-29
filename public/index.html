@@ -93,6 +93,68 @@
         .about-text { color: #ccc; font-size: 16px; line-height: 1.8; margin-bottom: 20px;}
         .about-text strong { color: var(--primary); }
 
+        @media (max-width: 640px) {
+            .top-nav { flex-wrap: wrap; gap: 10px 14px; padding: 10px 14px; }
+            .logo { font-size: 20px; }
+            .nav-links { order: 3; }
+            .nav-links a { margin-right: 12px; font-size: 13px; }
+            .search-bar { order: 4; flex: 1 1 100%; max-width: none; }
+            .user-stats { gap: 10px; font-size: 12px; }
+        }
+
+        /* ---------- Classic profile page (no paper doll / no slot grid) ---------- */
+        .classic-profile { width: 100%; max-width: 1060px; display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+        .profile-hero { display: flex; align-items: flex-start; gap: 22px; padding: 22px; background: var(--card); border: 1px solid var(--border); }
+        .profile-avatar {
+            width: 118px; height: 118px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50% !important; overflow: hidden;
+            background: linear-gradient(135deg, #ffd166 0%, #f9a825 55%, #e08a12 100%);
+            border: 3px solid var(--border);
+            color: #1a120d; font-size: 44px; font-weight: 900; line-height: 1;
+            text-transform: uppercase; user-select: none;
+            box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+        .profile-hero-info { flex: 1; min-width: 0; }
+        .profile-name-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+        .profile-name-row h1 { color: var(--primary); font-size: 30px; line-height: 1.1; font-weight: 900; letter-spacing: 0.2px; overflow-wrap: anywhere; }
+        .profile-verified { color: var(--verified); font-size: 18px; }
+        .profile-status { color: #c9bcb0; font-style: italic; font-size: 13.5px; margin-top: 6px; line-height: 1.4; overflow-wrap: anywhere; }
+        .profile-stats { display: grid; margin-top: 22px; border-top: 1px solid var(--border); padding-top: 14px; }
+        .profile-stat { min-width: 0; padding: 0 16px; border-right: 1px solid var(--border); }
+        .profile-stat:first-child { padding-left: 0; }
+        .profile-stat:last-child { border-right: none; padding-right: 0; }
+        .profile-stat-label { color: #a99a8d; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+        .profile-stat-value { color: #fff; font-size: 21px; font-weight: 900; margin-top: 3px; line-height: 1; font-variant-numeric: tabular-nums; }
+        .profile-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: #1f1815; padding: 0 6px; }
+        .profile-tab { position: relative; background: none; border: none; color: var(--primary); padding: 12px 24px; font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: 0.3px; }
+        .profile-tab.active { color: #fff; }
+        .profile-tab.active::after { content: ''; position: absolute; left: 18px; right: 18px; bottom: -1px; height: 2px; background: #fff; }
+        .profile-panel { background: var(--card); border: 1px solid var(--border); padding: 18px 20px; }
+        .profile-about-text { color: #fff; font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 86px; }
+        .profile-about-footer { display: flex; align-items: flex-end; justify-content: flex-end; margin-top: 16px; }
+        .profile-social { display: flex; gap: 8px; }
+        .profile-social a { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: var(--primary); background: #1a1512; border: 1px solid var(--border); text-decoration: none; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+        .profile-social a:hover { background: rgba(249, 168, 37, 0.12); color: #ffd166; border-color: var(--primary); }
+        .profile-bio-edit { display: flex; gap: 8px; margin-top: 16px; }
+        .profile-bio-edit input { flex: 1; min-width: 0; padding: 9px 11px; background: #1a1512; border: 1px solid var(--border); color: #fff; outline: none; font-size: 13px; }
+        .profile-bio-edit input:focus { border-color: var(--primary); }
+        .profile-bio-edit button { padding: 9px 16px; background: var(--primary); border: none; color: #1a120d; font-weight: 900; font-size: 12px; cursor: pointer; }
+        .profile-bio-edit button:hover { background: #ffd166; }
+
+        @media (max-width: 640px) {
+            .profile-hero { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 18px; }
+            .profile-name-row { justify-content: center; }
+            .profile-avatar { width: 96px; height: 96px; font-size: 36px; }
+            .profile-name-row h1 { font-size: 24px; }
+            .profile-stats { width: 100%; }
+            .profile-stat { padding: 0 10px; text-align: center; }
+            .profile-about-footer { justify-content: center; }
+            .profile-bio-edit { flex-direction: column; }
+            .profile-bio-edit button { padding: 10px 16px; }
+            .classic-profile { margin-top: 0; }
+        }
+
         /* BRANDED LEGAL PAGES (/tos and /privacy) */
         .legal-page-container { width: 100%; max-width: 900px; margin: 20px 0 40px 0; background: var(--card); border: 2px solid var(--border); border-radius: 0; padding: 35px 40px; color: #ccc; }
         .legal-page-title { color: var(--primary); font-size: 28px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 6px; }
@@ -151,6 +213,17 @@
         .avatar-layout { display: flex; gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px;}
         .avatar-left { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; display: flex; flex-direction: column;}
         .avatar-right { flex: 2; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px;}
+        .avatar-preview { width: 100%; height: 360px; background: #17110e; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+        .paper-doll { position: relative; width: 200px; height: 320px; max-width: 100%; flex-shrink: 0; }
+        .paper-doll-base { width: 100%; height: 100%; display: block; }
+        .paper-doll .worn-item { position: absolute; object-fit: contain; pointer-events: none; z-index: 2; }
+        .paper-doll .worn-item.hats { top: 7%; left: 50%; transform: translateX(-50%); width: 120px; }
+        .paper-doll .worn-item.faces { top: 20%; left: 50%; transform: translateX(-50%); width: 40px; z-index: 3; }
+        .paper-doll .worn-item.shirts { top: 30%; left: 50%; transform: translateX(-50%); width: 110px; }
+        .paper-doll .worn-item.pants { top: 52%; left: 50%; transform: translateX(-50%); width: 100px; }
+        .wearing-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .wearing-slot { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; background: #1a1512; border: 1px solid var(--border); }
+        .wearing-slot img { max-width: 36px; max-height: 36px; object-fit: contain; }
         .inventory-tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;}
         .inv-tab { color: #aaa; cursor: pointer; font-weight: bold; padding: 5px 10px; border-radius: 5px;}
         .inv-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary);}
@@ -776,35 +849,7 @@
                 const res = await fetch(`/api/user/${userId}`);
                 if (!res.ok) return main.innerHTML = `<h2 style="color: red;">User not found</h2>`;
                 const u = (await res.json()).user;
-                const isOwnProfile = u.id === currentUser.id;
-
-                main.innerHTML = `
-                <div class="profile-card" style="width: 100%; max-width: 800px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); padding: 20px;">
-                    <div class="profile-header" style="display:flex; gap:20px;">
-                        <img src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=150&height=150&format=png" style="width: 120px; height: 120px; border-radius: 10px; border: 3px solid var(--border);">
-                        <div class="profile-info">
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-                                <span style="font-size: 28px; color: var(--primary); font-weight: bold;">${u.username}</span>
-                                ${u.is_verified ? '<i class="fa-solid fa-circle-check" style="color: var(--verified); font-size: 18px;"></i>' : ''}
-                            </div>
-                            <div style="color: #aaa; font-style: italic; font-size: 14px; margin-bottom: 20px;" id="profile-bio-display">"${u.bio}"</div>
-                            ${isOwnProfile ? `
-                            <div class="bio-edit-box" id="bio-edit-container">
-                                <input type="text" id="new-bio-input" placeholder="Enter a new bio..." value="${u.bio}">
-                                <button onclick="saveBio()">Save</button>
-                            </div>` : ''}
-                            <div style="display: flex; gap: 40px; margin-top: 20px;">
-                                <div><div style="color: var(--primary); font-size: 14px; font-weight: bold;">RAP</div><div style="font-size: 18px; color: white;">${u.rap.toLocaleString()}+</div></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display: flex; border-bottom: 2px solid var(--border); margin-top: 20px;">
-                        <button style="padding: 10px 20px; background: none; border: none; color: white; font-size: 16px; font-weight: bold; border-bottom: 3px solid var(--primary);">About</button>
-                    </div>
-                    <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 0 0 10px 10px;">
-                        <div style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #ccc;">Hey I'm ${u.username} this is my profile!</div>
-                    </div>
-                </div>`;
+                renderProfilePage(main, u, u.id === currentUser.id);
             }
         }
 
@@ -961,26 +1006,117 @@
             container.innerHTML = html;
         }
 
+        function renderProfilePage(container, u, isOwnProfile) {
+            const initial = escapeHtml(String(u.username || '?').charAt(0).toUpperCase());
+            const username = escapeHtml(u.username);
+            const bio = String(u.bio || '').trim();
+            const aboutText = bio
+                ? escapeHtml(bio)
+                : (isOwnProfile ? 'You have not written a bio yet.' : 'This user has not written a bio yet.');
+            const rap = Number(u.rap || 0).toLocaleString();
+
+            // Friends / Followers are not modelled yet, so they report 0 rather than fake numbers.
+            const friendCount = 0;
+            const followerCount = 0;
+
+            container.innerHTML = `
+            <div class="classic-profile">
+                <section class="profile-hero">
+                    <div class="profile-avatar">${initial}</div>
+                    <div class="profile-hero-info">
+                        <div class="profile-name-row">
+                            <h1>${username}</h1>
+                            ${u.is_verified ? '<i class="fa-solid fa-circle-check profile-verified" title="Verified"></i>' : ''}
+                        </div>
+                        <div class="profile-status">${bio ? escapeHtml(bio) : 'No bio set.'}</div>
+                        <div class="profile-stats" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+                            <div class="profile-stat">
+                                <div class="profile-stat-label">Friends</div>
+                                <div class="profile-stat-value">${friendCount.toLocaleString()}</div>
+                            </div>
+                            <div class="profile-stat">
+                                <div class="profile-stat-label">Followers</div>
+                                <div class="profile-stat-value">${followerCount.toLocaleString()}</div>
+                            </div>
+                            <div class="profile-stat">
+                                <div class="profile-stat-label">RAP</div>
+                                <div class="profile-stat-value">${rap}</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="profile-tabs">
+                    <button class="profile-tab active">About</button>
+                </div>
+
+                <section class="profile-panel">
+                    <div class="profile-about-text">${aboutText}</div>
+                    ${isOwnProfile ? `
+                    <div class="profile-bio-edit">
+                        <input type="text" id="new-bio-input" maxlength="160" placeholder="Update your status..." value="${escapeHtml(bio)}">
+                        <button onclick="saveBio()">Save Bio</button>
+                    </div>` : ''}
+                    <div class="profile-about-footer">
+                        <div class="profile-social">
+                            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" title="Discord"><i class="fa-brands fa-discord"></i></a>
+                            <a href="https://github.com/Qrdz0" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                            <a href="https://www.roblox.com" target="_blank" rel="noopener noreferrer" title="Roblox"><i class="fa-solid fa-gamepad"></i></a>
+                        </div>
+                    </div>
+                </section>
+            </div>`;
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
+        }
+
+        const R6_BASE_AVATAR = `
+            <svg class="paper-doll-base" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="R6 avatar">
+                <g stroke="#120d0a" stroke-width="2">
+                    <rect x="32" y="86" width="26" height="88" fill="#f0c15a"></rect>
+                    <rect x="142" y="86" width="26" height="88" fill="#f0c15a"></rect>
+                    <rect x="64" y="164" width="32" height="120" fill="#2f6f3e"></rect>
+                    <rect x="104" y="164" width="32" height="120" fill="#2f6f3e"></rect>
+                    <rect x="60" y="84" width="80" height="82" fill="#1f5f9e"></rect>
+                    <rect x="70" y="16" width="60" height="60" fill="#f0c15a"></rect>
+                </g>
+                <rect x="84" y="38" width="9" height="10" fill="#241a13"></rect>
+                <rect x="107" y="38" width="9" height="10" fill="#241a13"></rect>
+                <rect x="88" y="58" width="24" height="4" fill="#241a13"></rect>
+                <rect x="92" y="84" width="16" height="10" fill="#164a7c"></rect>
+            </svg>`;
+
+        function renderPaperDoll(equipped) {
+            const layers = (equipped || []).map(item => {
+                const category = String(item.category || '').toLowerCase();
+                if (!['hats', 'faces', 'shirts', 'pants'].includes(category)) return '';
+                return `<img src="${escapeHtml(item.asset_image)}" class="worn-item ${category}" alt="" onerror="this.style.display='none'">`;
+            }).join('');
+            return `<div class="paper-doll">${R6_BASE_AVATAR}${layers}</div>`;
+        }
+
         function renderAvatarEditor(container) {
             const equipped = currentInventory.filter(i => i.is_wearing === 1);
-            const baseAvatarUrl = "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4A5D1F5E8E5F5D5E5F5E5F5E5F5E5F5E-Png/150/150/AvatarHeadshot/Png/noFilter";
-            const renderedItems = equipped.map(item => {
-                const cat = item.category.toLowerCase();
-                return `<img src="${item.asset_image}" class="worn-item ${cat}">`;
-            }).join('');
 
             container.innerHTML = `
             <h2 style="color: var(--primary); width: 100%; max-width: 1000px; margin-bottom: 10px;">Avatar Editor</h2>
             <div class="avatar-layout">
                 <div class="avatar-left">
                     <div class="avatar-preview">
-                        <img src="${baseAvatarUrl}" class="base-avatar">
-                        ${renderedItems}
+                        ${renderPaperDoll(equipped)}
                     </div>
                     <div style="margin-top: 15px; color: var(--primary); font-weight: bold; font-size: 14px;">Currently Wearing</div>
                     <div class="wearing-list" id="wearing-list">
                         ${equipped.length === 0 ? '<p style="color: #555; font-size: 12px;">No items equipped.</p>' : equipped.map(item => `
-                            <div class="wearing-slot"><img src="${item.asset_image}"></div>
+                            <div class="wearing-slot"><img src="${escapeHtml(item.asset_image)}" alt="" onerror="this.style.display='none'"></div>
                         `).join('')}
                     </div>
                 </div>
@@ -989,9 +1125,9 @@
                     <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Click an item to equip/unequip it.</p>
                     <div class="small-grid">
                         ${currentInventory.map(item => `
-                            <div class="small-item" onclick="toggleEquip(${item.id}, ${item.is_wearing})" style="border: ${item.is_wearing === 1 ? '2px solid var(--primary)' : '1px solid var(--border)'}">
-                                <img src="${item.asset_image}">
-                                <p>${item.custom_name}</p>
+                            <div class="small-item" onclick="toggleEquip(${Number(item.id)}, ${Number(item.is_wearing)})" style="border: ${Number(item.is_wearing) === 1 ? '2px solid var(--primary)' : '1px solid var(--border)'}">
+                                <img src="${escapeHtml(item.asset_image)}" alt="">
+                                <p>${escapeHtml(item.custom_name)}</p>
                             </div>
                         `).join('')}
                     </div>
