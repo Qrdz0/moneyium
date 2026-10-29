@@ -407,7 +407,7 @@
                 <label style="color: var(--primary); font-size: 14px; font-weight: bold;">Robux to Offer</label>
                 <input type="number" id="trade-robux" placeholder="0" value="0" style="width: 100%; padding: 10px; margin: 5px 0 15px 0; background: #111; border: 1px solid var(--border); color: white; border-radius: 5px;">
                 <label style="color: var(--primary); font-size: 14px; font-weight: bold;">Select Items to Offer</label>
-                <div class="trade-item-grid" id="trade-items-grid"></div>
+                <div class="trade-item-grid" id="trade-item-grid"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn-primary" onclick="submitTrade()">Send Trade</button>
@@ -1194,9 +1194,12 @@
             }
         }
 
-        function closeModal() { 
-            document.getElementById('modal-overlay').classList.remove('active'); 
-            currentItemToBuy = null; 
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('modal-buy').classList.add('hidden');
+            document.getElementById('modal-insufficient').classList.add('hidden');
+            document.getElementById('modal-trade').classList.add('hidden');
+            currentItemToBuy = null;
             selectedTradeItems = [];
         }
 
@@ -1211,7 +1214,7 @@
 
             let html = `<h2 style="color: var(--primary); width: 100%; max-width: 800px;">Trade Hub</h2>
             <div class="trade-container">
-                <button class="btn-primary" style="margin-bottom: 20px; padding: 10px 20px;" onclick="openTradeModal()">Create New Trade</button>
+                <button class="btn-primary" style="margin-bottom: 20px; padding: 10px 20px;" onclick="initiateTrade()">Create New Trade</button>
                 <h3 style="color: var(--primary); margin-bottom: 15px;">Pending Trades</h3>`;
 
             if (trades.length === 0) {
@@ -1242,16 +1245,17 @@
             container.innerHTML = html;
         }
 
-        function openTradeModal(targetUsername = '') {
-            document.getElementById('trade-receiver').value = targetUsername;
+        function initiateTrade(targetUsername = '') {
+            // Opens the dark-mode trade modal instead of the old prompt() flow.
+            document.getElementById('trade-receiver').value = targetUsername || '';
             document.getElementById('trade-robux').value = 0;
             selectedTradeItems = [];
 
-            const grid = document.getElementById('trade-items-grid');
+            const grid = document.getElementById('trade-item-grid');
             grid.innerHTML = currentInventory.map(item => `
                 <div class="trade-item" id="trade-item-${item.id}" onclick="toggleTradeItem(${item.id})">
-                    <img src="${item.asset_image}">
-                    <p>${item.custom_name}</p>
+                    <img src="${escapeHtml(item.asset_image)}" alt="">
+                    <p>${escapeHtml(item.custom_name)}</p>
                 </div>
             `).join('');
 

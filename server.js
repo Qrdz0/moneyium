@@ -253,6 +253,9 @@ app.post('/api/trade/respond', (req, res) => {
                         rItems.forEach(itemId => db.run(`UPDATE inventory SET user_id = ? WHERE user_id = ? AND catalog_id = ?`, [trade.sender_id, trade.receiver_id, itemId]));
                         
                         db.run(`UPDATE trades SET status = 'accepted' WHERE id = ?`, [tradeId]);
+                        // Transaction history: one log per side of the completed trade.
+                        db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Trade Sent', ?, 'N/A')`, [trade.sender_id, -trade.sender_robux]);
+                        db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Trade Received', ?, 'N/A')`, [trade.receiver_id, trade.receiver_robux]);
                         db.run("COMMIT");
                         res.json({ success: true });
                     });
