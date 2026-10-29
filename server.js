@@ -10,91 +10,73 @@ const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ secret: 'moneyium_secret_key', resave: false, saveUninitialized: true, cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, path: '/' } }));
 
 const db = new sqlite3.Database('./database.db');
 
 function setupDatabase() {
     db.serialize(() => {
-        // 1. Create Tables
-        db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0, is_verified INTEGER DEFAULT 0)`);
+        db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, robux INTEGER DEFAULT 100, tix INTEGER DEFAULT 0, is_admin INTEGER DEFAULT 0, can_upload INTEGER DEFAULT 0, bio TEXT DEFAULT 'Welcome to my profile!', rap INTEGER DEFAULT 0, is_verified INTEGER DEFAULT 0, tos_accepted_at DATETIME)`);
+        // Migration for databases created before consent tracking was added.
+        db.run(`ALTER TABLE users ADD COLUMN tos_accepted_at DATETIME`, () => {});
         db.run(`CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY AUTOINCREMENT, asset_id TEXT, custom_name TEXT, asset_image TEXT, description TEXT, price INTEGER DEFAULT 10, category TEXT DEFAULT 'Hats', item_type TEXT DEFAULT 'None', total_copies INTEGER DEFAULT 1, copies_left INTEGER DEFAULT 1, creator_id INTEGER)`);
         db.run(`CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, catalog_id INTEGER, serial_number INTEGER DEFAULT 0, is_wearing INTEGER DEFAULT 0, purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
         db.run(`CREATE TABLE IF NOT EXISTS transactions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, type TEXT, amount INTEGER, site_item_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(user_id) REFERENCES users(id))`);
         db.run(`CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, receiver_id INTEGER, sender_items TEXT, receiver_items TEXT, sender_robux INTEGER DEFAULT 0, receiver_robux INTEGER DEFAULT 0, status TEXT DEFAULT 'pending', timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`);
         db.run(`CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, thumbnail TEXT, game_url TEXT, creator_id INTEGER, visits INTEGER DEFAULT 0)`);
 
-        // 2. Ensure the verified system accounts exist
-        ensureSystemAccount('ROBLOX', 'system_dummy_pass_123', {
-            isAdmin: 1,
-            canUpload: 1,
-            bio: 'This is the official system account of Moneyium. Holding serial #1 of all assets.'
-        }, () => {
-            ensureSystemAccount('moneyium', 'system_dummy_pass_123', {
-                isAdmin: 1,
-                canUpload: 1,
-                bio: 'Official Moneyium Staff Account.'
-            }, () => injectBaseballCap());
+        db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, row) => {
+            if (!row) {
+                const sysPass = bcrypt.hashSync('system_dummy_pass_123', 10);
+                db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio, is_verified) VALUES ('ROBLOX', ?, 1, 1, 'Official system account.', 1)`, [sysPass], () => {
+                    injectBaseballCap();
+                });
+            } else {
+                injectBaseballCap();
+            }
         });
     });
 }
 
-// Creates a system account if missing, otherwise keeps its flags, bio, and password in sync.
-function ensureSystemAccount(username, password, options, done) {
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    db.get(`SELECT id FROM users WHERE username = ?`, [username], (err, row) => {
-        if (!row) {
-            db.run(`INSERT INTO users (username, password, is_admin, can_upload, bio, is_verified) VALUES (?, ?, ?, ?, ?, 1)`,
-                [username, hashedPassword, options.isAdmin, options.canUpload, options.bio],
-                () => done && done());
-        } else {
-            db.run(`UPDATE users SET password = ?, is_admin = ?, can_upload = ?, bio = ?, is_verified = 1 WHERE id = ?`,
-                [hashedPassword, options.isAdmin, options.canUpload, options.bio, row.id],
-                () => done && done());
-        }
-    });
-}
-
-// 3. Ensure the Free ROBLOX 'R' Baseball Cap Exists
 function injectBaseballCap() {
-    const capImage = 'https://tr.rbxcdn.com/180DAY-c977137e24824df9a31f4837a97fcbda/420/420/Hat/Png/noFilter';
     db.get(`SELECT id FROM catalog WHERE asset_id = '417457461'`, (err, row) => {
         if (!row) {
+            const capImage = 'https://tr.rbxcdn.com/180DAY-c977137e24824f9a31f4837a97fcbda/420/420/Hat/Png/noFilter';
             const capName = "ROBLOX 'R' Baseball Cap";
             const capDesc = 'The classic ROBLOX Baseball Cap. Free for everyone!';
-            
             db.run(`INSERT INTO catalog (asset_id, custom_name, asset_image, description, price, category, item_type, total_copies, copies_left, creator_id) VALUES (?, ?, ?, ?, 0, 'Hats', 'None', 999999, 999999, 1)`, 
                 ['417457461', capName, capImage, capDesc], 
                 function(err) {
                     if (!err) {
                         const newItemId = this.lastID;
                         db.get(`SELECT id FROM users WHERE username = 'ROBLOX'`, (err, sysUser) => {
-                            if (sysUser) {
-                                db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
-                            }
+                            if (sysUser) db.run(`INSERT INTO inventory (user_id, catalog_id, serial_number) VALUES (?, ?, 1)`, [sysUser.id, newItemId]);
                         });
                     }
                 }
             );
-        } else {
-            db.run(`UPDATE catalog SET asset_image = ? WHERE id = ?`, [capImage, row.id]);
         }
     });
 }
-
 setupDatabase();
 
 // --- AUTH & USER ROUTES ---
 app.post('/api/register', async (req, res) => {
-    let { username, password } = req.body;
-    if (!username || !password || username.includes(' ')) return res.status(400).json({ error: "Invalid username/password" });
-    if (['roblox', 'moneyium'].includes(username.toLowerCase())) return res.status(400).json({ error: "This username is reserved." });
+    const { username, password, agreedToTos } = req.body;
+
+    // GDPR / consumer-protection: explicit, verifiable consent is required before an account is created.
+    if (agreedToTos !== true) {
+        return res.status(400).json({ error: "You must agree to the Moneyium Terms of Service and Privacy Policy." });
+    }
+
+    if (!username || !password || typeof username !== 'string' || typeof password !== 'string' || username.includes(' ')) return res.status(400).json({ error: "Invalid username/password" });
+    if (username === 'ROBLOX') return res.status(400).json({ error: "This username is reserved." });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    db.get(`SELECT COUNT(*) as count FROM users WHERE LOWER(username) NOT IN ('roblox', 'moneyium')`, [], async (err, row) => {
-        const isFirstUser = row.count === 0 ? 1 : 0;
-        db.run(`INSERT INTO users (username, password, is_admin, can_upload) VALUES (?, ?, ?, ?)`, [username, hashedPassword, isFirstUser, isFirstUser], function(err) {
+    db.get(`SELECT COUNT(*) as count FROM users`, [], async (err, row) => {
+        const isFirstUser = row.count <= 1 ? 1 : 0;
+        db.run(`INSERT INTO users (username, password, is_admin, can_upload, tos_accepted_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`, [username, hashedPassword, isFirstUser, isFirstUser], function(err) {
             if (err) return res.status(400).json({ error: "Username taken" });
             res.json({ success: true });
         });
@@ -117,7 +99,7 @@ app.get('/api/user', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap, is_verified FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
         if (!user) { req.session.destroy(); return res.status(401).json({ error: "Invalid session" }); }
-        db.all(`SELECT c.*, i.id AS inventory_id, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
+        db.all(`SELECT c.*, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
     });
@@ -127,7 +109,7 @@ app.get('/api/user/:id', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     db.get(`SELECT id, username, robux, tix, is_admin, can_upload, bio, rap, is_verified FROM users WHERE id = ?`, [req.params.id], (err, user) => {
         if (!user) return res.status(404).json({ error: "User not found" });
-        db.all(`SELECT c.*, i.id AS inventory_id, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
+        db.all(`SELECT c.*, i.is_wearing, i.serial_number FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ?`, [user.id], (err, inventory) => {
             res.json({ user, inventory: inventory || [] });
         });
     });
@@ -176,23 +158,22 @@ app.post('/api/buy-item', (req, res) => {
 app.post('/api/equip-item', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     const { itemId, equip } = req.body;
-    db.get(`SELECT c.category FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ? AND i.id = ?`, [req.session.userId, itemId], (err, item) => {
+    db.get(`SELECT c.category FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ? AND i.catalog_id = ?`, [req.session.userId, itemId], (err, item) => {
         if (!item) return res.status(404).json({ error: "Not in inventory" });
         if (equip) db.run(`UPDATE inventory SET is_wearing = 0 WHERE user_id = ? AND catalog_id IN (SELECT id FROM catalog WHERE category = ?)`, [req.session.userId, item.category]);
-        db.run(`UPDATE inventory SET is_wearing = ? WHERE user_id = ? AND id = ?`, [equip ? 1 : 0, req.session.userId, itemId], () => res.json({ success: true }));
+        db.run(`UPDATE inventory SET is_wearing = ? WHERE user_id = ? AND catalog_id = ?`, [equip ? 1 : 0, req.session.userId, itemId], () => res.json({ success: true }));
     });
 });
 
 app.post('/api/sell-item', (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
     const { itemId } = req.body;
-    db.get(`SELECT c.*, i.id AS inventory_id FROM inventory i JOIN catalog c ON i.catalog_id = c.id WHERE i.user_id = ? AND i.id = ?`, [req.session.userId, itemId], (err, item) => {
-        if (!item) return res.status(400).json({ error: "You don't own this" });
-        db.run(`DELETE FROM inventory WHERE user_id = ? AND id = ?`, [req.session.userId, item.inventory_id], function(err) {
+    db.get(`SELECT * FROM catalog WHERE id = ?`, [itemId], (err, item) => {
+        db.run(`DELETE FROM inventory WHERE user_id = ? AND catalog_id = ?`, [req.session.userId, itemId], function(err) {
             if (this.changes === 0) return res.status(400).json({ error: "You don't own this" });
             db.run(`UPDATE users SET robux = robux + ? WHERE id = ?`, [item.price, req.session.userId]);
             db.run(`INSERT INTO transactions (user_id, type, amount, site_item_id) VALUES (?, 'Sale', ?, ?)`, [req.session.userId, item.price, item.id]);
-            if (item.item_type === 'Limited' || item.item_type === 'LimitedU') db.run(`UPDATE catalog SET copies_left = copies_left + 1 WHERE id = ?`, [item.id]);
+            if (item.item_type === 'Limited' || item.item_type === 'LimitedU') db.run(`UPDATE catalog SET copies_left = copies_left + 1 WHERE id = ?`, [itemId]);
             res.json({ success: true });
         });
     });
