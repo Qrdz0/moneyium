@@ -299,6 +299,73 @@ app.get('/api/user/:id', authenticate, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ─── AVATAR 3D RENDER ──────────────────────────────────────────────────
+// Placeholder render source: Moneyium users are not linked to real Roblox
+// accounts yet, so we fetch the thumbnail for Roblox user id 1 (ROBLOX).
+// equippedAssetIds is already parsed and returned, so a real renderer can be
+// swapped in once account linking exists.
+const avatarThumbCache = new Map();
+const AVATAR_THUMB_TTL_MS = 5 * 60 * 1000;      // good result: cache 5 minutes
+const AVATAR_THUMB_FAIL_TTL_MS = 30 * 1000;     // failure/pending: retry soon
+
+async function getAvatarThumbnail(robloxUserId) {
+  const key = String(robloxUserId);
+  const hit = avatarThumbCache.get(key);
+  if (hit && hit.expires > Date.now()) return hit.value;
+
+  try {
+    const resp = await axios.get(
+      `https://thumbnails.roblox.com/v1/users/avatar?userIds=${encodeURIComponent(key)}&size=420x420&format=Png&isCircular=false`,
+      { timeout: 8000 }
+    );
+    // Response shape: { data: [ { imageUrl, state, error?, ... } ] }
+    const entry = Array.isArray(resp.data?.data) ? resp.data.data[0] : null;
+    // The render can be queued: only a completed entry carries a usable imageUrl.
+    const usable = entry && !entry.error && String(entry.state).toLowerCase() === 'completed' && entry.imageUrl;
+    if (!usable) console.warn(`[avatar] thumbnail not ready for userId ${key} (state: ${entry ? entry.state : 'none'})`);
+    avatarThumbCache.set(key, {
+      value: usable ? String(entry.imageUrl) : null,
+      expires: Date.now() + (usable ? AVATAR_THUMB_TTL_MS : AVATAR_THUMB_FAIL_TTL_MS),
+    });
+    return usable ? String(entry.imageUrl) : null;
+  } catch (err) {
+    console.warn(`[avatar] thumbnail fetch failed for userId ${key}: ${err.message}`);
+    avatarThumbCache.set(key, { value: null, expires: Date.now() + AVATAR_THUMB_FAIL_TTL_MS });
+    return null;
+  }
+}
+
+app.get('/api/user/:id/avatar-render', authenticate, async (req, res, next) => {
+  try {
+    if (!isValidId(req.params.id)) return res.status(400).json({ error: 'Invalid user id' });
+    const user = await dbGet(
+      `SELECT id FROM users WHERE id = ?`,
+      [req.params.id]
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Collect everything the user currently has equipped.
+    const equippedItems = await dbAll(
+      `SELECT c.asset_id, c.custom_name, c.category, c.item_type, i.serial_number
+       FROM inventory i JOIN catalog c ON i.catalog_id = c.id
+       WHERE i.user_id = ? AND i.is_wearing = 1`,
+      [user.id]
+    );
+    const equippedAssetIds = (equippedItems || [])
+      .map(row => row.asset_id)
+      .filter(isValidAssetId);
+
+    const imageUrl = await getAvatarThumbnail('1'); // placeholder: ROBLOX (id 1)
+
+    res.json({
+      imageUrl,                      // null → frontend shows its placeholder
+      equippedAssetIds,              // real asset ids of worn items, ready for true rendering
+      equipped: equippedItems || [],
+      renderedFor: { placeholder: true, robloxUserId: 1, reason: 'No Roblox account linked yet' },
+    });
+  } catch (err) { next(err); }
+});
+
 app.post('/api/update-bio', authenticate, writeLimiter, async (req, res, next) => {
   try {
     if (!isValidBio(req.body.bio)) return res.status(400).json({ error: 'Bio must be 160 characters or fewer.' });
