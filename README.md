@@ -1,6 +1,10 @@
-Moneyium — Custom Roblox Revival Platform
+# Moneyium — Custom Roblox Revival Platform
 
-Status Tech Frontend Purpose Security Testing
+![Status](https://img.shields.io/badge/Status-Educational%20Sandbox-blue)
+![Tech](https://img.shields.io/badge/Stack-Node.js%20%7C%20Express%20%7C%20SQLite-green)
+![Frontend](https://img.shields.io/badge/Frontend-Vanilla%20JS-orange)
+![Security](https://img.shields.io/badge/Security-Hardened-success)
+![Testing](https://img.shields.io/badge/Tests-Vitest%20%2B%20Supertest-yellow)
 
 Moneyium is a from-scratch Roblox revival platform built for educational purposes. It explores how revival sites handle authentication, virtual economies, serialized limited items, trading, profiles, and Roblox API integrations without relying on leaked source code.
 
@@ -11,71 +15,81 @@ Moneyium is an independent educational project and is not affiliated with Roblox
 > **A Note to the Hexium Community:**
 > If you are here from Hexium, please know that I have absolutely no plans to launch my own revival. Moneyium is purely a personal learning sandbox. I vibe-code this all day for fun to understand how the backend, databases, and security actually work. Hexium is my home; this is just where I break things to learn how to fix them.
 
-What's New (Latest Update)
+---
 
-Security Hardening & Economy Protection
-- Environment Variables: SESSION_SECRET and ROBLOX_SYSTEM_PASSWORD are now securely loaded via .env.
-- SQL Injection Prevention: Admin routes dynamically validate column names (e.g., robux, tix) before executing.
-- Anti-Dupe Transactions: Economy endpoints (buy-item, sell-item, trade/respond) use BEGIN IMMEDIATE database locks to physically prevent race-condition duping.
-- Rate Limiting & Headers: Added helmet and express-rate-limit to protect against brute-force and DDoS.
-- CSRF Guard: All state-changing requests require Content-Type: application/json.
+## What's New (Latest Update)
 
-Automated Test Suite (Vitest + Supertest)
+### Security Hardening & Economy Protection
+- **Environment Variables:** `SESSION_SECRET` and `ROBLOX_SYSTEM_PASSWORD` are now securely loaded via `.env`.
+- **SQL Injection Prevention:** Admin routes dynamically validate column names (e.g., `robux`, `tix`) before executing.
+- **Anti-Dupe Transactions:** Economy endpoints (`buy-item`, `sell-item`, `trade/respond`) use `BEGIN IMMEDIATE` database locks to physically prevent race-condition duping.
+- **Rate Limiting & Headers:** Added `helmet` and `express-rate-limit` to protect against brute-force and DDoS.
+- **CSRF Guard:** All state-changing requests require `Content-Type: application/json`.
+
+### Automated Test Suite (Vitest + Supertest)
 - Full backend test suite covering Auth, Economy, Trades, Admin, and Social features.
-- Tests run against an in-memory SQLite database (:memory:) so your real database is never touched.
+- Tests run against an **in-memory SQLite database** (`:memory:`) so your real database is never touched.
 - Includes adversarial tests (e.g., double-accepting a trade, spamming buy on a limited item).
 
-Real Social Graph & Feed
-- Replaced front-end mocks with real SQLite tables: follows, friend_requests, friendships, posts, and post_likes.
-- Home Feed: Real 280-character post composer with working likes and soft-deletes.
-- Profiles: Real Friends, Followers, and Following counters, plus functional Follow and Add Friend buttons.
+### Real Social Graph & Feed
+- Replaced front-end mocks with real SQLite tables: `follows`, `friend_requests`, `friendships`, `posts`, and `post_likes`.
+- **Home Feed:** Real 280-character post composer with working likes and soft-deletes.
+- **Profiles:** Real Friends, Followers, and Following counters, plus functional Follow and Add Friend buttons.
 
-Complete Trading UI
+### Complete Trading UI
 - The trade modal is now fully connected to the backend.
-- Support for offering both Items and Robux.
+- Support for offering both **Items** and **Robux**.
 - Two-way trades (requesting items/Robux from the receiver) are supported.
 
-Debugging Tools
-- Added DEBUG=1 request logging that outputs timings and auth context to the console.
-- New admin-only endpoint: GET /api/debug/health to check uptime, memory, and DB table row counts.
+### Debugging Tools
+- Added `DEBUG=1` request logging that outputs timings and auth context to the console.
+- New admin-only endpoint: `GET /api/debug/health` to check uptime, memory, and DB table row counts.
 
-Core Features
+---
 
-Accounts & Profiles
-- Secure registration and login with bcrypt password hashing (configurable cost).
+## Core Features
+
+### Accounts & Profiles
+- Secure registration and login with `bcrypt` password hashing (configurable cost).
 - Session-based authentication with secure, HttpOnly cookies.
 - Editable profile bio and real RAP totals.
 - Classic profile pages with equipped-item displays and social counters.
 
-Economy & Catalog
+### Economy & Catalog
 - Robux and Tix balances stored in SQLite.
 - New users start with 100 Robux.
-- Admins upload items using a Roblox Asset ID; the backend fetches metadata and thumbnails via axios.
+- Admins upload items using a Roblox Asset ID; the backend fetches metadata and thumbnails via `axios`.
 - Items can be free, limited, or unlimited.
 - Users can resell owned items back to the catalog.
 
-Serialized Limiteds
+### Serialized Limiteds
 - Every limited item receives realistic serial numbers.
-- A system account named ROBLOX permanently owns serial #1 of every item.
+- A system account named `ROBLOX` permanently owns serial #1 of every item.
 - Item detail pages show every owner, serial number, purchase date, and verification badge.
 
-Games
-- Admins can upload games with a name, description, thumbnail, and .rbxl link.
-- Public /games page with game cards and visit counts.
+### Games
+- Admins can upload games with a name, description, thumbnail, and `.rbxl` link.
+- Public `/games` page with game cards and visit counts.
 
-Tech Stack
+---
 
-Layer	Technology
-Backend	Node.js, Express
-Database	SQLite3
-Auth	bcrypt, express-session
-Security	helmet, express-rate-limit, custom CSRF guard
-Testing	Vitest, Supertest
-Frontend	Vanilla HTML, CSS, JavaScript
-Icons	FontAwesome 6
+## Tech Stack
 
-Project Structure
+| Layer | Technology |
+| :--- | :--- |
+| **Backend** | Node.js, Express |
+| **Database** | SQLite3 |
+| **Auth** | bcrypt, express-session |
+| **Security** | helmet, express-rate-limit, custom CSRF guard |
+| **Testing** | Vitest, Supertest |
+| **Frontend** | Vanilla HTML, CSS, JavaScript |
+| **Icons** | FontAwesome 6 |
 
+---
+
+## Project Structure
+
+```text
 moneyium/
 ├── public/
 │   ├── index.html      # SPA: home, catalog, profile, inventory, avatar, games
